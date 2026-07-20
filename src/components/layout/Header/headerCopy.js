@@ -1,0 +1,20 @@
+export const HEADER_COPY = {
+  logoAlt: "Estoque Inteligente",
+  avatarTooltip: "Perfil e opções",
+  loadingUser: "Carregando...",
+  minhaConta: "Minha conta",
+  sair: "Sair",
+  logoutTitle: "Confirmar saída",
+  logoutDescription: "Tem certeza que deseja sair da sua conta?",
+  logoutCancel: "Cancelar",
+  logoutConfirm: "Sair",
+  closeMenuAria: "Fechar menu",
+  openMenuAria: "Abrir menu",
+  avatarFallback: "U",
+};
+
+export const HEADER_PATHS = {
+  dashboard: "/dashboard",
+  minhaConta: "/minha-conta",
+  login: "/login",
+};
