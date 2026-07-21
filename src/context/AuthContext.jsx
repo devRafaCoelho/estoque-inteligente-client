@@ -32,6 +32,11 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const updateSessionUser = useCallback((nextUser) => {
+    sessionStorage.setItem(USER_KEY, JSON.stringify(nextUser));
+    setUser(nextUser);
+  }, []);
+
   const login = useCallback(
     async ({ email, password }) => {
       const data = await authService.login({ email, password });
@@ -50,14 +55,45 @@ export function AuthProvider({ children }) {
     [persistSession],
   );
 
+  const loginWithGoogle = useCallback(
+    async (idToken) => {
+      const data = await authService.loginWithGoogle({ idToken });
+      persistSession(data.token, data.user);
+      return data;
+    },
+    [persistSession],
+  );
+
+  const loginWithApple = useCallback(
+    async ({ idToken, fullName }) => {
+      const data = await authService.loginWithApple({ idToken, fullName });
+      persistSession(data.token, data.user);
+      return data;
+    },
+    [persistSession],
+  );
+
+  const linkGoogle = useCallback(
+    async (idToken) => {
+      const data = await authService.linkGoogle({ idToken });
+      updateSessionUser(data.user);
+      return data;
+    },
+    [updateSessionUser],
+  );
+
+  const linkApple = useCallback(
+    async ({ idToken, fullName }) => {
+      const data = await authService.linkApple({ idToken, fullName });
+      updateSessionUser(data.user);
+      return data;
+    },
+    [updateSessionUser],
+  );
+
   const logout = useCallback(() => {
     clearSession();
   }, [clearSession]);
-
-  const updateSessionUser = useCallback((nextUser) => {
-    sessionStorage.setItem(USER_KEY, JSON.stringify(nextUser));
-    setUser(nextUser);
-  }, []);
 
   const refreshSessionUser = useCallback(async () => {
     const data = await authService.me();
@@ -94,6 +130,10 @@ export function AuthProvider({ children }) {
       booting,
       login,
       register,
+      loginWithGoogle,
+      loginWithApple,
+      linkGoogle,
+      linkApple,
       logout,
       clearSession,
       updateSessionUser,
@@ -105,6 +145,10 @@ export function AuthProvider({ children }) {
       booting,
       login,
       register,
+      loginWithGoogle,
+      loginWithApple,
+      linkGoogle,
+      linkApple,
       logout,
       clearSession,
       updateSessionUser,

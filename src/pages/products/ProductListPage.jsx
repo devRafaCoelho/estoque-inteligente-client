@@ -88,14 +88,24 @@ export default function ProductListPage() {
         )}
       </Stack>
 
-      <Fab
-        color="primary"
-        aria-label="Novo produto"
-        onClick={() => navigate("/produtos/novo")}
-        sx={{ position: "fixed", right: 20, bottom: { xs: 88, md: 28 } }}
-      >
-        <AddIcon />
-      </Fab>
+      <Stack direction="row" spacing={1} sx={{ position: "fixed", right: 20, bottom: { xs: 88, md: 28 } }}>
+        <Fab
+          color="secondary"
+          variant="extended"
+          aria-label="Entrada por texto"
+          onClick={() => navigate("/entrada")}
+          sx={{ px: 2 }}
+        >
+          Entrada
+        </Fab>
+        <Fab
+          color="primary"
+          aria-label="Novo produto"
+          onClick={() => navigate("/produtos/novo")}
+        >
+          <AddIcon />
+        </Fab>
+      </Stack>
     </Box>
   );
 }

@@ -53,3 +53,12 @@ export const changePasswordSchema = yup.object({
     .oneOf([yup.ref("newPassword")], "As senhas não coincidem")
     .required("Confirme a senha"),
 });
+
+export const intakeParseSchema = yup.object({
+  text: yup
+    .string()
+    .trim()
+    .min(3, "Descreva o que comprou (mín. 3 caracteres)")
+    .max(4000, "Texto muito longo")
+    .required("Descreva o que comprou"),
+});

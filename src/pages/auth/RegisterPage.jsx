@@ -21,6 +21,7 @@ import { useAppSnackbar } from "../../hooks/useAppSnackbar";
 import LoadingButton from "../../components/common/LoadingButton";
 import PasswordTextField from "../../components/form/PasswordTextField";
 import AuthSplitLayout from "../../components/auth/AuthSplitLayout";
+import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 import { ApiError } from "../../services/apiClient";
 
 const STEPS = ["Dados pessoais", "Acesso", "Confirmação"];
@@ -38,7 +39,7 @@ function isFilled(value) {
 }
 
 export default function RegisterPage() {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, loginWithGoogle, loginWithApple } = useAuth();
   const navigate = useNavigate();
   const { success, error } = useAppSnackbar();
   const [activeStep, setActiveStep] = useState(0);
@@ -99,13 +100,54 @@ export default function RegisterPage() {
     }
   };
 
+  const finishSocial = (data) => {
+    if (data.isNewUser) success("Conta criada! Bem-vindo ao Estoque Inteligente.");
+    else success("Login realizado!");
+    navigate("/dashboard");
+  };
+
+  const handleGoogle = async (idToken) => {
+    setLoading(true);
+    try {
+      const data = await loginWithGoogle(idToken);
+      finishSocial(data);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : "Falha no cadastro com Google");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApple = async ({ idToken, fullName }) => {
+    setLoading(true);
+    try {
+      const data = await loginWithApple({ idToken, fullName });
+      finishSocial(data);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : "Falha no cadastro com Apple");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthSplitLayout
       formTitle="Crie sua conta"
-      formSubtitle="Cadastre seus dados em minutos"
+      formSubtitle="Use Google, Apple ou cadastre com e-mail"
       brandSubtitle="Cadastre-se e comece a controlar o estoque da casa"
     >
       <Stack spacing={2.5}>
+        {activeStep === 0 && (
+          <SocialAuthButtons
+            disabled={loading}
+            onGoogle={handleGoogle}
+            onApple={handleApple}
+            onError={(message) => error(message)}
+          />
+        )}
+
         <Stepper activeStep={activeStep} alternativeLabel>
           {STEPS.map((label) => (
             <Step key={label}>

@@ -12,6 +12,7 @@ import { useAppSnackbar } from "../../hooks/useAppSnackbar";
 import LoadingButton from "../../components/common/LoadingButton";
 import PasswordTextField from "../../components/form/PasswordTextField";
 import AuthSplitLayout from "../../components/auth/AuthSplitLayout";
+import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 import { ApiError } from "../../services/apiClient";
 
 function isFilled(value) {
@@ -19,7 +20,7 @@ function isFilled(value) {
 }
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle, loginWithApple } = useAuth();
   const navigate = useNavigate();
   const { success, error } = useAppSnackbar();
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,38 @@ export default function LoginPage() {
   const password = watch("password");
   const canSubmit = isFilled(email) && isFilled(password);
 
+  const finishSocial = (data) => {
+    if (data.isNewUser) success("Conta criada! Bem-vindo ao Estoque Inteligente.");
+    else success("Login realizado!");
+    navigate("/dashboard");
+  };
+
+  const handleGoogle = async (idToken) => {
+    setLoading(true);
+    try {
+      const data = await loginWithGoogle(idToken);
+      finishSocial(data);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : "Falha no login com Google");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApple = async ({ idToken, fullName }) => {
+    setLoading(true);
+    try {
+      const data = await loginWithApple({ idToken, fullName });
+      finishSocial(data);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : "Falha no login com Apple");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async (values) => {
     setLoading(true);
     try {
@@ -54,42 +87,51 @@ export default function LoginPage() {
   return (
     <AuthSplitLayout
       formTitle="Acesse sua conta"
-      formSubtitle="Entre com e-mail e senha para continuar"
+      formSubtitle="Entre com Google, Apple ou e-mail e senha"
       brandSubtitle="Gerencie seu estoque doméstico com praticidade"
     >
-      <Stack spacing={2.5} component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-        <TextField
-          label="E-mail"
-          type="email"
-          fullWidth
-          autoComplete="email"
-          error={Boolean(errors.email)}
-          helperText={errors.email?.message}
-          {...register("email")}
+      <Stack spacing={2.5}>
+        <SocialAuthButtons
+          disabled={loading}
+          onGoogle={handleGoogle}
+          onApple={handleApple}
+          onError={(message) => error(message)}
         />
-        <PasswordTextField
-          label="Senha"
-          autoComplete="current-password"
-          error={errors.password}
-          helperText={errors.password?.message}
-          registerProps={register("password")}
-        />
-        <LoadingButton
-          type="submit"
-          variant="contained"
-          size="large"
-          fullWidth
-          loading={loading}
-          disabled={!canSubmit}
-        >
-          Entrar
-        </LoadingButton>
-        <Typography variant="body2" textAlign="center" color="text.secondary">
-          Não tem conta?{" "}
-          <Link component={RouterLink} to="/cadastro" fontWeight={700}>
-            Cadastre-se
-          </Link>
-        </Typography>
+
+        <Stack spacing={2.5} component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <TextField
+            label="E-mail"
+            type="email"
+            fullWidth
+            autoComplete="email"
+            error={Boolean(errors.email)}
+            helperText={errors.email?.message}
+            {...register("email")}
+          />
+          <PasswordTextField
+            label="Senha"
+            autoComplete="current-password"
+            error={errors.password}
+            helperText={errors.password?.message}
+            registerProps={register("password")}
+          />
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            size="large"
+            fullWidth
+            loading={loading}
+            disabled={!canSubmit}
+          >
+            Entrar
+          </LoadingButton>
+          <Typography variant="body2" textAlign="center" color="text.secondary">
+            Não tem conta?{" "}
+            <Link component={RouterLink} to="/cadastro" fontWeight={700}>
+              Cadastre-se
+            </Link>
+          </Typography>
+        </Stack>
       </Stack>
     </AuthSplitLayout>
   );

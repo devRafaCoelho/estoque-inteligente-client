@@ -79,8 +79,14 @@ export default function DashboardPage() {
       </Stack>
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-        <Button variant="contained" onClick={() => navigate("/produtos/novo")}>
-          Adicionar produto
+        <Button variant="contained" onClick={() => navigate("/entrada")}>
+          Entrada por texto
+        </Button>
+        <Button variant="outlined" onClick={() => navigate("/baixa")}>
+          Dar baixa
+        </Button>
+        <Button variant="outlined" onClick={() => navigate("/lista-compras")}>
+          Lista de compras
         </Button>
         <Button variant="outlined" onClick={() => navigate("/produtos")}>
           Ver todos
