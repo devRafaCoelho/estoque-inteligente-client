@@ -6,8 +6,8 @@ export const HEADER_PATHS = {
 
 export const HEADER_CONFIG = {
   toolbarMinHeight: { xs: 56, sm: 64 },
-  logoHeight: { xs: 36, sm: 42, md: 48 },
-  logoMaxWidth: { xs: "52vw", sm: 220, md: 260 },
+  logoHeight: { xs: 36, sm: 42, md: 36 },
+  logoMaxWidth: { xs: "52vw", sm: 220, md: 200 },
   avatarSize: 40,
   drawerWidth: 300,
   drawerLogoHeight: 36,

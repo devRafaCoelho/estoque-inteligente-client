@@ -1,9 +1,10 @@
 export const GOOGLE_SIGN_IN_BUTTON_CONFIG = {
-  useOneTap: false,
+  type: "standard",
   theme: "outline",
   size: "large",
-  width: "100%",
+  width: 384,
   text: "continue_with",
   shape: "rectangular",
   logoAlignment: "left",
+  progressSize: 18,
 };

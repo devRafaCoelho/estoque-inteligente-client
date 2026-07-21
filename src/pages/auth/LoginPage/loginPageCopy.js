@@ -1,6 +1,5 @@
 export const LOGIN_PAGE_COPY = {
   formTitle: "Acesse sua conta",
-  formSubtitle: "Entre com Google, Apple ou e-mail e senha",
   brandSubtitle: "Gerencie seu estoque doméstico com praticidade",
   emailLabel: "E-mail",
   passwordLabel: "Senha",

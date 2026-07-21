@@ -18,9 +18,8 @@ export const statCardContentSx = {
   "&:last-child": { pb: 1.75 },
 };
 
-export const statValueSx = (color) => ({
-  color,
-  mt: 0.5,
-});
+export const statValueSx = {
+  mt: 1,
+};
 
 export const criticalListSpacing = 1.5;

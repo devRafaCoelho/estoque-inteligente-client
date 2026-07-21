@@ -42,8 +42,8 @@ export const authSplitBrandPanelSx = (theme, isMobile) => ({
   justifyContent: "center",
   alignItems: { xs: "center", md: "flex-start" },
   textAlign: { xs: "center", md: "left" },
-  px: { xs: 3, md: 5 },
-  py: { xs: 4, md: 5 },
+  px: { xs: 3, sm: 4, md: 5 },
+  py: { xs: 3.5, md: 5 },
   position: "relative",
   overflow: "hidden",
   border: "none",
@@ -57,35 +57,51 @@ export const authSplitBrandGlowSx = {
   pointerEvents: "none",
 };
 
-export const authSplitBrandLogoSx = (isMobile) => ({
+/** Logo completa (ícone + wordmark) em todos os breakpoints. */
+export const authSplitBrandLogoSx = {
   position: "relative",
-  width: isMobile ? 120 : "100%",
-  maxWidth: isMobile ? 140 : 320,
+  width: "100%",
+  maxWidth: { xs: 280, sm: 320, md: 340 },
   height: "auto",
   objectFit: "contain",
-  mb: { xs: 2, md: 3 },
+  mb: { xs: 1.5, md: 2.5 },
   filter: "drop-shadow(0 10px 28px rgba(0,0,0,0.45))",
-});
-
-export const authSplitBrandTitleSx = {
-  position: "relative",
-  lineHeight: 1.15,
 };
 
 export const authSplitBrandSubtitleSx = {
   position: "relative",
-  mt: 1.25,
+  mt: 0.5,
   opacity: 0.9,
-  maxWidth: 340,
+  maxWidth: 360,
+  lineHeight: 1.45,
+  fontSize: { xs: "0.95rem", md: "1rem" },
 };
 
 export const authSplitFeaturesStackSx = {
   position: "relative",
   mt: 4,
+  width: "100%",
+  maxWidth: 360,
 };
 
 export const authSplitFeatureItemSx = {
-  opacity: 0.82,
+  display: "flex",
+  alignItems: "center",
+  gap: 1.25,
+};
+
+export const authSplitFeatureIconSx = {
+  fontSize: 20,
+  color: "primary.light",
+  opacity: 0.95,
+  flexShrink: 0,
+};
+
+export const authSplitFeatureTextSx = {
+  opacity: 0.92,
+  lineHeight: 1.45,
+  fontWeight: 600,
+  letterSpacing: "0.01em",
 };
 
 export const authSplitFormPanelSx = {

@@ -127,7 +127,6 @@ export default function RegisterPage() {
   return (
     <AuthSplitLayout
       formTitle={REGISTER_PAGE_COPY.formTitle}
-      formSubtitle={REGISTER_PAGE_COPY.formSubtitle}
       brandSubtitle={REGISTER_PAGE_COPY.brandSubtitle}
     >
       <Stack spacing={REGISTER_PAGE_CONFIG.stackSpacing}>

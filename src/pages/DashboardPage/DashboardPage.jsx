@@ -12,6 +12,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useAppSnackbar } from "../../hooks/useAppSnackbar";
 import { ApiError } from "../../services/apiClient";
 import ProductCard from "../../components/products/ProductCard/ProductCard";
+import StockStatusChip from "../../components/products/StockStatusChip/StockStatusChip";
 import { pageLoadingBoxSx, pageHeaderSubtitleSx, pageSectionTitleSx } from "../../styles/pageStyles";
 import { DASHBOARD_COPY } from "./dashboardCopy";
 import { DASHBOARD_CONFIG } from "./dashboardConfig";
@@ -26,14 +27,12 @@ import {
   criticalListSpacing,
 } from "./DashboardPage.styled";
 
-function StatCard({ label, value, color }) {
+function StatCard({ status, value }) {
   return (
     <Card sx={statCardSx}>
       <CardContent sx={statCardContentSx}>
-        <Typography variant="body2" color="text.secondary" noWrap>
-          {label}
-        </Typography>
-        <Typography variant="h4" fontWeight={800} sx={statValueSx(color)}>
+        <StockStatusChip status={status} />
+        <Typography variant="h4" fontWeight={800} color="text.primary" sx={statValueSx}>
           {value}
         </Typography>
       </CardContent>
@@ -89,9 +88,9 @@ export default function DashboardPage() {
       </Box>
 
       <Stack direction="row" spacing={statsRowSpacing}>
-        <StatCard label={DASHBOARD_COPY.statOk} value={ok} color="stock.ok" />
-        <StatCard label={DASHBOARD_COPY.statLow} value={low} color="stock.low" />
-        <StatCard label={DASHBOARD_COPY.statOut} value={out} color="stock.out" />
+        <StatCard status={stockStatus.ok} value={ok} />
+        <StatCard status={stockStatus.low} value={low} />
+        <StatCard status={stockStatus.out} value={out} />
       </Stack>
 
       <Stack direction={actionsRowSx.direction} spacing={actionsRowSpacing}>

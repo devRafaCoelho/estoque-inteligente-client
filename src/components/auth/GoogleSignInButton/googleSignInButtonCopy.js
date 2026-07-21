@@ -1,4 +1,5 @@
 export const GOOGLE_SIGN_IN_BUTTON_COPY = {
+  buttonLabel: "Continuar com Google",
   noCredential: "Google não retornou credencial",
   loginFailed: "Falha no login com Google",
   connectFailed: "Não foi possível conectar ao Google",

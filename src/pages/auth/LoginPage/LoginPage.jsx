@@ -89,7 +89,6 @@ export default function LoginPage() {
   return (
     <AuthSplitLayout
       formTitle={LOGIN_PAGE_COPY.formTitle}
-      formSubtitle={LOGIN_PAGE_COPY.formSubtitle}
       brandSubtitle={LOGIN_PAGE_COPY.brandSubtitle}
     >
       <Stack spacing={LOGIN_PAGE_CONFIG.stackSpacing}>

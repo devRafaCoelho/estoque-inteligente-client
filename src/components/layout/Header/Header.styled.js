@@ -16,9 +16,9 @@ export const headerMenuButtonSx = {
 };
 
 export const headerLogoSx = (isMobile) => ({
-  height: { xs: 36, sm: 42, md: 48 },
+  height: { xs: 36, sm: 42, md: 36 },
   width: "auto",
-  maxWidth: { xs: "52vw", sm: 220, md: 260 },
+  maxWidth: { xs: "52vw", sm: 220, md: 200 },
   objectFit: "contain",
   display: "block",
   cursor: "pointer",

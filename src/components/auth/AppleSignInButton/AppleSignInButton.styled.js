@@ -1,6 +1,11 @@
+/** Visual alinhado ao botão Google / Toolpad Sign-in. */
 export const appleSignInButtonSx = {
-  color: "#111",
-  borderColor: "#111",
-  bgcolor: "#fff",
-  "&:hover": { borderColor: "#111", bgcolor: "#f5f5f5" },
+  color: "text.primary",
+  borderColor: "rgba(0, 0, 0, 0.23)",
+  bgcolor: "background.paper",
+  fontWeight: 700,
+  "&:hover": {
+    borderColor: "text.primary",
+    bgcolor: "grey.50",
+  },
 };

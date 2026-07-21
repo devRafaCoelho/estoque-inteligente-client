@@ -2,9 +2,9 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import brandIcon from "../../../assets/brand-icon.png";
 import brandLogo from "../../../assets/brand-logo.png";
 import { AUTH_SPLIT_LAYOUT_COPY } from "./authSplitLayoutCopy";
 import {
@@ -12,8 +12,9 @@ import {
   authSplitBrandLogoSx,
   authSplitBrandPanelSx,
   authSplitBrandSubtitleSx,
-  authSplitBrandTitleSx,
+  authSplitFeatureIconSx,
   authSplitFeatureItemSx,
+  authSplitFeatureTextSx,
   authSplitFeaturesStackSx,
   authSplitFormHeaderSx,
   authSplitFormPanelSx,
@@ -23,13 +24,12 @@ import {
 } from "./AuthSplitLayout.styled";
 
 /**
- * Layout split de autenticação (web), no espírito do my-products-front:
- * painel de marca à esquerda + formulário à direita; no mobile, marca no topo.
+ * Layout split de autenticação:
+ * painel de marca à esquerda + formulário à direita; no mobile/tablet, marca no topo.
  */
 export default function AuthSplitLayout({
   formTitle,
   formSubtitle,
-  brandTitle = AUTH_SPLIT_LAYOUT_COPY.defaultBrandTitle,
   brandSubtitle = AUTH_SPLIT_LAYOUT_COPY.defaultBrandSubtitle,
   children,
 }) {
@@ -44,28 +44,26 @@ export default function AuthSplitLayout({
 
           <Box
             component="img"
-            src={isMobile ? brandIcon : brandLogo}
-            alt={brandTitle}
-            sx={authSplitBrandLogoSx(isMobile)}
+            src={brandLogo}
+            alt={AUTH_SPLIT_LAYOUT_COPY.logoAlt}
+            sx={authSplitBrandLogoSx}
           />
 
-          <Typography
-            variant={isMobile ? "h5" : "h4"}
-            fontWeight={800}
-            sx={authSplitBrandTitleSx}
-          >
-            {brandTitle}
-          </Typography>
-          <Typography variant="body1" sx={authSplitBrandSubtitleSx}>
-            {brandSubtitle}
-          </Typography>
+          {brandSubtitle && (
+            <Typography variant="body1" sx={authSplitBrandSubtitleSx}>
+              {brandSubtitle}
+            </Typography>
+          )}
 
           {!isMobile && (
-            <Stack spacing={1} sx={authSplitFeaturesStackSx}>
+            <Stack spacing={1.75} sx={authSplitFeaturesStackSx}>
               {AUTH_SPLIT_LAYOUT_COPY.featureBullets.map((item) => (
-                <Typography key={item} variant="body2" sx={authSplitFeatureItemSx}>
-                  • {item}
-                </Typography>
+                <Box key={item} sx={authSplitFeatureItemSx}>
+                  <CheckCircleOutlineIcon sx={authSplitFeatureIconSx} />
+                  <Typography variant="body2" sx={authSplitFeatureTextSx}>
+                    {item}
+                  </Typography>
+                </Box>
               ))}
             </Stack>
           )}
@@ -76,11 +74,11 @@ export default function AuthSplitLayout({
             <Typography variant="h5" fontWeight={800}>
               {formTitle}
             </Typography>
-            {formSubtitle && (
+            {formSubtitle ? (
               <Typography color="text.secondary" sx={authSplitFormSubtitleSx}>
                 {formSubtitle}
               </Typography>
-            )}
+            ) : null}
           </Box>
           {children}
         </Box>

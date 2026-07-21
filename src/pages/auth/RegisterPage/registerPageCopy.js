@@ -1,6 +1,5 @@
 export const REGISTER_PAGE_COPY = {
   formTitle: "Crie sua conta",
-  formSubtitle: "Use Google, Apple ou cadastre com e-mail",
   brandSubtitle: "Cadastre-se e comece a controlar o estoque da casa",
   steps: ["Dados pessoais", "Acesso", "Confirmação"],
   nameLabel: "Nome",
