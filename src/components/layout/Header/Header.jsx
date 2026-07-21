@@ -17,8 +17,19 @@ import HeaderDesktopNav from "./components/HeaderDesktopNav";
 import HeaderLogoutDialog from "./components/HeaderLogoutDialog";
 import HeaderMobileDrawer from "./components/HeaderMobileDrawer";
 import HeaderProfileMenu from "./components/HeaderProfileMenu";
-import { HEADER_COPY, HEADER_PATHS } from "./headerCopy";
+import { HEADER_COPY } from "./headerCopy";
+import { HEADER_PATHS } from "./headerConfig";
 import { getInitials, isPathActive } from "./headerUtils";
+import {
+  headerActionsSx,
+  headerAppBarSx,
+  headerAvatarButtonSx,
+  headerAvatarSx,
+  headerLogoSx,
+  headerMenuButtonSx,
+  headerToolbarSx,
+  headerUserNameSx,
+} from "./Header.styled";
 
 export default function Header() {
   const theme = useTheme();
@@ -67,31 +78,15 @@ export default function Header() {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        elevation={0}
-        square
-        sx={{
-          bgcolor: "primary.dark",
-          borderRadius: 0,
-          zIndex: (t) => t.zIndex.drawer + 1,
-        }}
-      >
-        <Toolbar
-          sx={{
-            gap: 2,
-            position: "relative",
-            minHeight: { xs: 56, sm: 64 },
-            px: { xs: 1.5, md: 2 },
-          }}
-        >
+      <AppBar position="fixed" elevation={0} square sx={headerAppBarSx}>
+        <Toolbar sx={headerToolbarSx}>
           {isMobile && (
             <IconButton
               color="inherit"
               edge="start"
               onClick={() => setDrawerOpen(true)}
               aria-label={HEADER_COPY.openMenuAria}
-              sx={{ zIndex: 1 }}
+              sx={headerMenuButtonSx}
             >
               <MenuIcon />
             </IconButton>
@@ -102,22 +97,7 @@ export default function Header() {
             src={brandLogo}
             alt={HEADER_COPY.logoAlt}
             onClick={() => navigate(HEADER_PATHS.dashboard)}
-            sx={{
-              height: { xs: 36, sm: 42, md: 48 },
-              width: "auto",
-              maxWidth: { xs: "52vw", sm: 220, md: 260 },
-              objectFit: "contain",
-              display: "block",
-              cursor: "pointer",
-              flexShrink: 0,
-              ...(isMobile
-                ? {
-                    position: "absolute",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                  }
-                : { mr: 2 }),
-            }}
+            sx={headerLogoSx(isMobile)}
           />
 
           {!isMobile && (
@@ -128,40 +108,18 @@ export default function Header() {
             />
           )}
 
-          <Box
-            sx={{
-              ml: "auto",
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              zIndex: 1,
-            }}
-          >
+          <Box sx={headerActionsSx}>
             {!isMobile && userDisplayName && (
-              <Typography
-                variant="body2"
-                sx={{ color: "rgba(255,255,255,0.85)", fontSize: "0.85rem" }}
-              >
+              <Typography variant="body2" sx={headerUserNameSx}>
                 {userDisplayName}
               </Typography>
             )}
             <Tooltip title={HEADER_COPY.avatarTooltip}>
               <IconButton
                 onClick={(event) => setProfileAnchorEl(event.currentTarget)}
-                sx={{ p: 0.5 }}
+                sx={headerAvatarButtonSx}
               >
-                <Avatar
-                  sx={{
-                    bgcolor: "primary.main",
-                    width: 40,
-                    height: 40,
-                    fontSize: "0.85rem",
-                    fontWeight: 700,
-                    border: "2px solid rgba(255,255,255,0.4)",
-                  }}
-                >
-                  {userInitials}
-                </Avatar>
+                <Avatar sx={headerAvatarSx}>{userInitials}</Avatar>
               </IconButton>
             </Tooltip>
           </Box>

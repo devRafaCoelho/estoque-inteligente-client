@@ -1,6 +1,9 @@
 import { GoogleLogin } from "@react-oauth/google";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { GOOGLE_SIGN_IN_BUTTON_CONFIG } from "./googleSignInButtonConfig";
+import { GOOGLE_SIGN_IN_BUTTON_COPY } from "./googleSignInButtonCopy";
+import { googleSignInContainerSx } from "./GoogleSignInButton.styled";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -15,41 +18,31 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
   if (!isGoogleAuthConfigured()) return null;
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        opacity: disabled ? 0.6 : 1,
-        pointerEvents: disabled ? "none" : "auto",
-        display: "flex",
-        justifyContent: "center",
-        "& > div": { width: "100% !important" },
-        "& iframe": { width: "100% !important" },
-      }}
-    >
+    <Box sx={googleSignInContainerSx(disabled)}>
       <GoogleLogin
         onSuccess={async (response) => {
           if (!response.credential) {
-            onError?.("Google não retornou credencial");
+            onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.noCredential);
             return;
           }
           try {
             await onSuccess(response.credential);
           } catch (err) {
-            onError?.(err?.message || "Falha no login com Google");
+            onError?.(err?.message || GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed);
           }
         }}
-        onError={() => onError?.("Não foi possível conectar ao Google")}
-        useOneTap={false}
-        theme="outline"
-        size="large"
-        width="100%"
-        text="continue_with"
-        shape="rectangular"
-        logo_alignment="left"
+        onError={() => onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.connectFailed)}
+        useOneTap={GOOGLE_SIGN_IN_BUTTON_CONFIG.useOneTap}
+        theme={GOOGLE_SIGN_IN_BUTTON_CONFIG.theme}
+        size={GOOGLE_SIGN_IN_BUTTON_CONFIG.size}
+        width={GOOGLE_SIGN_IN_BUTTON_CONFIG.width}
+        text={GOOGLE_SIGN_IN_BUTTON_CONFIG.text}
+        shape={GOOGLE_SIGN_IN_BUTTON_CONFIG.shape}
+        logo_alignment={GOOGLE_SIGN_IN_BUTTON_CONFIG.logoAlignment}
       />
       {!googleClientId && (
         <Typography variant="caption" color="text.secondary">
-          Configure VITE_GOOGLE_CLIENT_ID
+          {GOOGLE_SIGN_IN_BUTTON_COPY.configureClientId}
         </Typography>
       )}
     </Box>

@@ -2,13 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AppleIcon from "@mui/icons-material/Apple";
+import { APPLE_SIGN_IN_BUTTON_CONFIG } from "./appleSignInButtonConfig";
+import { APPLE_SIGN_IN_BUTTON_COPY } from "./appleSignInButtonCopy";
+import { appleSignInButtonSx } from "./AppleSignInButton.styled";
 
 const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID;
 const appleRedirectUri =
   import.meta.env.VITE_APPLE_REDIRECT_URI || window.location.origin;
-
-const APPLE_SCRIPT =
-  "https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js";
 
 export function isAppleAuthConfigured() {
   return Boolean(appleClientId);
@@ -16,19 +16,23 @@ export function isAppleAuthConfigured() {
 
 function loadAppleScript() {
   if (window.AppleID) return Promise.resolve();
-  const existing = document.querySelector(`script[src="${APPLE_SCRIPT}"]`);
+  const existing = document.querySelector(
+    `script[src="${APPLE_SIGN_IN_BUTTON_CONFIG.scriptUrl}"]`
+  );
   if (existing) {
     return new Promise((resolve, reject) => {
       existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Falha ao carregar Apple JS")));
+      existing.addEventListener("error", () =>
+        reject(new Error(APPLE_SIGN_IN_BUTTON_COPY.scriptLoadFailed))
+      );
     });
   }
   return new Promise((resolve, reject) => {
     const script = document.createElement("script");
-    script.src = APPLE_SCRIPT;
+    script.src = APPLE_SIGN_IN_BUTTON_CONFIG.scriptUrl;
     script.async = true;
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Falha ao carregar Apple JS"));
+    script.onerror = () => reject(new Error(APPLE_SIGN_IN_BUTTON_COPY.scriptLoadFailed));
     document.head.appendChild(script);
   });
 }
@@ -40,7 +44,7 @@ export default function AppleSignInButton({
   onSuccess,
   onError,
   disabled = false,
-  label = "Continuar com Apple",
+  label = APPLE_SIGN_IN_BUTTON_COPY.defaultLabel,
 }) {
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,14 +57,14 @@ export default function AppleSignInButton({
         if (cancelled) return;
         window.AppleID.auth.init({
           clientId: appleClientId,
-          scope: "name email",
+          scope: APPLE_SIGN_IN_BUTTON_CONFIG.scope,
           redirectURI: appleRedirectUri,
-          usePopup: true,
+          usePopup: APPLE_SIGN_IN_BUTTON_CONFIG.usePopup,
         });
         setReady(true);
       })
       .catch((err) => {
-        if (!cancelled) onError?.(err.message || "Apple JS indisponível");
+        if (!cancelled) onError?.(err.message || APPLE_SIGN_IN_BUTTON_COPY.unavailable);
       });
     return () => {
       cancelled = true;
@@ -74,7 +78,7 @@ export default function AppleSignInButton({
       const response = await window.AppleID.auth.signIn();
       const idToken = response?.authorization?.id_token;
       if (!idToken) {
-        onError?.("Apple não retornou id_token");
+        onError?.(APPLE_SIGN_IN_BUTTON_COPY.noIdToken);
         return;
       }
       const nameParts = response?.user?.name;
@@ -83,8 +87,8 @@ export default function AppleSignInButton({
         : null;
       await onSuccess({ idToken, fullName });
     } catch (err) {
-      if (err?.error === "popup_closed_by_user") return;
-      onError?.(err?.message || "Falha no login com Apple");
+      if (err?.error === APPLE_SIGN_IN_BUTTON_CONFIG.popupClosedError) return;
+      onError?.(err?.message || APPLE_SIGN_IN_BUTTON_COPY.loginFailed);
     } finally {
       setLoading(false);
     }
@@ -99,13 +103,14 @@ export default function AppleSignInButton({
       variant="outlined"
       onClick={handleClick}
       disabled={disabled || !ready || loading}
-      startIcon={loading ? <CircularProgress size={18} color="inherit" /> : <AppleIcon />}
-      sx={{
-        color: "#111",
-        borderColor: "#111",
-        bgcolor: "#fff",
-        "&:hover": { borderColor: "#111", bgcolor: "#f5f5f5" },
-      }}
+      startIcon={
+        loading ? (
+          <CircularProgress size={APPLE_SIGN_IN_BUTTON_CONFIG.progressSize} color="inherit" />
+        ) : (
+          <AppleIcon />
+        )
+      }
+      sx={appleSignInButtonSx}
     >
       {label}
     </Button>

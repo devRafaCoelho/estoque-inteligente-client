@@ -1,0 +1,15 @@
+export const PRODUCT_DETAIL_COPY = {
+  loadError: "Erro ao carregar produto",
+  consumeSuccess: "Baixa registrada",
+  consumeError: "Erro ao dar baixa",
+  markOutSuccess: "Produto marcado como acabou",
+  markOutError: "Erro ao zerar produto",
+  consumeAction: "Dar baixa",
+  markOutAction: "Marcar acabou",
+  historyTitle: "Histórico",
+  historyEmpty: "Sem movimentos ainda.",
+  minPrefix: "mínimo",
+  movementIn: "+",
+  movementOut: "−",
+  movementAdjust: "±",
+};

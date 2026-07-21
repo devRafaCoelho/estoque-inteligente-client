@@ -4,8 +4,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import LoadingButton from "../../../common/LoadingButton";
+import LoadingButton from "../../../common/LoadingButton/LoadingButton";
 import { HEADER_COPY } from "../headerCopy";
+import { logoutDialogActionsSx } from "../Header.styled";
 
 export default function HeaderLogoutDialog({
   open,
@@ -26,7 +27,7 @@ export default function HeaderLogoutDialog({
           {HEADER_COPY.logoutDescription}
         </DialogContentText>
       </DialogContent>
-      <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+      <DialogActions sx={logoutDialogActionsSx}>
         <Button onClick={onCancel} variant="outlined" disabled={loading}>
           {HEADER_COPY.logoutCancel}
         </Button>

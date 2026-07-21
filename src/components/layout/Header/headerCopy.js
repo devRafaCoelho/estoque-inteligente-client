@@ -12,9 +12,3 @@ export const HEADER_COPY = {
   openMenuAria: "Abrir menu",
   avatarFallback: "U",
 };
-
-export const HEADER_PATHS = {
-  dashboard: "/dashboard",
-  minhaConta: "/minha-conta",
-  login: "/login",
-};

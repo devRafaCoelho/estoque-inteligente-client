@@ -1,18 +1,18 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import AppLayout from "../components/layout/AppLayout";
-import { PrivateRoute, PublicRoute } from "../components/auth/AuthSessionGuard";
-import LoginPage from "../pages/auth/LoginPage";
-import RegisterPage from "../pages/auth/RegisterPage";
-import DashboardPage from "../pages/DashboardPage";
-import ProductListPage from "../pages/products/ProductListPage";
-import ProductDetailPage from "../pages/products/ProductDetailPage";
-import ProductCreatePage from "../pages/products/ProductCreatePage";
-import MyAccountPage from "../pages/account/MyAccountPage";
-import IntakePage from "../pages/intake/IntakePage";
-import IntakePreviewPage from "../pages/intake/IntakePreviewPage";
-import StockOutPage from "../pages/stockOut/StockOutPage";
-import StockOutPreviewPage from "../pages/stockOut/StockOutPreviewPage";
-import ShoppingListPage from "../pages/shopping/ShoppingListPage";
+import AppLayout from "../components/layout/AppLayout/AppLayout";
+import { PrivateRoute, PublicRoute } from "../components/auth/AuthSessionGuard/AuthSessionGuard";
+import LoginPage from "../pages/auth/LoginPage/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage/RegisterPage";
+import DashboardPage from "../pages/DashboardPage/DashboardPage";
+import ProductListPage from "../pages/products/ProductListPage/ProductListPage";
+import ProductDetailPage from "../pages/products/ProductDetailPage/ProductDetailPage";
+import ProductCreatePage from "../pages/products/ProductCreatePage/ProductCreatePage";
+import MyAccountPage from "../pages/account/MyAccountPage/MyAccountPage";
+import IntakePage from "../pages/intake/IntakePage/IntakePage";
+import IntakePreviewPage from "../pages/intake/IntakePreviewPage/IntakePreviewPage";
+import StockOutPage from "../pages/stockOut/StockOutPage/StockOutPage";
+import StockOutPreviewPage from "../pages/stockOut/StockOutPreviewPage/StockOutPreviewPage";
+import ShoppingListPage from "../pages/shopping/ShoppingListPage/ShoppingListPage";
 
 export default function AppRouter() {
   return (
