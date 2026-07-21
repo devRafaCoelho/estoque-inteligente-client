@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -6,6 +6,8 @@ import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { accountSchema, changePasswordSchema } from "../../../schemas";
@@ -37,7 +39,9 @@ export default function MyAccountPage() {
   const { success, error } = useAppSnackbar();
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [savingPreferences, setSavingPreferences] = useState(false);
   const [linking, setLinking] = useState(false);
+  const [preferences, setPreferences] = useState({ ...MY_ACCOUNT_CONFIG.preferenceDefaults });
 
   const providers = user?.authProviders || [];
   const hasGoogle = providers.includes(MY_ACCOUNT_CONFIG.providers.google);
@@ -57,6 +61,31 @@ export default function MyAccountPage() {
     resolver: yupResolver(changePasswordSchema),
     defaultValues: { ...MY_ACCOUNT_CONFIG.passwordDefaults },
   });
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const data = await userService.getPreferences();
+        if (!active) return;
+        setPreferences({
+          notifyLowStock: data.preferences?.notifyLowStock !== false,
+          notifyOutOfStock: data.preferences?.notifyOutOfStock !== false,
+          notifyConsumptionNudge: data.preferences?.notifyConsumptionNudge !== false,
+          consumptionNudgeDays:
+            data.preferences?.consumptionNudgeDays ||
+            MY_ACCOUNT_CONFIG.preferenceDefaults.consumptionNudgeDays,
+        });
+      } catch (err) {
+        if (active) {
+          error(err instanceof ApiError ? err.message : MY_ACCOUNT_COPY.preferencesLoadError);
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [error]);
 
   const saveProfile = async (values) => {
     setSavingProfile(true);
@@ -84,6 +113,29 @@ export default function MyAccountPage() {
       error(err instanceof ApiError ? err.message : MY_ACCOUNT_COPY.passwordError);
     } finally {
       setSavingPassword(false);
+    }
+  };
+
+  const savePreferences = async () => {
+    setSavingPreferences(true);
+    try {
+      const data = await userService.updatePreferences({
+        notifyLowStock: preferences.notifyLowStock,
+        notifyOutOfStock: preferences.notifyOutOfStock,
+        notifyConsumptionNudge: preferences.notifyConsumptionNudge,
+        consumptionNudgeDays: Number(preferences.consumptionNudgeDays),
+      });
+      setPreferences({
+        notifyLowStock: data.preferences.notifyLowStock,
+        notifyOutOfStock: data.preferences.notifyOutOfStock,
+        notifyConsumptionNudge: data.preferences.notifyConsumptionNudge,
+        consumptionNudgeDays: data.preferences.consumptionNudgeDays,
+      });
+      success(MY_ACCOUNT_COPY.preferencesSuccess);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : MY_ACCOUNT_COPY.preferencesError);
+    } finally {
+      setSavingPreferences(false);
     }
   };
 
@@ -132,6 +184,68 @@ export default function MyAccountPage() {
         />
         <LoadingButton type="submit" variant="contained" loading={savingProfile}>
           {MY_ACCOUNT_COPY.saveProfile}
+        </LoadingButton>
+      </Stack>
+
+      <Divider />
+
+      <Stack spacing={formStackSpacing}>
+        <Typography variant="h6">{MY_ACCOUNT_COPY.alertsTitle}</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {MY_ACCOUNT_COPY.alertsSubtitle}
+        </Typography>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={preferences.notifyLowStock}
+              onChange={(e) =>
+                setPreferences((prev) => ({ ...prev, notifyLowStock: e.target.checked }))
+              }
+            />
+          }
+          label={MY_ACCOUNT_COPY.notifyLowStock}
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={preferences.notifyOutOfStock}
+              onChange={(e) =>
+                setPreferences((prev) => ({ ...prev, notifyOutOfStock: e.target.checked }))
+              }
+            />
+          }
+          label={MY_ACCOUNT_COPY.notifyOutOfStock}
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={preferences.notifyConsumptionNudge}
+              onChange={(e) =>
+                setPreferences((prev) => ({
+                  ...prev,
+                  notifyConsumptionNudge: e.target.checked,
+                }))
+              }
+            />
+          }
+          label={MY_ACCOUNT_COPY.notifyConsumptionNudge}
+        />
+        <TextField
+          type="number"
+          label={MY_ACCOUNT_COPY.consumptionNudgeDays}
+          helperText={MY_ACCOUNT_COPY.consumptionNudgeDaysHelper}
+          disabled={!preferences.notifyConsumptionNudge}
+          value={preferences.consumptionNudgeDays}
+          onChange={(e) =>
+            setPreferences((prev) => ({ ...prev, consumptionNudgeDays: e.target.value }))
+          }
+          inputProps={{
+            min: MY_ACCOUNT_CONFIG.nudgeDaysMin,
+            max: MY_ACCOUNT_CONFIG.nudgeDaysMax,
+          }}
+        />
+        <LoadingButton variant="contained" loading={savingPreferences} onClick={savePreferences}>
+          {MY_ACCOUNT_COPY.savePreferences}
         </LoadingButton>
       </Stack>
 

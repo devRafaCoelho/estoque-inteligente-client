@@ -12,6 +12,7 @@ export const DASHBOARD_COPY = {
   noRecentAlerts: "Nenhum alerta recente.",
   markRead: "Marcar como lido",
   openProduct: "Ver produto",
+  registerStockOut: "Registrar baixa",
   markReadSuccess: "Alerta marcado como lido",
   markReadError: "Erro ao marcar alerta como lido",
 };

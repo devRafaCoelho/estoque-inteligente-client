@@ -8,6 +8,12 @@ export const DASHBOARD_CONFIG = {
     product: (id) => `/produtos/${id}`,
   },
   locale: "pt-BR",
+  types: {
+    consumptionNudge: "consumption_nudge",
+  },
+  actions: {
+    openQuickConsume: "open_quick_consume",
+  },
   stockStatus: {
     ok: "ok",
     low: "low",

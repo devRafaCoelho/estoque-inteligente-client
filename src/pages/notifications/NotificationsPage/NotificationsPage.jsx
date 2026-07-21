@@ -40,7 +40,8 @@ export default function NotificationsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState(NOTIFICATIONS_PAGE_CONFIG.defaultFilter);
 
-  const { filters, listLimit, productPath, locale } = NOTIFICATIONS_PAGE_CONFIG;
+  const { filters, listLimit, productPath, stockOutPath, locale, types, actions } =
+    NOTIFICATIONS_PAGE_CONFIG;
 
   const load = useCallback(
     async ({ silent = false } = {}) => {
@@ -93,9 +94,25 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleOpen = (notification) => {
-    if (!notification.productId) return;
-    navigate(productPath(notification.productId));
+  const handleOpen = async (notification) => {
+    const action = notification.payload?.action;
+    if (
+      notification.type === types.consumptionNudge ||
+      action === actions.openQuickConsume
+    ) {
+      if (notification.unread) {
+        try {
+          await notificationService.markRead(notification.id);
+        } catch {
+          /* segue para a baixa mesmo se falhar marcar lida */
+        }
+      }
+      navigate(stockOutPath);
+      return;
+    }
+    if (notification.productId) {
+      navigate(productPath(notification.productId));
+    }
   };
 
   if (loading) {
@@ -153,7 +170,10 @@ export default function NotificationsPage() {
       ) : (
         <Stack spacing={listSpacing}>
           {notifications.map((notification) => {
-            const clickable = Boolean(notification.productId);
+            const isNudge =
+              notification.type === types.consumptionNudge ||
+              notification.payload?.action === actions.openQuickConsume;
+            const clickable = Boolean(notification.productId) || isNudge;
             return (
               <Box
                 key={notification.id}
@@ -192,13 +212,25 @@ export default function NotificationsPage() {
                       {NOTIFICATIONS_PAGE_COPY.markRead}
                     </LoadingButton>
                   )}
-                  {notification.productId && (
+                  {isNudge && (
                     <Button
                       size="small"
                       variant="text"
                       onClick={(event) => {
                         event.stopPropagation();
                         handleOpen(notification);
+                      }}
+                    >
+                      {NOTIFICATIONS_PAGE_COPY.registerStockOut}
+                    </Button>
+                  )}
+                  {notification.productId && (
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        navigate(productPath(notification.productId));
                       }}
                     >
                       {NOTIFICATIONS_PAGE_COPY.openProduct}

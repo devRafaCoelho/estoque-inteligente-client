@@ -1,6 +1,6 @@
 export const NOTIFICATIONS_PAGE_COPY = {
   title: "Alertas",
-  subtitle: "Avisos de estoque baixo e produtos zerados",
+  subtitle: "Estoque baixo, zerados e lembretes de baixa",
   loadError: "Erro ao carregar alertas",
   markReadError: "Erro ao marcar alerta como lido",
   markAllReadError: "Erro ao marcar todos como lidos",
@@ -13,6 +13,7 @@ export const NOTIFICATIONS_PAGE_COPY = {
   markAllRead: "Marcar todos como lidos",
   markRead: "Marcar como lido",
   openProduct: "Ver produto",
+  registerStockOut: "Registrar baixa",
   unreadCount: (count) =>
     count === 1 ? "1 não lido" : `${count} não lidos`,
 };

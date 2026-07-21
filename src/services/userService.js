@@ -8,6 +8,17 @@ export const userService = {
     });
   },
 
+  getPreferences() {
+    return apiRequest("/api/users/me/preferences");
+  },
+
+  updatePreferences(payload) {
+    return apiRequest("/api/users/me/preferences", {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+  },
+
   changePassword(payload) {
     return apiRequest("/api/users/me/password", {
       method: "POST",

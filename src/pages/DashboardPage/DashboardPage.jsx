@@ -59,7 +59,7 @@ export default function DashboardPage() {
   const [recentAlerts, setRecentAlerts] = useState([]);
   const [busyId, setBusyId] = useState(null);
 
-  const { stockStatus, paths, locale } = DASHBOARD_CONFIG;
+  const { stockStatus, paths, locale, types, actions } = DASHBOARD_CONFIG;
 
   const load = useCallback(
     async ({ silent = false } = {}) => {
@@ -167,6 +167,12 @@ export default function DashboardPage() {
                     >
                       {DASHBOARD_COPY.markRead}
                     </LoadingButton>
+                  )}
+                  {(alert.type === types.consumptionNudge ||
+                    alert.payload?.action === actions.openQuickConsume) && (
+                    <Button size="small" variant="text" onClick={() => navigate(paths.stockOut)}>
+                      {DASHBOARD_COPY.registerStockOut}
+                    </Button>
                   )}
                   {alert.productId && (
                     <Button

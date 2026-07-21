@@ -16,4 +16,12 @@ export const MY_ACCOUNT_CONFIG = {
     newPassword: "",
     confirmPassword: "",
   },
+  preferenceDefaults: {
+    notifyLowStock: true,
+    notifyOutOfStock: true,
+    notifyConsumptionNudge: true,
+    consumptionNudgeDays: 5,
+  },
+  nudgeDaysMin: 1,
+  nudgeDaysMax: 30,
 };
