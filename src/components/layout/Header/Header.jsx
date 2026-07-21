@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
+import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
@@ -13,6 +15,7 @@ import { useTheme } from "@mui/material/styles";
 import brandLogo from "../../../assets/brand-logo.png";
 import { mainNavItems } from "../../../config/navigation";
 import { useAuth } from "../../../hooks/useAuth";
+import { notificationService } from "../../../services/notificationService";
 import HeaderDesktopNav from "./components/HeaderDesktopNav";
 import HeaderLogoutDialog from "./components/HeaderLogoutDialog";
 import HeaderMobileDrawer from "./components/HeaderMobileDrawer";
@@ -27,6 +30,8 @@ import {
   headerAvatarSx,
   headerLogoSx,
   headerMenuButtonSx,
+  headerNotificationsBadgeSx,
+  headerNotificationsButtonSx,
   headerToolbarSx,
   headerUserNameSx,
 } from "./Header.styled";
@@ -42,11 +47,25 @@ export default function Header() {
   const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const userDisplayName = user?.name || "";
   const userInitials = getInitials(userDisplayName) || HEADER_COPY.avatarFallback;
 
   const isActive = (path) => isPathActive(location.pathname, path);
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const data = await notificationService.unreadCount();
+      setUnreadCount(data.unreadCount ?? 0);
+    } catch {
+      // Mantém o último valor conhecido; falha silenciosa no header.
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadCount();
+  }, [fetchUnreadCount, location.pathname]);
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -114,6 +133,23 @@ export default function Header() {
                 {userDisplayName}
               </Typography>
             )}
+            <Tooltip title={HEADER_COPY.notificationsTooltip}>
+              <IconButton
+                color="inherit"
+                aria-label={HEADER_COPY.notificationsAria}
+                onClick={() => navigate(HEADER_PATHS.notifications)}
+                sx={headerNotificationsButtonSx}
+              >
+                <Badge
+                  badgeContent={unreadCount}
+                  color="error"
+                  max={99}
+                  sx={headerNotificationsBadgeSx}
+                >
+                  <NotificationsOutlinedIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
             <Tooltip title={HEADER_COPY.avatarTooltip}>
               <IconButton
                 onClick={(event) => setProfileAnchorEl(event.currentTarget)}

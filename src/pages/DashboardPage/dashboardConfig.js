@@ -1,11 +1,13 @@
 export const DASHBOARD_CONFIG = {
-  criticalLimit: 4,
   paths: {
     intake: "/entrada",
     stockOut: "/baixa",
     shopping: "/lista-compras",
     products: "/produtos",
+    notifications: "/notificacoes",
+    product: (id) => `/produtos/${id}`,
   },
+  locale: "pt-BR",
   stockStatus: {
     ok: "ok",
     low: "low",

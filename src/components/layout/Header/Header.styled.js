@@ -45,6 +45,18 @@ export const headerUserNameSx = {
   fontSize: "0.85rem",
 };
 
+export const headerNotificationsButtonSx = {
+  color: "white",
+};
+
+export const headerNotificationsBadgeSx = {
+  "& .MuiBadge-badge": {
+    bgcolor: "error.main",
+    color: "white",
+    fontWeight: 700,
+  },
+};
+
 export const headerAvatarButtonSx = {
   p: 0.5,
 };

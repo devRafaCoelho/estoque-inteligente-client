@@ -13,6 +13,7 @@ import IntakePreviewPage from "../pages/intake/IntakePreviewPage/IntakePreviewPa
 import StockOutPage from "../pages/stockOut/StockOutPage/StockOutPage";
 import StockOutPreviewPage from "../pages/stockOut/StockOutPreviewPage/StockOutPreviewPage";
 import ShoppingListPage from "../pages/shopping/ShoppingListPage/ShoppingListPage";
+import NotificationsPage from "../pages/notifications/NotificationsPage/NotificationsPage";
 
 export default function AppRouter() {
   return (
@@ -30,6 +31,7 @@ export default function AppRouter() {
           <Route path="/baixa" element={<StockOutPage />} />
           <Route path="/baixa/:id/preview" element={<StockOutPreviewPage />} />
           <Route path="/lista-compras" element={<ShoppingListPage />} />
+          <Route path="/notificacoes" element={<NotificationsPage />} />
           <Route path="/produtos" element={<ProductListPage />} />
           <Route path="/produtos/novo" element={<ProductCreatePage />} />
           <Route path="/produtos/:id" element={<ProductDetailPage />} />

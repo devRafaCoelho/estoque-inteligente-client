@@ -1,6 +1,8 @@
 export const HEADER_COPY = {
   logoAlt: "Estoque Inteligente",
   avatarTooltip: "Perfil e opções",
+  notificationsTooltip: "Alertas",
+  notificationsAria: "Abrir alertas",
   loadingUser: "Carregando...",
   minhaConta: "Minha conta",
   sair: "Sair",

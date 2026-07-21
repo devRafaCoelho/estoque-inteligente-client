@@ -1,30 +1,39 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
-import { productService } from "../../services/productService";
+import ProductCard from "../../components/products/ProductCard/ProductCard";
+import StockStatusChip from "../../components/products/StockStatusChip/StockStatusChip";
+import LoadingButton from "../../components/common/LoadingButton/LoadingButton";
 import { useAuth } from "../../hooks/useAuth";
 import { useAppSnackbar } from "../../hooks/useAppSnackbar";
 import { ApiError } from "../../services/apiClient";
-import ProductCard from "../../components/products/ProductCard/ProductCard";
-import StockStatusChip from "../../components/products/StockStatusChip/StockStatusChip";
+import { dashboardService } from "../../services/dashboardService";
+import { notificationService } from "../../services/notificationService";
 import { pageLoadingBoxSx, pageHeaderSubtitleSx, pageSectionTitleSx } from "../../styles/pageStyles";
 import { DASHBOARD_COPY } from "./dashboardCopy";
 import { DASHBOARD_CONFIG } from "./dashboardConfig";
 import {
   pageStackSpacing,
   statsRowSpacing,
+  statsRowDirection,
+  statsRowSx,
   actionsRowSx,
   actionsRowSpacing,
   statCardSx,
   statCardContentSx,
   statValueSx,
   criticalListSpacing,
+  alertsListSpacing,
+  alertItemSx,
+  alertItemTitleSx,
+  alertActionsSx,
+  alertActionsSpacing,
 } from "./DashboardPage.styled";
 
 function StatCard({ status, value }) {
@@ -43,32 +52,53 @@ function StatCard({ status, value }) {
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { error } = useAppSnackbar();
+  const { success, error } = useAppSnackbar();
   const [loading, setLoading] = useState(true);
-  const [products, setProducts] = useState([]);
+  const [stats, setStats] = useState({ ok: 0, low: 0, out: 0 });
+  const [criticalProducts, setCriticalProducts] = useState([]);
+  const [recentAlerts, setRecentAlerts] = useState([]);
+  const [busyId, setBusyId] = useState(null);
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
+  const { stockStatus, paths, locale } = DASHBOARD_CONFIG;
+
+  const load = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!silent) setLoading(true);
       try {
-        const data = await productService.list();
-        if (active) setProducts(data.products || []);
+        const data = await dashboardService.getStats();
+        setStats({
+          ok: data.stats?.ok || 0,
+          low: data.stats?.low || 0,
+          out: data.stats?.out || 0,
+        });
+        setCriticalProducts(data.criticalProducts || []);
+        setRecentAlerts(data.recentAlerts || []);
       } catch (err) {
         error(err instanceof ApiError ? err.message : DASHBOARD_COPY.loadError);
       } finally {
-        if (active) setLoading(false);
+        if (!silent) setLoading(false);
       }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [error]);
+    },
+    [error],
+  );
 
-  const { stockStatus, criticalLimit, paths } = DASHBOARD_CONFIG;
-  const ok = products.filter((p) => p.stockStatus === stockStatus.ok).length;
-  const low = products.filter((p) => p.stockStatus === stockStatus.low).length;
-  const out = products.filter((p) => p.stockStatus === stockStatus.out).length;
-  const critical = products.filter((p) => p.stockStatus !== stockStatus.ok).slice(0, criticalLimit);
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const handleMarkRead = async (alert) => {
+    if (!alert.unread) return;
+    setBusyId(alert.id);
+    try {
+      await notificationService.markRead(alert.id);
+      success(DASHBOARD_COPY.markReadSuccess);
+      await load({ silent: true });
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : DASHBOARD_COPY.markReadError);
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -87,10 +117,10 @@ export default function DashboardPage() {
         <Typography sx={pageHeaderSubtitleSx}>{DASHBOARD_COPY.subtitle}</Typography>
       </Box>
 
-      <Stack direction="row" spacing={statsRowSpacing}>
-        <StatCard status={stockStatus.ok} value={ok} />
-        <StatCard status={stockStatus.low} value={low} />
-        <StatCard status={stockStatus.out} value={out} />
+      <Stack direction={statsRowDirection} spacing={statsRowSpacing} sx={statsRowSx}>
+        <StatCard status={stockStatus.ok} value={stats.ok} />
+        <StatCard status={stockStatus.low} value={stats.low} />
+        <StatCard status={stockStatus.out} value={stats.out} />
       </Stack>
 
       <Stack direction={actionsRowSx.direction} spacing={actionsRowSpacing}>
@@ -110,13 +140,59 @@ export default function DashboardPage() {
 
       <Box>
         <Typography variant="h6" sx={pageSectionTitleSx}>
+          {DASHBOARD_COPY.alertsTitle}
+        </Typography>
+        {recentAlerts.length === 0 ? (
+          <Typography color="text.secondary">{DASHBOARD_COPY.noRecentAlerts}</Typography>
+        ) : (
+          <Stack spacing={alertsListSpacing}>
+            {recentAlerts.map((alert) => (
+              <Box key={alert.id} sx={alertItemSx(alert.unread)}>
+                <Typography variant="subtitle1" sx={alertItemTitleSx}>
+                  {alert.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {alert.body}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.75 }}>
+                  {new Date(alert.createdAt).toLocaleString(locale)}
+                </Typography>
+                <Stack direction="row" spacing={alertActionsSpacing} sx={alertActionsSx}>
+                  {alert.unread && (
+                    <LoadingButton
+                      size="small"
+                      variant="text"
+                      loading={busyId === alert.id}
+                      onClick={() => handleMarkRead(alert)}
+                    >
+                      {DASHBOARD_COPY.markRead}
+                    </LoadingButton>
+                  )}
+                  {alert.productId && (
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={() => navigate(paths.product(alert.productId))}
+                    >
+                      {DASHBOARD_COPY.openProduct}
+                    </Button>
+                  )}
+                </Stack>
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Box>
+
+      <Box>
+        <Typography variant="h6" sx={pageSectionTitleSx}>
           {DASHBOARD_COPY.attentionTitle}
         </Typography>
-        {critical.length === 0 ? (
+        {criticalProducts.length === 0 ? (
           <Typography color="text.secondary">{DASHBOARD_COPY.nothingUrgent}</Typography>
         ) : (
           <Stack spacing={criticalListSpacing}>
-            {critical.map((product) => (
+            {criticalProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </Stack>

@@ -2,6 +2,7 @@ export const HEADER_PATHS = {
   dashboard: "/dashboard",
   minhaConta: "/minha-conta",
   login: "/login",
+  notifications: "/notificacoes",
 };
 
 export const HEADER_CONFIG = {
