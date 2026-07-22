@@ -13,4 +13,8 @@ export const appLayoutMainSx = {
   mx: "auto",
   px: { xs: 2, sm: 3 },
   py: { xs: 2, sm: 3 },
+  pb: {
+    xs: "calc(64px + env(safe-area-inset-bottom) + 16px)",
+    md: 3,
+  },
 };

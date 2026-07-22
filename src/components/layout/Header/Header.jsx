@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import MenuIcon from "@mui/icons-material/Menu";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
@@ -18,7 +17,6 @@ import { useAuth } from "../../../hooks/useAuth";
 import { notificationService } from "../../../services/notificationService";
 import HeaderDesktopNav from "./components/HeaderDesktopNav";
 import HeaderLogoutDialog from "./components/HeaderLogoutDialog";
-import HeaderMobileDrawer from "./components/HeaderMobileDrawer";
 import HeaderProfileMenu from "./components/HeaderProfileMenu";
 import { HEADER_COPY } from "./headerCopy";
 import { HEADER_PATHS } from "./headerConfig";
@@ -29,7 +27,6 @@ import {
   headerAvatarButtonSx,
   headerAvatarSx,
   headerLogoSx,
-  headerMenuButtonSx,
   headerNotificationsBadgeSx,
   headerNotificationsButtonSx,
   headerToolbarSx,
@@ -43,7 +40,6 @@ export default function Header() {
   const location = useLocation();
   const { user, logout } = useAuth();
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [profileAnchorEl, setProfileAnchorEl] = useState(null);
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -69,7 +65,6 @@ export default function Header() {
 
   const handleNavigate = (path) => {
     navigate(path);
-    setDrawerOpen(false);
   };
 
   const handleProfileMenuClose = () => setProfileAnchorEl(null);
@@ -99,18 +94,6 @@ export default function Header() {
     <>
       <AppBar position="fixed" elevation={0} square sx={headerAppBarSx}>
         <Toolbar sx={headerToolbarSx}>
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={() => setDrawerOpen(true)}
-              aria-label={HEADER_COPY.openMenuAria}
-              sx={headerMenuButtonSx}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-
           <Box
             component="img"
             src={brandLogo}
@@ -176,14 +159,6 @@ export default function Header() {
         onCancel={() => setLogoutDialogOpen(false)}
         onConfirm={handleLogoutConfirm}
         loading={logoutLoading}
-      />
-
-      <HeaderMobileDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        items={mainNavItems}
-        isActive={isActive}
-        onNavigate={handleNavigate}
       />
     </>
   );
