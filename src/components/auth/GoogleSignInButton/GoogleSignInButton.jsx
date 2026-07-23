@@ -1,7 +1,13 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  clearGoogleCredentialHandler,
+  ensureGoogleIdentityInitialized,
+  renderGoogleSignInButton,
+  setGoogleCredentialHandler,
+} from "../../../lib/googleIdentity";
 import { GOOGLE_SIGN_IN_BUTTON_CONFIG } from "./googleSignInButtonConfig";
 import { GOOGLE_SIGN_IN_BUTTON_COPY } from "./googleSignInButtonCopy";
 import {
@@ -55,42 +61,43 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
   const [busy, setBusy] = useState(false);
   const overlayRef = useRef(null);
   const handlersRef = useRef({ onSuccess, onError });
+  const lastWidthRef = useRef(0);
+  const ownerIdRef = useRef(`google-btn-${Math.random().toString(36).slice(2)}`);
   handlersRef.current = { onSuccess, onError };
-
-  const handleCredential = useCallback(async (response) => {
-    if (!response?.credential) {
-      handlersRef.current.onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.noCredential);
-      return;
-    }
-    setBusy(true);
-    try {
-      await handlersRef.current.onSuccess(response.credential);
-    } catch (err) {
-      handlersRef.current.onError?.(
-        err?.message || GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed,
-      );
-    } finally {
-      setBusy(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (!isGoogleAuthConfigured() || !overlayRef.current) return undefined;
 
     const container = overlayRef.current;
+    const ownerId = ownerIdRef.current;
     let cancelled = false;
+    let resizeTimer = null;
 
-    const renderGoogleButton = () => {
-      if (cancelled || !window.google?.accounts?.id) return;
+    const handleCredential = async (response) => {
+      if (!response?.credential) {
+        handlersRef.current.onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.noCredential);
+        return;
+      }
+      setBusy(true);
+      try {
+        await handlersRef.current.onSuccess(response.credential);
+      } catch (err) {
+        handlersRef.current.onError?.(
+          err?.message || GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed,
+        );
+      } finally {
+        setBusy(false);
+      }
+    };
+
+    setGoogleCredentialHandler(ownerId, handleCredential);
+
+    const paintButton = () => {
+      if (cancelled || !container.isConnected) return;
       const width = Math.max(Math.floor(container.getBoundingClientRect().width), 280);
-      container.innerHTML = "";
-      window.google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: handleCredential,
-        auto_select: false,
-        cancel_on_tap_outside: true,
-      });
-      window.google.accounts.id.renderButton(container, {
+      if (width === lastWidthRef.current && container.childElementCount > 0) return;
+      lastWidthRef.current = width;
+      renderGoogleSignInButton(container, {
         type: GOOGLE_SIGN_IN_BUTTON_CONFIG.type,
         theme: GOOGLE_SIGN_IN_BUTTON_CONFIG.theme,
         size: GOOGLE_SIGN_IN_BUTTON_CONFIG.size,
@@ -101,32 +108,38 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
       });
     };
 
-    const tryRender = () => {
-      if (window.google?.accounts?.id) {
-        renderGoogleButton();
-        return true;
+    const setup = async () => {
+      try {
+        await ensureGoogleIdentityInitialized(googleClientId);
+        if (cancelled) return;
+        paintButton();
+      } catch {
+        if (!cancelled) {
+          handlersRef.current.onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed);
+        }
       }
-      return false;
     };
 
-    if (!tryRender()) {
-      const timer = window.setInterval(() => {
-        if (tryRender()) window.clearInterval(timer);
-      }, 100);
-      window.setTimeout(() => window.clearInterval(timer), 5000);
-    }
+    setup();
 
-    const observer = typeof ResizeObserver !== "undefined"
-      ? new ResizeObserver(() => renderGoogleButton())
-      : null;
+    const observer =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => {
+            window.clearTimeout(resizeTimer);
+            resizeTimer = window.setTimeout(paintButton, 150);
+          })
+        : null;
     observer?.observe(container);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(resizeTimer);
       observer?.disconnect();
+      clearGoogleCredentialHandler(ownerId);
+      lastWidthRef.current = 0;
       container.innerHTML = "";
     };
-  }, [handleCredential]);
+  }, []);
 
   if (!isGoogleAuthConfigured()) return null;
 

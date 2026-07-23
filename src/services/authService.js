@@ -1,4 +1,26 @@
-import { apiRequest } from "./apiClient";
+import { apiRequest, ApiError } from "./apiClient";
+
+async function withNetworkRetry(requestFn, { retries = 1 } = {}) {
+  let lastError;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await requestFn();
+    } catch (err) {
+      lastError = err;
+      const isTransientStatus =
+        err instanceof ApiError && (err.status === 502 || err.status === 503);
+      const isNetwork =
+        !(err instanceof ApiError) &&
+        (err?.name === "TypeError" ||
+          /failed to fetch|network|econnreset|load failed/i.test(
+            String(err?.message || ""),
+          ));
+      if ((!isNetwork && !isTransientStatus) || attempt === retries) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+  }
+  throw lastError;
+}
 
 export const authService = {
   register(payload) {
@@ -16,17 +38,21 @@ export const authService = {
   },
 
   loginWithGoogle({ idToken }) {
-    return apiRequest("/api/auth/google", {
-      method: "POST",
-      body: JSON.stringify({ idToken }),
-    });
+    return withNetworkRetry(() =>
+      apiRequest("/api/auth/google", {
+        method: "POST",
+        body: JSON.stringify({ idToken }),
+      }),
+    );
   },
 
   loginWithApple({ idToken, fullName }) {
-    return apiRequest("/api/auth/apple", {
-      method: "POST",
-      body: JSON.stringify({ idToken, fullName: fullName || null }),
-    });
+    return withNetworkRetry(() =>
+      apiRequest("/api/auth/apple", {
+        method: "POST",
+        body: JSON.stringify({ idToken, fullName: fullName || null }),
+      }),
+    );
   },
 
   linkGoogle({ idToken }) {

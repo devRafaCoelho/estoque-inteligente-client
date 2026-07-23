@@ -27,6 +27,13 @@ export const productService = {
     });
   },
 
+  createBatch(products) {
+    return apiRequest("/api/products/batch", {
+      method: "POST",
+      body: JSON.stringify({ products }),
+    });
+  },
+
   update(id, payload) {
     return apiRequest(`/api/products/${id}`, {
       method: "PATCH",

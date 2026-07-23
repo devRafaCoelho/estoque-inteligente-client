@@ -9,17 +9,17 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
-import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import UndoIcon from "@mui/icons-material/Undo";
-import { UNIT_LABELS } from "../../../config/constants";
 import { stockOutService } from "../../../services/stockOutService";
 import { productService } from "../../../services/productService";
+import { listStockUnits } from "../../../services/stockUnitService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { formatQuantity } from "../../../utils/unitLabels";
@@ -53,6 +53,21 @@ export default function StockOutPreviewPage() {
   const [stockOut, setStockOut] = useState(null);
   const [items, setItems] = useState([]);
   const [products, setProducts] = useState([]);
+  const [stockUnits, setStockUnits] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    listStockUnits()
+      .then((units) => {
+        if (active) setStockUnits(units);
+      })
+      .catch(() => {
+        if (active) setStockUnits([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -275,21 +290,13 @@ export default function StockOutPreviewPage() {
                   onChange={(e) => updateItem(item.id, { quantity: e.target.value })}
                   fullWidth
                 />
-                <TextField
-                  select
+                <StockUnitSelectField
                   label={STOCK_OUT_PREVIEW_PAGE_COPY.unitLabel}
-                  size="small"
                   value={item.unit || STOCK_OUT_PREVIEW_PAGE_CONFIG.defaultUnit}
                   disabled={item.excluded}
-                  onChange={(e) => updateItem(item.id, { unit: e.target.value })}
-                  fullWidth
-                >
-                  {Object.entries(UNIT_LABELS).map(([value, label]) => (
-                    <MenuItem key={value} value={value}>
-                      {label}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                  onChange={(value) => updateItem(item.id, { unit: value })}
+                  stockUnits={stockUnits}
+                />
               </Stack>
 
               {item.warning === STOCK_OUT_PREVIEW_PAGE_CONFIG.warningExceedsStock &&

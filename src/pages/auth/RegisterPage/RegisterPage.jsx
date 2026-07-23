@@ -3,7 +3,6 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Step from "@mui/material/Step";
 import StepLabel from "@mui/material/StepLabel";
@@ -15,11 +14,12 @@ import CheckCircle from "@mui/icons-material/CheckCircle";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { registerSchema } from "../../../schemas";
-import { BRAZIL_STATES, getStateLabel } from "../../../config/brazilStates";
+import { getStateLabel } from "../../../config/brazilStates";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import PasswordTextField from "../../../components/form/PasswordTextField/PasswordTextField";
+import BrazilianStateSelectField from "../../../components/form/BrazilianStateSelectField";
 import AuthSplitLayout from "../../../components/auth/AuthSplitLayout/AuthSplitLayout";
 import SocialAuthButtons from "../../../components/auth/SocialAuthButtons/SocialAuthButtons";
 import { ApiError } from "../../../services/apiClient";
@@ -160,23 +160,15 @@ export default function RegisterPage() {
               name="defaultState"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
+                <BrazilianStateSelectField
                   label={REGISTER_PAGE_COPY.stateLabel}
-                  fullWidth
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
                   error={Boolean(errors.defaultState)}
                   helperText={errors.defaultState?.message}
-                >
-                  <MenuItem value="">
-                    <em>{REGISTER_PAGE_COPY.statePlaceholder}</em>
-                  </MenuItem>
-                  {BRAZIL_STATES.map((state) => (
-                    <MenuItem key={state.code} value={state.code}>
-                      {state.code} — {state.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                  required
+                />
               )}
             />
           </Stack>

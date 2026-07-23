@@ -20,16 +20,17 @@ export const mainNavItems = [
   { label: "Alertas", path: "/notificacoes", icon: NotificationsOutlinedIcon },
 ];
 
-/** Bottom nav mobile — item `more` abre o menu adicional */
+/** Bottom nav mobile — `intake` abre sheet; `more` abre menu adicional */
 export const bottomNavItems = [
   { id: "home", label: "Início", path: "/dashboard", icon: HomeOutlinedIcon },
   { id: "products", label: "Produtos", path: "/produtos", icon: Inventory2OutlinedIcon },
   {
     id: "intake",
     label: "Entrada",
-    path: "/entrada",
+    path: null,
     icon: AddCircleOutlineIcon,
     prominent: true,
+    action: "intake-menu",
   },
   {
     id: "list",
@@ -54,9 +55,4 @@ export const moreMenuItems = [
     icon: NotificationsOutlinedIcon,
   },
   { label: "Minha conta", path: "/minha-conta", icon: PersonOutlineIcon },
-  {
-    label: "Novo produto",
-    path: "/produtos/novo",
-    icon: AddCircleOutlineIcon,
-  },
 ];

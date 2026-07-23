@@ -4,10 +4,12 @@ export const DASHBOARD_CONFIG = {
     stockOut: "/baixa",
     shopping: "/lista-compras",
     products: "/produtos",
+    finance: "/financeiro",
     notifications: "/notificacoes",
     product: (id) => `/produtos/${id}`,
   },
   locale: "pt-BR",
+  currency: "BRL",
   types: {
     consumptionNudge: "consumption_nudge",
   },

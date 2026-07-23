@@ -6,16 +6,18 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import UndoIcon from "@mui/icons-material/Undo";
-import { CATEGORY_LABELS, UNIT_LABELS } from "../../../config/constants";
 import { intakeService } from "../../../services/intakeService";
+import { listProductCategories } from "../../../services/productCategoryService";
+import { listStockUnits } from "../../../services/stockUnitService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import ProductCategorySelectField from "../../../components/form/ProductCategorySelectField";
+import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import {
@@ -26,7 +28,6 @@ import {
   pageLoadingBoxSx,
   rawInputBoxSx,
 } from "../../../styles/pageStyles";
-import { unitSelectMinWidthSx } from "../../../styles/formStyles";
 import { INTAKE_PREVIEW_PAGE_COPY } from "./intakePreviewPageCopy";
 import {
   INTAKE_PREVIEW_PAGE_CONFIG,
@@ -53,6 +54,26 @@ export default function IntakePreviewPage() {
   const [intake, setIntake] = useState(null);
   const [items, setItems] = useState([]);
   const [storeName, setStoreName] = useState("");
+  const [productCategories, setProductCategories] = useState([]);
+  const [stockUnits, setStockUnits] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    Promise.all([listProductCategories(), listStockUnits()])
+      .then(([categories, units]) => {
+        if (!active) return;
+        setProductCategories(categories);
+        setStockUnits(units);
+      })
+      .catch(() => {
+        if (!active) return;
+        setProductCategories([]);
+        setStockUnits([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -267,37 +288,20 @@ export default function IntakePreviewPage() {
                     onChange={(e) => updateItem(item.id, { quantity: e.target.value })}
                     fullWidth
                   />
-                  <TextField
-                    select
+                  <StockUnitSelectField
                     label={INTAKE_PREVIEW_PAGE_COPY.unitLabel}
-                    size="small"
                     value={item.unit || INTAKE_PREVIEW_PAGE_CONFIG.defaultUnit}
                     disabled={item.excluded}
-                    onChange={(e) => updateItem(item.id, { unit: e.target.value })}
-                    sx={unitSelectMinWidthSx}
-                    fullWidth
-                  >
-                    {Object.entries(UNIT_LABELS).map(([value, label]) => (
-                      <MenuItem key={value} value={value}>
-                        {label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    select
+                    onChange={(value) => updateItem(item.id, { unit: value })}
+                    stockUnits={stockUnits}
+                  />
+                  <ProductCategorySelectField
                     label={INTAKE_PREVIEW_PAGE_COPY.categoryLabel}
-                    size="small"
                     value={item.category || INTAKE_PREVIEW_PAGE_CONFIG.defaultCategory}
                     disabled={item.excluded}
-                    onChange={(e) => updateItem(item.id, { category: e.target.value })}
-                    fullWidth
-                  >
-                    {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                      <MenuItem key={value} value={value}>
-                        {label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    onChange={(value) => updateItem(item.id, { category: value })}
+                    productCategories={productCategories}
+                  />
                   <TextField
                     label={INTAKE_PREVIEW_PAGE_COPY.unitPriceLabel}
                     type="number"

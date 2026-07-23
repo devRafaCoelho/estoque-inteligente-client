@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { accountSchema, changePasswordSchema } from "../../../schemas";
 import { useAuth } from "../../../hooks/useAuth";
@@ -21,6 +21,7 @@ import AppleSignInButton, {
   isAppleAuthConfigured,
 } from "../../../components/auth/AppleSignInButton/AppleSignInButton";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
+import BrazilianStateSelectField from "../../../components/form/BrazilianStateSelectField";
 import { ApiError } from "../../../services/apiClient";
 import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import { MY_ACCOUNT_COPY } from "./myAccountCopy";
@@ -177,10 +178,19 @@ export default function MyAccountPage() {
           helperText={profileForm.formState.errors.name?.message}
           {...profileForm.register("name")}
         />
-        <TextField
-          label={MY_ACCOUNT_COPY.defaultStateLabel}
-          inputProps={{ maxLength: MY_ACCOUNT_CONFIG.defaultStateMaxLength }}
-          {...profileForm.register("defaultState")}
+        <Controller
+          name="defaultState"
+          control={profileForm.control}
+          render={({ field }) => (
+            <BrazilianStateSelectField
+              label={MY_ACCOUNT_COPY.defaultStateLabel}
+              value={field.value ?? ""}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={Boolean(profileForm.formState.errors.defaultState)}
+              helperText={profileForm.formState.errors.defaultState?.message}
+            />
+          )}
         />
         <LoadingButton type="submit" variant="contained" loading={savingProfile}>
           {MY_ACCOUNT_COPY.saveProfile}

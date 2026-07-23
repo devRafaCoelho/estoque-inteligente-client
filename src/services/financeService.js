@@ -5,9 +5,9 @@ export const financeService = {
     return apiRequest("/api/finance/summary");
   },
 
-  getSeries({ weeks = 8 } = {}) {
+  getSeries({ year } = {}) {
     const params = new URLSearchParams();
-    if (weeks) params.set("weeks", String(weeks));
+    if (year) params.set("year", String(year));
     const query = params.toString();
     return apiRequest(`/api/finance/series${query ? `?${query}` : ""}`);
   },

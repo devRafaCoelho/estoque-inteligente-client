@@ -30,9 +30,6 @@ import {
   seriesChartSx,
   summaryCardContentSx,
   summaryCardSx,
-  summaryRowDirection,
-  summaryRowSpacing,
-  summaryRowSx,
   tipItemSx,
 } from "./FinancePage.styled";
 
@@ -57,32 +54,6 @@ function formatShortDate(value, locale) {
   }).format(new Date(value));
 }
 
-function SummaryCard({ title, total, count, deltaPercent, extra }) {
-  const rising = (Number(deltaPercent) || 0) > 0;
-  return (
-    <Card sx={summaryCardSx}>
-      <CardContent sx={summaryCardContentSx}>
-        <Typography variant="body2" color="text.secondary">
-          {title}
-        </Typography>
-        <Typography variant="h4" fontWeight={800} color="text.primary" mt={0.5}>
-          {formatMoney(total)}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
-          {FINANCE_PAGE_COPY.purchasesCount(count || 0)}
-        </Typography>
-        <Typography variant="body2" sx={deltaSx(rising)} mt={0.75}>
-          {formatDelta(deltaPercent)}{" "}
-          <Typography component="span" variant="caption" color="text.secondary">
-            {FINANCE_PAGE_COPY.vsPrevious}
-          </Typography>
-        </Typography>
-        {extra}
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function FinancePage() {
   const { error } = useAppSnackbar();
   const [loading, setLoading] = useState(true);
@@ -90,14 +61,15 @@ export default function FinancePage() {
   const [series, setSeries] = useState([]);
   const [tips, setTips] = useState([]);
 
-  const { seriesWeeks, locale } = FINANCE_PAGE_CONFIG;
+  const { locale } = FINANCE_PAGE_CONFIG;
+  const year = new Date().getFullYear();
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const [summaryData, seriesData, tipsData] = await Promise.all([
         financeService.getSummary(),
-        financeService.getSeries({ weeks: seriesWeeks }),
+        financeService.getSeries({ year }),
         financeService.getTips(),
       ]);
       setSummary(summaryData);
@@ -108,7 +80,7 @@ export default function FinancePage() {
     } finally {
       setLoading(false);
     }
-  }, [error, seriesWeeks]);
+  }, [error, year]);
 
   useEffect(() => {
     load();
@@ -124,6 +96,11 @@ export default function FinancePage() {
     [series],
   );
 
+  const hasSeriesSpend = useMemo(
+    () => series.some((point) => Number(point.total) > 0),
+    [series],
+  );
+
   if (loading) {
     return (
       <Box sx={pageLoadingBoxSx}>
@@ -132,6 +109,8 @@ export default function FinancePage() {
     );
   }
 
+  const rising = (Number(summary?.month?.deltaPercent) || 0) > 0;
+
   return (
     <Stack spacing={pageStackSpacing}>
       <Box>
@@ -139,30 +118,59 @@ export default function FinancePage() {
         <Typography sx={pageHeaderSubtitleSx}>{FINANCE_PAGE_COPY.subtitle}</Typography>
       </Box>
 
-      <Stack direction={summaryRowDirection} spacing={summaryRowSpacing} sx={summaryRowSx}>
-        <SummaryCard
-          title={FINANCE_PAGE_COPY.weekTitle}
-          total={summary?.week?.total}
-          count={summary?.week?.count}
-          deltaPercent={summary?.week?.deltaPercent}
-        />
-        <SummaryCard
-          title={FINANCE_PAGE_COPY.monthTitle}
-          total={summary?.month?.total}
-          count={summary?.month?.count}
-          deltaPercent={summary?.month?.deltaPercent}
-          extra={
-            summary?.month?.projectedTotal > 0 ? (
-              <Typography variant="caption" color="text.secondary" display="block" mt={1}>
-                {FINANCE_PAGE_COPY.projectionLabel}:{" "}
-                <Typography component="span" variant="caption" fontWeight={700} color="text.primary">
-                  {formatMoney(summary.month.projectedTotal)}
-                </Typography>
+      <Card sx={summaryCardSx}>
+        <CardContent sx={summaryCardContentSx}>
+          <Typography variant="body2" color="text.secondary">
+            {FINANCE_PAGE_COPY.monthTitle}
+          </Typography>
+          <Typography variant="h4" fontWeight={800} color="text.primary" mt={0.5}>
+            {formatMoney(summary?.month?.total)}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block" mt={0.5}>
+            {FINANCE_PAGE_COPY.purchasesCount(summary?.month?.count || 0)}
+          </Typography>
+          <Typography variant="body2" sx={deltaSx(rising)} mt={0.75}>
+            {formatDelta(summary?.month?.deltaPercent)}{" "}
+            <Typography component="span" variant="caption" color="text.secondary">
+              {FINANCE_PAGE_COPY.vsPrevious}
+            </Typography>
+          </Typography>
+          {summary?.month?.projectedTotal > 0 ? (
+            <Typography variant="caption" color="text.secondary" display="block" mt={1}>
+              {FINANCE_PAGE_COPY.projectionLabel}:{" "}
+              <Typography component="span" variant="caption" fontWeight={700} color="text.primary">
+                {formatMoney(summary.month.projectedTotal)}
               </Typography>
-            ) : null
-          }
-        />
-      </Stack>
+            </Typography>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Box>
+        <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.yearSeriesTitle}</Typography>
+        <Box sx={sectionCardSx}>
+          {!hasSeriesSpend ? (
+            <Typography color="text.secondary">{FINANCE_PAGE_COPY.emptySeries}</Typography>
+          ) : (
+            <Box sx={seriesChartSx}>
+              {series.map((point) => {
+                const ratio = maxSeries > 0 ? point.total / maxSeries : 0;
+                return (
+                  <Box key={`${point.year}-${point.month}`} sx={seriesBarColumnSx}>
+                    <Typography variant="caption" color="text.secondary" noWrap>
+                      {point.total > 0 ? formatMoney(point.total) : "—"}
+                    </Typography>
+                    <Box sx={seriesBarSx(ratio)} />
+                    <Typography variant="caption" color="text.secondary">
+                      {point.label}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
+        </Box>
+      </Box>
 
       <Box>
         <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.categoriesTitle}</Typography>
@@ -186,32 +194,6 @@ export default function FinancePage() {
                 </Box>
               );
             })
-          )}
-        </Box>
-      </Box>
-
-      <Box>
-        <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.seriesTitle}</Typography>
-        <Box sx={sectionCardSx}>
-          {series.length === 0 ? (
-            <Typography color="text.secondary">{FINANCE_PAGE_COPY.emptySeries}</Typography>
-          ) : (
-            <Box sx={seriesChartSx}>
-              {series.map((point) => {
-                const ratio = maxSeries > 0 ? point.total / maxSeries : 0;
-                return (
-                  <Box key={String(point.weekStart)} sx={seriesBarColumnSx}>
-                    <Typography variant="caption" color="text.secondary" noWrap>
-                      {formatMoney(point.total)}
-                    </Typography>
-                    <Box sx={seriesBarSx(ratio)} />
-                    <Typography variant="caption" color="text.secondary">
-                      {formatShortDate(point.weekStart, locale)}
-                    </Typography>
-                  </Box>
-                );
-              })}
-            </Box>
           )}
         </Box>
       </Box>
