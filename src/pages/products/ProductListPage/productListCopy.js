@@ -1,8 +1,10 @@
 export const PRODUCT_LIST_COPY = {
   title: "Produtos",
   searchPlaceholder: "Buscar produto...",
+  categoryLabel: "Categoria",
+  categoryAll: "Todas",
   filterAll: "Todos",
-  filterOk: "Ok",
+  filterOk: "Em estoque",
   filterLow: "Acabando",
   filterOut: "Zerados",
   emptyDefaultTitle: "Estoque vazio",
