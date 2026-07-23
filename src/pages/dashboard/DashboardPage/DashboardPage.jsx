@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import DocumentScannerOutlinedIcon from "@mui/icons-material/DocumentScannerOutlined";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -15,6 +17,7 @@ import Typography from "@mui/material/Typography";
 import ProductCard from "../../../components/products/ProductCard/ProductCard";
 import StockStatusChip from "../../../components/products/StockStatusChip/StockStatusChip";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import EmptyState from "../../../components/common/EmptyState/EmptyState";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -206,7 +209,12 @@ export default function DashboardPage() {
           {DASHBOARD_PAGE_COPY.alertsTitle}
         </Typography>
         {recentAlerts.length === 0 ? (
-          <Typography color="text.secondary">{DASHBOARD_PAGE_COPY.noRecentAlerts}</Typography>
+          <EmptyState
+            size="sm"
+            icon={NotificationsNoneOutlinedIcon}
+            title={DASHBOARD_PAGE_COPY.noRecentAlertsTitle}
+            description={DASHBOARD_PAGE_COPY.noRecentAlertsDescription}
+          />
         ) : (
           <Stack spacing={alertsListSpacing}>
             {recentAlerts.map((alert) => (
@@ -258,7 +266,12 @@ export default function DashboardPage() {
           {DASHBOARD_PAGE_COPY.attentionTitle}
         </Typography>
         {criticalProducts.length === 0 ? (
-          <Typography color="text.secondary">{DASHBOARD_PAGE_COPY.nothingUrgent}</Typography>
+          <EmptyState
+            size="sm"
+            icon={CheckCircleOutlineIcon}
+            title={DASHBOARD_PAGE_COPY.nothingUrgentTitle}
+            description={DASHBOARD_PAGE_COPY.nothingUrgentDescription}
+          />
         ) : (
           <Stack spacing={criticalListSpacing}>
             {criticalProducts.map((product) => (

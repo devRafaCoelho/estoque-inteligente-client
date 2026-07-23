@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
+import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
@@ -6,6 +10,7 @@ import CardContent from "@mui/material/CardContent";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import EmptyState from "../../../components/common/EmptyState/EmptyState";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { getFinanceSeries, getFinanceSummary, getFinanceTips } from "../../../services/financeService";
@@ -150,7 +155,12 @@ export default function FinancePage() {
         <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.yearSeriesTitle}</Typography>
         <Box sx={sectionCardSx}>
           {!hasSeriesSpend ? (
-            <Typography color="text.secondary">{FINANCE_PAGE_COPY.emptySeries}</Typography>
+            <EmptyState
+              size="sm"
+              icon={AccountBalanceWalletOutlinedIcon}
+              title={FINANCE_PAGE_COPY.emptySeriesTitle}
+              description={FINANCE_PAGE_COPY.emptySeriesDescription}
+            />
           ) : (
             <Box sx={seriesChartSx}>
               {series.map((point) => {
@@ -176,7 +186,12 @@ export default function FinancePage() {
         <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.categoriesTitle}</Typography>
         <Box sx={sectionCardSx}>
           {(summary?.byCategory || []).length === 0 ? (
-            <Typography color="text.secondary">{FINANCE_PAGE_COPY.emptyCategories}</Typography>
+            <EmptyState
+              size="sm"
+              icon={CategoryOutlinedIcon}
+              title={FINANCE_PAGE_COPY.emptyCategoriesTitle}
+              description={FINANCE_PAGE_COPY.emptyCategoriesDescription}
+            />
           ) : (
             (summary.byCategory || []).map((row) => {
               const ratio = maxCategory > 0 ? row.total / maxCategory : 0;
@@ -202,7 +217,12 @@ export default function FinancePage() {
         <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.tipsTitle}</Typography>
         <Stack spacing={1.25}>
           {tips.length === 0 ? (
-            <Typography color="text.secondary">{FINANCE_PAGE_COPY.emptyTips}</Typography>
+            <EmptyState
+              size="sm"
+              icon={LightbulbOutlinedIcon}
+              title={FINANCE_PAGE_COPY.emptyTipsTitle}
+              description={FINANCE_PAGE_COPY.emptyTipsDescription}
+            />
           ) : (
             tips.map((tip) => (
               <Alert
@@ -222,7 +242,12 @@ export default function FinancePage() {
         <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.recentTitle}</Typography>
         <Box sx={sectionCardSx}>
           {(summary?.recentPurchases || []).length === 0 ? (
-            <Typography color="text.secondary">{FINANCE_PAGE_COPY.emptyRecent}</Typography>
+            <EmptyState
+              size="sm"
+              icon={ReceiptLongOutlinedIcon}
+              title={FINANCE_PAGE_COPY.emptyRecentTitle}
+              description={FINANCE_PAGE_COPY.emptyRecentDescription}
+            />
           ) : (
             (summary.recentPurchases || []).map((purchase) => (
               <Box key={purchase.id} sx={recentItemSx}>

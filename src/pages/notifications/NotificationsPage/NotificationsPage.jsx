@@ -8,6 +8,9 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import EmptyState from "../../../components/common/EmptyState/EmptyState";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import MarkEmailReadOutlinedIcon from "@mui/icons-material/MarkEmailReadOutlined";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { listNotifications, markAllNotificationsRead, markNotificationRead } from "../../../services/notificationService";
@@ -123,10 +126,18 @@ export default function NotificationsPage() {
     );
   }
 
-  const emptyLabel =
+  const emptyContent =
     filter === filters.unread
-      ? NOTIFICATIONS_PAGE_COPY.emptyUnread
-      : NOTIFICATIONS_PAGE_COPY.emptyAll;
+      ? {
+          icon: MarkEmailReadOutlinedIcon,
+          title: NOTIFICATIONS_PAGE_COPY.emptyUnreadTitle,
+          description: NOTIFICATIONS_PAGE_COPY.emptyUnreadDescription,
+        }
+      : {
+          icon: NotificationsNoneOutlinedIcon,
+          title: NOTIFICATIONS_PAGE_COPY.emptyAllTitle,
+          description: NOTIFICATIONS_PAGE_COPY.emptyAllDescription,
+        };
 
   return (
     <Stack spacing={pageStackSpacing}>
@@ -166,7 +177,11 @@ export default function NotificationsPage() {
       </Stack>
 
       {notifications.length === 0 ? (
-        <Typography color="text.secondary">{emptyLabel}</Typography>
+        <EmptyState
+          icon={emptyContent.icon}
+          title={emptyContent.title}
+          description={emptyContent.description}
+        />
       ) : (
         <Stack spacing={listSpacing}>
           {notifications.map((notification) => {

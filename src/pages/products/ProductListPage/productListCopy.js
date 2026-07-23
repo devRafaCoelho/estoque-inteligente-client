@@ -5,7 +5,9 @@ export const PRODUCT_LIST_COPY = {
   filterOk: "Ok",
   filterLow: "Acabando",
   filterOut: "Zerados",
-  emptyFiltered: "Nenhum produto encontrado com esses filtros.",
-  emptyDefault: "Seu estoque ainda está vazio. Adicione o primeiro produto.",
+  emptyDefaultTitle: "Estoque vazio",
+  emptyDefaultDescription: "Adicione o primeiro produto pela Entrada ou cadastro manual.",
+  emptyFilteredTitle: "Nenhum produto encontrado",
+  emptyFilteredDescription: "Tente alterar os filtros ou a busca para ver resultados.",
   listError: "Erro ao listar produtos",
 };

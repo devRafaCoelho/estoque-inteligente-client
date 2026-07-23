@@ -1,7 +1,5 @@
 import LogoutIcon from "@mui/icons-material/Logout";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import PersonIcon from "@mui/icons-material/Person";
-import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Menu from "@mui/material/Menu";
@@ -9,7 +7,6 @@ import MenuItem from "@mui/material/MenuItem";
 import Typography from "@mui/material/Typography";
 import { HEADER_COPY } from "../headerCopy";
 import {
-  headerNotificationsBadgeSx,
   profileMenuItemSx,
   profileMenuLogoutItemSx,
   profileMenuPaperSx,
@@ -21,8 +18,6 @@ export default function HeaderProfileMenu({
   onClose,
   userDisplayName,
   userEmail,
-  unreadCount = 0,
-  onAlertas,
   onMinhaConta,
   onLogout,
 }) {
@@ -48,17 +43,6 @@ export default function HeaderProfileMenu({
         )}
       </Box>
       <Divider />
-      <MenuItem onClick={onAlertas} sx={profileMenuItemSx}>
-        <Badge
-          badgeContent={unreadCount}
-          color="error"
-          max={99}
-          sx={headerNotificationsBadgeSx}
-        >
-          <NotificationsOutlinedIcon fontSize="small" color="action" />
-        </Badge>
-        <Typography variant="body2">{HEADER_COPY.alertas}</Typography>
-      </MenuItem>
       <MenuItem onClick={onMinhaConta} sx={profileMenuItemSx}>
         <PersonIcon fontSize="small" color="action" />
         <Typography variant="body2">{HEADER_COPY.minhaConta}</Typography>

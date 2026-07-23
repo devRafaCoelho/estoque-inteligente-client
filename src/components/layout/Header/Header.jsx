@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import AppBar from "@mui/material/AppBar";
 import Avatar from "@mui/material/Avatar";
+import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
@@ -25,6 +27,8 @@ import {
   headerAvatarButtonSx,
   headerAvatarSx,
   headerLogoSx,
+  headerNotificationsBadgeSx,
+  headerNotificationsButtonSx,
   headerToolbarSx,
   headerUserNameSx,
 } from "./Header.styled";
@@ -70,11 +74,6 @@ export default function Header() {
     navigate(HEADER_PATHS.minhaConta);
   };
 
-  const handleAlertas = () => {
-    handleProfileMenuClose();
-    navigate(HEADER_PATHS.notifications);
-  };
-
   const handleLogoutClick = () => {
     handleProfileMenuClose();
     setLogoutDialogOpen(true);
@@ -117,6 +116,23 @@ export default function Header() {
                 {userDisplayName}
               </Typography>
             )}
+            <Tooltip title={HEADER_COPY.notificationsTooltip}>
+              <IconButton
+                color="inherit"
+                aria-label={HEADER_COPY.notificationsAria}
+                onClick={() => navigate(HEADER_PATHS.notifications)}
+                sx={headerNotificationsButtonSx}
+              >
+                <Badge
+                  badgeContent={unreadCount}
+                  color="error"
+                  max={99}
+                  sx={headerNotificationsBadgeSx}
+                >
+                  <NotificationsOutlinedIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
             <Tooltip title={HEADER_COPY.avatarTooltip}>
               <IconButton
                 onClick={(event) => setProfileAnchorEl(event.currentTarget)}
@@ -134,8 +150,6 @@ export default function Header() {
         onClose={handleProfileMenuClose}
         userDisplayName={userDisplayName}
         userEmail={user?.email}
-        unreadCount={unreadCount}
-        onAlertas={handleAlertas}
         onMinhaConta={handleMinhaConta}
         onLogout={handleLogoutClick}
       />

@@ -5,6 +5,8 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import EmptyState from "../../common/EmptyState/EmptyState";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { SHOPPING_CHECKLIST_COPY } from "./shoppingChecklistCopy";
 import { SHOPPING_CHECKLIST_CONFIG } from "./shoppingChecklistConfig";
@@ -19,7 +21,12 @@ import {
 export default function ShoppingChecklist({ items, onToggle, onDelete, busyId }) {
   if (!items?.length) {
     return (
-      <Typography color="text.secondary">{SHOPPING_CHECKLIST_COPY.empty}</Typography>
+      <EmptyState
+        size="sm"
+        icon={ShoppingCartOutlinedIcon}
+        title={SHOPPING_CHECKLIST_COPY.emptyTitle}
+        description={SHOPPING_CHECKLIST_COPY.emptyDescription}
+      />
     );
   }
 

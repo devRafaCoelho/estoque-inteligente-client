@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -6,6 +8,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import EmptyState from "../../../components/common/EmptyState/EmptyState";
 import { listProducts } from "../../../services/productService";
 import ProductCard from "../../../components/products/ProductCard/ProductCard";
 import { useDebounce } from "../../../hooks/useDebounce";
@@ -49,10 +52,22 @@ export default function ProductListPage() {
     };
   }, [debouncedSearch, status, error]);
 
-  const emptyLabel = useMemo(() => {
-    if (search || status) return PRODUCT_LIST_COPY.emptyFiltered;
-    return PRODUCT_LIST_COPY.emptyDefault;
-  }, [search, status]);
+  const isFiltered = Boolean(search || status);
+  const emptyContent = useMemo(
+    () =>
+      isFiltered
+        ? {
+            icon: SearchOffOutlinedIcon,
+            title: PRODUCT_LIST_COPY.emptyFilteredTitle,
+            description: PRODUCT_LIST_COPY.emptyFilteredDescription,
+          }
+        : {
+            icon: Inventory2OutlinedIcon,
+            title: PRODUCT_LIST_COPY.emptyDefaultTitle,
+            description: PRODUCT_LIST_COPY.emptyDefaultDescription,
+          },
+    [isFiltered],
+  );
 
   return (
     <Stack spacing={pageStackSpacing}>
@@ -82,7 +97,11 @@ export default function ProductListPage() {
           <CircularProgress />
         </Box>
       ) : products.length === 0 ? (
-        <Typography color="text.secondary">{emptyLabel}</Typography>
+        <EmptyState
+          icon={emptyContent.icon}
+          title={emptyContent.title}
+          description={emptyContent.description}
+        />
       ) : (
         <Stack spacing={productListSpacing}>
           {products.map((product) => (
