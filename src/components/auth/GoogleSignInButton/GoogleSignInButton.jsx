@@ -7,7 +7,7 @@ import {
   ensureGoogleIdentityInitialized,
   renderGoogleSignInButton,
   setGoogleCredentialHandler,
-} from "../../../lib/googleIdentity";
+} from "../../../utils/googleIdentity";
 import { GOOGLE_SIGN_IN_BUTTON_CONFIG } from "./googleSignInButtonConfig";
 import { GOOGLE_SIGN_IN_BUTTON_COPY } from "./googleSignInButtonCopy";
 import {

@@ -3,7 +3,7 @@ import AppLayout from "../components/layout/AppLayout/AppLayout";
 import { PrivateRoute, PublicRoute } from "../components/auth/AuthSessionGuard/AuthSessionGuard";
 import LoginPage from "../pages/auth/LoginPage/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage/RegisterPage";
-import DashboardPage from "../pages/DashboardPage/DashboardPage";
+import DashboardPage from "../pages/dashboard/DashboardPage/DashboardPage";
 import ProductListPage from "../pages/products/ProductListPage/ProductListPage";
 import ProductDetailPage from "../pages/products/ProductDetailPage/ProductDetailPage";
 import ProductCreatePage from "../pages/products/ProductCreatePage/ProductCreatePage";

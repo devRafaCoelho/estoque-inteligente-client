@@ -1,8 +1,14 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
 import { BRAZILIAN_STATES_URL } from "./endpoints";
 
-/** @returns {Promise<Array<{ code: string, name: string }>>} */
+/**
+ * @typedef {{ code: string, name: string }} BrazilianState
+ */
+
+/**
+ * @returns {Promise<BrazilianState[]>}
+ */
 export async function listBrazilianStates() {
-  const data = await apiRequest(BRAZILIAN_STATES_URL);
+  const data = await api.get(BRAZILIAN_STATES_URL);
   return data.states || [];
 }

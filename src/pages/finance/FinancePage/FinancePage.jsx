@@ -8,7 +8,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { financeService } from "../../../services/financeService";
+import { getFinanceSeries, getFinanceSummary, getFinanceTips } from "../../../services/financeService";
 import { categoryLabel } from "../../../utils/categoryLabels";
 import {
   pageHeaderSubtitleSx,
@@ -68,9 +68,9 @@ export default function FinancePage() {
     setLoading(true);
     try {
       const [summaryData, seriesData, tipsData] = await Promise.all([
-        financeService.getSummary(),
-        financeService.getSeries({ year }),
-        financeService.getTips(),
+        getFinanceSummary(),
+        getFinanceSeries({ year }),
+        getFinanceTips(),
       ]);
       setSummary(summaryData);
       setSeries(seriesData.series || []);

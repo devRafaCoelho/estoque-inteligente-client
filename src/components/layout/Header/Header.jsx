@@ -14,7 +14,7 @@ import { useTheme } from "@mui/material/styles";
 import brandLogo from "../../../assets/brand-logo.png";
 import { mainNavItems } from "../../../config/navigation";
 import { useAuth } from "../../../hooks/useAuth";
-import { notificationService } from "../../../services/notificationService";
+import { getUnreadNotificationsCount } from "../../../services/notificationService";
 import HeaderDesktopNav from "./components/HeaderDesktopNav";
 import HeaderLogoutDialog from "./components/HeaderLogoutDialog";
 import HeaderProfileMenu from "./components/HeaderProfileMenu";
@@ -52,7 +52,7 @@ export default function Header() {
 
   const fetchUnreadCount = useCallback(async () => {
     try {
-      const data = await notificationService.unreadCount();
+      const data = await getUnreadNotificationsCount();
       setUnreadCount(data.unreadCount ?? 0);
     } catch {
       // Mantém o último valor conhecido; falha silenciosa no header.

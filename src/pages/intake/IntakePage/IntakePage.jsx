@@ -11,7 +11,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { intakeParseSchema } from "../../../schemas";
-import { intakeService } from "../../../services/intakeService";
+import { parseIntakeText } from "../../../services/intakeService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -41,7 +41,7 @@ export default function IntakePage() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const data = await intakeService.parseText(values.text.trim());
+      const data = await parseIntakeText(values.text.trim());
       navigate(INTAKE_PAGE_CONFIG.paths.preview(data.intake.id));
     } catch (err) {
       error(err instanceof ApiError ? err.message : INTAKE_PAGE_COPY.parseError);

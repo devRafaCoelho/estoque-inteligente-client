@@ -9,7 +9,7 @@ import Fab from "@mui/material/Fab";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import AddIcon from "@mui/icons-material/Add";
-import { productService } from "../../../services/productService";
+import { listProducts } from "../../../services/productService";
 import ProductCard from "../../../components/products/ProductCard/ProductCard";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
@@ -37,23 +37,23 @@ export default function ProductListPage() {
   const debouncedSearch = useDebounce(search, PRODUCT_LIST_CONFIG.searchDebounceMs);
 
   useEffect(() => {
-    let active = true;
+    let ativo = true;
     (async () => {
       setLoading(true);
       try {
-        const data = await productService.list({
+        const data = await listProducts({
           search: debouncedSearch || undefined,
           status: status || undefined,
         });
-        if (active) setProducts(data.products || []);
+        if (ativo) setProducts(data.products || []);
       } catch (err) {
         error(err instanceof ApiError ? err.message : PRODUCT_LIST_COPY.listError);
       } finally {
-        if (active) setLoading(false);
+        if (ativo) setLoading(false);
       }
     })();
     return () => {
-      active = false;
+      ativo = false;
     };
   }, [debouncedSearch, status, error]);
 

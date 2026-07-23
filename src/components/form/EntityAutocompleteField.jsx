@@ -9,6 +9,14 @@ const filterOptions = createFilterOptions({
   trim: true,
 });
 
+/**
+ * @typedef {{ value: string, label: string }} AutocompleteOption
+ */
+
+/**
+ * @param {AutocompleteOption[]} options
+ * @returns {AutocompleteOption[]}
+ */
 function dedupeOptions(options) {
   const seen = new Set();
   return options.filter((option) => {
@@ -20,6 +28,22 @@ function dedupeOptions(options) {
 
 /**
  * Autocomplete controlado (value = code/id string), sem fetch.
+ *
+ * @param {Object} props
+ * @param {string} [props.label]
+ * @param {string} props.value
+ * @param {(value: string) => void} props.onChange
+ * @param {() => void} [props.onBlur]
+ * @param {boolean} [props.error]
+ * @param {string} [props.helperText]
+ * @param {boolean} [props.required]
+ * @param {boolean} [props.fullWidth]
+ * @param {boolean} [props.loading]
+ * @param {boolean} [props.disabled]
+ * @param {string} [props.noOptionsText]
+ * @param {AutocompleteOption[]} props.options
+ * @param {string} [props.valueLabel] — label de fallback quando `value` ainda não está em `options`
+ * @param {string} [props.fieldKey] — remonta o campo ao abrir/resetar formulários
  */
 export default function EntityAutocompleteField({ fieldKey, ...props }) {
   return <EntityAutocompleteFieldInner key={fieldKey ?? props.value} {...props} />;

@@ -9,7 +9,14 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import "@fontsource/caveat/400.css";
 import "@fontsource/caveat/700.css";
-import { shoppingListService } from "../../../services/shoppingListService";
+import {
+  addShoppingListItem,
+  deleteShoppingListItem,
+  generateShoppingList,
+  getActiveShoppingList,
+  setShoppingListViewMode,
+  updateShoppingListItem,
+} from "../../../services/shoppingListService";
 import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/ShoppingChecklist";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -52,7 +59,7 @@ export default function ShoppingListPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await shoppingListService.getActive();
+      const data = await getActiveShoppingList();
       applyList(data.list);
     } catch (err) {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.loadError);
@@ -68,7 +75,7 @@ export default function ShoppingListPage() {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      const data = await shoppingListService.generate(SHOPPING_LIST_PAGE_CONFIG.generateMode);
+      const data = await generateShoppingList(SHOPPING_LIST_PAGE_CONFIG.generateMode);
       applyList(data.list);
       success(
         data.list.stats.pending
@@ -86,7 +93,7 @@ export default function ShoppingListPage() {
     if (!value || value === viewMode) return;
     setViewMode(value);
     try {
-      const data = await shoppingListService.setViewMode(value);
+      const data = await setShoppingListViewMode(value);
       applyList(data.list);
     } catch (err) {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.viewModeError);
@@ -97,7 +104,7 @@ export default function ShoppingListPage() {
   const handleToggle = async (item) => {
     setBusyId(item.id);
     try {
-      await shoppingListService.updateItem(item.id, { checked: !item.checked });
+      await updateShoppingListItem(item.id, { checked: !item.checked });
       await load();
     } catch (err) {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.toggleError);
@@ -109,7 +116,7 @@ export default function ShoppingListPage() {
   const handleDelete = async (item) => {
     setBusyId(item.id);
     try {
-      await shoppingListService.deleteItem(item.id);
+      await deleteShoppingListItem(item.id);
       await load();
       success(SHOPPING_LIST_PAGE_COPY.itemRemoved);
     } catch (err) {
@@ -124,7 +131,7 @@ export default function ShoppingListPage() {
     if (!text) return;
     setAdding(true);
     try {
-      const data = await shoppingListService.addItem({ text });
+      const data = await addShoppingListItem({ text });
       setAddText("");
       await load();
       const count = data.items?.length || 1;

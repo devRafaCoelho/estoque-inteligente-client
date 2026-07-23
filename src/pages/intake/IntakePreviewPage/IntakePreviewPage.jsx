@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import UndoIcon from "@mui/icons-material/Undo";
-import { intakeService } from "../../../services/intakeService";
+import { cancelIntake, confirmIntake, getIntakeById, updateIntake } from "../../../services/intakeService";
 import { listProductCategories } from "../../../services/productCategoryService";
 import { listStockUnits } from "../../../services/stockUnitService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -58,27 +58,27 @@ export default function IntakePreviewPage() {
   const [stockUnits, setStockUnits] = useState([]);
 
   useEffect(() => {
-    let active = true;
+    let ativo = true;
     Promise.all([listProductCategories(), listStockUnits()])
       .then(([categories, units]) => {
-        if (!active) return;
+        if (!ativo) return;
         setProductCategories(categories);
         setStockUnits(units);
       })
       .catch(() => {
-        if (!active) return;
+        if (!ativo) return;
         setProductCategories([]);
         setStockUnits([]);
       });
     return () => {
-      active = false;
+      ativo = false;
     };
   }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await intakeService.get(id);
+      const data = await getIntakeById(id);
       setIntake(data.intake);
       setItems(data.intake.items || []);
       setStoreName(data.intake.storeName || "");
@@ -128,7 +128,7 @@ export default function IntakePreviewPage() {
   const handleSaveDraft = async () => {
     setSaving(true);
     try {
-      const data = await intakeService.update(id, buildPayload());
+      const data = await updateIntake(id, buildPayload());
       setIntake(data.intake);
       setItems(data.intake.items || []);
       success(INTAKE_PREVIEW_PAGE_COPY.draftSaved);
@@ -146,7 +146,7 @@ export default function IntakePreviewPage() {
     }
     setConfirming(true);
     try {
-      const data = await intakeService.confirm(id, buildPayload());
+      const data = await confirmIntake(id, buildPayload());
       const count = data.products?.length || activeCount;
       success(
         data.purchase
@@ -164,7 +164,7 @@ export default function IntakePreviewPage() {
   const handleCancel = async () => {
     setCancelling(true);
     try {
-      await intakeService.cancel(id);
+      await cancelIntake(id);
       success(INTAKE_PREVIEW_PAGE_COPY.cancelled);
       navigate(INTAKE_PREVIEW_PAGE_CONFIG.paths.entrada);
     } catch (err) {

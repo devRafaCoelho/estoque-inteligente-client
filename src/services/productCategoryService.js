@@ -1,8 +1,14 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
 import { PRODUCT_CATEGORIES_URL } from "./endpoints";
 
-/** @returns {Promise<Array<{ code: string, label: string }>>} */
+/**
+ * @typedef {{ code: string, label: string }} ProductCategory
+ */
+
+/**
+ * @returns {Promise<ProductCategory[]>}
+ */
 export async function listProductCategories() {
-  const data = await apiRequest(PRODUCT_CATEGORIES_URL);
+  const data = await api.get(PRODUCT_CATEGORIES_URL);
   return data.categories || [];
 }

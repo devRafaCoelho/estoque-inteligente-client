@@ -17,7 +17,7 @@ import StockUnitSelectField from "../../../components/form/StockUnitSelectField"
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { productSchema } from "../../../schemas";
 import { ApiError } from "../../../services/apiClient";
-import { productService } from "../../../services/productService";
+import { createProductsBatch } from "../../../services/productService";
 import { categoryLabel } from "../../../utils/categoryLabels";
 import { unitLabel } from "../../../utils/unitLabels";
 import { formStackSpacing } from "../../../styles/formStyles";
@@ -129,7 +129,7 @@ export default function ProductCreatePage() {
         minQuantity,
         notes,
       }));
-      const result = await productService.createBatch(products);
+      const result = await createProductsBatch(products);
 
       if (result.createdCount > 0 && result.errorCount === 0) {
         success(PRODUCT_CREATE_COPY.successAll(result.createdCount));

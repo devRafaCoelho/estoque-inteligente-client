@@ -1,18 +1,19 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
+import { FINANCE_URL } from "./endpoints";
+import { buildQueryString } from "../utils/queryString";
 
-export const financeService = {
-  getSummary() {
-    return apiRequest("/api/finance/summary");
-  },
+export async function getFinanceSummary() {
+  return api.get(`${FINANCE_URL}/summary`);
+}
 
-  getSeries({ year } = {}) {
-    const params = new URLSearchParams();
-    if (year) params.set("year", String(year));
-    const query = params.toString();
-    return apiRequest(`/api/finance/series${query ? `?${query}` : ""}`);
-  },
+/**
+ * @param {{ year?: number|string }} [params]
+ */
+export async function getFinanceSeries({ year } = {}) {
+  const query = buildQueryString({ year }, ["year"]);
+  return api.get(query ? `${FINANCE_URL}/series?${query}` : `${FINANCE_URL}/series`);
+}
 
-  getTips() {
-    return apiRequest("/api/finance/tips");
-  },
-};
+export async function getFinanceTips() {
+  return api.get(`${FINANCE_URL}/tips`);
+}

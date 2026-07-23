@@ -1,34 +1,39 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
+import { STOCK_OUTS_URL } from "./endpoints";
 
-export const stockOutService = {
-  parseText(text) {
-    return apiRequest("/api/stock-outs/parse-text", {
-      method: "POST",
-      body: JSON.stringify({ text }),
-    });
-  },
+/**
+ * @param {string} text
+ */
+export async function parseStockOutText(text) {
+  return api.post(`${STOCK_OUTS_URL}/parse-text`, { text });
+}
 
-  get(id) {
-    return apiRequest(`/api/stock-outs/${id}`);
-  },
+/**
+ * @param {string} id
+ */
+export async function getStockOutById(id) {
+  return api.get(`${STOCK_OUTS_URL}/${id}`);
+}
 
-  update(id, payload) {
-    return apiRequest(`/api/stock-outs/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {string} id
+ * @param {object} payload
+ */
+export async function updateStockOut(id, payload) {
+  return api.patch(`${STOCK_OUTS_URL}/${id}`, payload);
+}
 
-  confirm(id, payload) {
-    return apiRequest(`/api/stock-outs/${id}/confirm`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {string} id
+ * @param {object} payload
+ */
+export async function confirmStockOut(id, payload) {
+  return api.post(`${STOCK_OUTS_URL}/${id}/confirm`, payload);
+}
 
-  cancel(id) {
-    return apiRequest(`/api/stock-outs/${id}/cancel`, {
-      method: "POST",
-    });
-  },
-};
+/**
+ * @param {string} id
+ */
+export async function cancelStockOut(id) {
+  return api.post(`${STOCK_OUTS_URL}/${id}/cancel`, {});
+}

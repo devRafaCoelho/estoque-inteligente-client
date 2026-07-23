@@ -1,5 +1,13 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-import { authService } from "../services/authService";
+import {
+  getMe,
+  linkApple as linkAppleRequest,
+  linkGoogle as linkGoogleRequest,
+  login as loginRequest,
+  loginWithApple as loginWithAppleRequest,
+  loginWithGoogle as loginWithGoogleRequest,
+  register as registerRequest,
+} from "../services/authService";
 import { clearSessionStorage } from "../services/apiClient";
 import { TOKEN_KEY, USER_KEY } from "../config/constants";
 
@@ -39,7 +47,7 @@ export function AuthProvider({ children }) {
 
   const login = useCallback(
     async ({ email, password }) => {
-      const data = await authService.login({ email, password });
+      const data = await loginRequest({ email, password });
       persistSession(data.token, data.user);
       return data;
     },
@@ -48,7 +56,7 @@ export function AuthProvider({ children }) {
 
   const register = useCallback(
     async (payload) => {
-      const data = await authService.register(payload);
+      const data = await registerRequest(payload);
       persistSession(data.token, data.user);
       return data;
     },
@@ -57,7 +65,7 @@ export function AuthProvider({ children }) {
 
   const loginWithGoogle = useCallback(
     async (idToken) => {
-      const data = await authService.loginWithGoogle({ idToken });
+      const data = await loginWithGoogleRequest({ idToken });
       persistSession(data.token, data.user);
       return data;
     },
@@ -66,7 +74,7 @@ export function AuthProvider({ children }) {
 
   const loginWithApple = useCallback(
     async ({ idToken, fullName }) => {
-      const data = await authService.loginWithApple({ idToken, fullName });
+      const data = await loginWithAppleRequest({ idToken, fullName });
       persistSession(data.token, data.user);
       return data;
     },
@@ -75,7 +83,7 @@ export function AuthProvider({ children }) {
 
   const linkGoogle = useCallback(
     async (idToken) => {
-      const data = await authService.linkGoogle({ idToken });
+      const data = await linkGoogleRequest({ idToken });
       updateSessionUser(data.user);
       return data;
     },
@@ -84,7 +92,7 @@ export function AuthProvider({ children }) {
 
   const linkApple = useCallback(
     async ({ idToken, fullName }) => {
-      const data = await authService.linkApple({ idToken, fullName });
+      const data = await linkAppleRequest({ idToken, fullName });
       updateSessionUser(data.user);
       return data;
     },
@@ -96,16 +104,16 @@ export function AuthProvider({ children }) {
   }, [clearSession]);
 
   const refreshSessionUser = useCallback(async () => {
-    const data = await authService.me();
+    const data = await getMe();
     updateSessionUser(data.user);
     return data.user;
   }, [updateSessionUser]);
 
   useEffect(() => {
-    let active = true;
+    let ativo = true;
     async function boot() {
       if (!token) {
-        if (active) setBooting(false);
+        if (ativo) setBooting(false);
         return;
       }
       try {
@@ -113,12 +121,12 @@ export function AuthProvider({ children }) {
       } catch {
         clearSession();
       } finally {
-        if (active) setBooting(false);
+        if (ativo) setBooting(false);
       }
     }
     boot();
     return () => {
-      active = false;
+      ativo = false;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

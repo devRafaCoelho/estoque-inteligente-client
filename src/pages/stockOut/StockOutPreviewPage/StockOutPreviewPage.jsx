@@ -15,8 +15,8 @@ import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import UndoIcon from "@mui/icons-material/Undo";
-import { stockOutService } from "../../../services/stockOutService";
-import { productService } from "../../../services/productService";
+import { cancelStockOut, confirmStockOut, getStockOutById } from "../../../services/stockOutService";
+import { listProducts } from "../../../services/productService";
 import { listStockUnits } from "../../../services/stockUnitService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
@@ -56,16 +56,16 @@ export default function StockOutPreviewPage() {
   const [stockUnits, setStockUnits] = useState([]);
 
   useEffect(() => {
-    let active = true;
+    let ativo = true;
     listStockUnits()
       .then((units) => {
-        if (active) setStockUnits(units);
+        if (ativo) setStockUnits(units);
       })
       .catch(() => {
-        if (active) setStockUnits([]);
+        if (ativo) setStockUnits([]);
       });
     return () => {
-      active = false;
+      ativo = false;
     };
   }, []);
 
@@ -73,8 +73,8 @@ export default function StockOutPreviewPage() {
     setLoading(true);
     try {
       const [draft, catalog] = await Promise.all([
-        stockOutService.get(id),
-        productService.list({ active: true }),
+        getStockOutById(id),
+        listProducts({ active: true }),
       ]);
       setStockOut(draft.stockOut);
       setItems(draft.stockOut.items || []);
@@ -150,7 +150,7 @@ export default function StockOutPreviewPage() {
     }
     setConfirming(true);
     try {
-      const data = await stockOutService.confirm(id, buildPayload());
+      const data = await confirmStockOut(id, buildPayload());
       success(
         STOCK_OUT_PREVIEW_PAGE_COPY.confirmSuccess(data.products?.length || activeCount),
       );
@@ -165,7 +165,7 @@ export default function StockOutPreviewPage() {
   const handleCancel = async () => {
     setCancelling(true);
     try {
-      await stockOutService.cancel(id);
+      await cancelStockOut(id);
       success(STOCK_OUT_PREVIEW_PAGE_COPY.cancelled);
       navigate(STOCK_OUT_PREVIEW_PAGE_CONFIG.paths.baixa);
     } catch (err) {

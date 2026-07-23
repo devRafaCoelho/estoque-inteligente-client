@@ -1,41 +1,42 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
+import { SHOPPING_LISTS_URL } from "./endpoints";
 
-export const shoppingListService = {
-  getActive() {
-    return apiRequest("/api/shopping-lists/active");
-  },
+export async function getActiveShoppingList() {
+  return api.get(`${SHOPPING_LISTS_URL}/active`);
+}
 
-  generate(mode = "rules") {
-    return apiRequest("/api/shopping-lists/generate", {
-      method: "POST",
-      body: JSON.stringify({ mode }),
-    });
-  },
+/**
+ * @param {string} [mode]
+ */
+export async function generateShoppingList(mode = "rules") {
+  return api.post(`${SHOPPING_LISTS_URL}/generate`, { mode });
+}
 
-  setViewMode(viewMode) {
-    return apiRequest("/api/shopping-lists/view-mode", {
-      method: "PATCH",
-      body: JSON.stringify({ viewMode }),
-    });
-  },
+/**
+ * @param {string} viewMode
+ */
+export async function setShoppingListViewMode(viewMode) {
+  return api.patch(`${SHOPPING_LISTS_URL}/view-mode`, { viewMode });
+}
 
-  addItem(payload) {
-    return apiRequest("/api/shopping-lists/items", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {object} payload
+ */
+export async function addShoppingListItem(payload) {
+  return api.post(`${SHOPPING_LISTS_URL}/items`, payload);
+}
 
-  updateItem(id, payload) {
-    return apiRequest(`/api/shopping-lists/items/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {string} id
+ * @param {object} payload
+ */
+export async function updateShoppingListItem(id, payload) {
+  return api.patch(`${SHOPPING_LISTS_URL}/items/${id}`, payload);
+}
 
-  deleteItem(id) {
-    return apiRequest(`/api/shopping-lists/items/${id}`, {
-      method: "DELETE",
-    });
-  },
-};
+/**
+ * @param {string} id
+ */
+export async function deleteShoppingListItem(id) {
+  return api.delete(`${SHOPPING_LISTS_URL}/items/${id}`);
+}

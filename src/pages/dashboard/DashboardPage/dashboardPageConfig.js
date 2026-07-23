@@ -1,4 +1,4 @@
-export const DASHBOARD_CONFIG = {
+export const DASHBOARD_PAGE_CONFIG = {
   paths: {
     intake: "/entrada",
     stockOut: "/baixa",

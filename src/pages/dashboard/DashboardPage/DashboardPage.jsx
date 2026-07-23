@@ -12,18 +12,18 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import ProductCard from "../../components/products/ProductCard/ProductCard";
-import StockStatusChip from "../../components/products/StockStatusChip/StockStatusChip";
-import LoadingButton from "../../components/common/LoadingButton/LoadingButton";
-import { useAuth } from "../../hooks/useAuth";
-import { useAppSnackbar } from "../../hooks/useAppSnackbar";
-import { ApiError } from "../../services/apiClient";
-import { dashboardService } from "../../services/dashboardService";
-import { financeService } from "../../services/financeService";
-import { notificationService } from "../../services/notificationService";
-import { pageLoadingBoxSx, pageHeaderSubtitleSx, pageSectionTitleSx } from "../../styles/pageStyles";
-import { DASHBOARD_COPY } from "./dashboardCopy";
-import { DASHBOARD_CONFIG } from "./dashboardConfig";
+import ProductCard from "../../../components/products/ProductCard/ProductCard";
+import StockStatusChip from "../../../components/products/StockStatusChip/StockStatusChip";
+import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import { useAuth } from "../../../hooks/useAuth";
+import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
+import { ApiError } from "../../../services/apiClient";
+import { getDashboardStats } from "../../../services/dashboardService";
+import { getFinanceSummary } from "../../../services/financeService";
+import { markNotificationRead } from "../../../services/notificationService";
+import { pageLoadingBoxSx, pageHeaderSubtitleSx, pageSectionTitleSx } from "../../../styles/pageStyles";
+import { DASHBOARD_PAGE_COPY } from "./dashboardPageCopy";
+import { DASHBOARD_PAGE_CONFIG } from "./dashboardPageConfig";
 import {
   pageStackSpacing,
   statsRowSpacing,
@@ -44,7 +44,7 @@ import {
   alertActionsSpacing,
 } from "./DashboardPage.styled";
 
-function formatMoney(value, { locale, currency } = DASHBOARD_CONFIG) {
+function formatMoney(value, { locale, currency } = DASHBOARD_PAGE_CONFIG) {
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
@@ -75,15 +75,15 @@ export default function DashboardPage() {
   const [monthSpend, setMonthSpend] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
-  const { stockStatus, paths, locale, types, actions } = DASHBOARD_CONFIG;
+  const { stockStatus, paths, locale, types, actions } = DASHBOARD_PAGE_CONFIG;
 
   const load = useCallback(
     async ({ silent = false } = {}) => {
       if (!silent) setLoading(true);
       try {
         const [data, finance] = await Promise.all([
-          dashboardService.getStats(),
-          financeService.getSummary().catch(() => null),
+          getDashboardStats(),
+          getFinanceSummary().catch(() => null),
         ]);
         setStats({
           ok: data.stats?.ok || 0,
@@ -94,7 +94,7 @@ export default function DashboardPage() {
         setRecentAlerts(data.recentAlerts || []);
         setMonthSpend(finance?.month || null);
       } catch (err) {
-        error(err instanceof ApiError ? err.message : DASHBOARD_COPY.loadError);
+        error(err instanceof ApiError ? err.message : DASHBOARD_PAGE_COPY.loadError);
       } finally {
         if (!silent) setLoading(false);
       }
@@ -110,11 +110,11 @@ export default function DashboardPage() {
     if (!alert.unread) return;
     setBusyId(alert.id);
     try {
-      await notificationService.markRead(alert.id);
-      success(DASHBOARD_COPY.markReadSuccess);
+      await markNotificationRead(alert.id);
+      success(DASHBOARD_PAGE_COPY.markReadSuccess);
       await load({ silent: true });
     } catch (err) {
-      error(err instanceof ApiError ? err.message : DASHBOARD_COPY.markReadError);
+      error(err instanceof ApiError ? err.message : DASHBOARD_PAGE_COPY.markReadError);
     } finally {
       setBusyId(null);
     }
@@ -128,34 +128,34 @@ export default function DashboardPage() {
     );
   }
 
-  const firstName = user?.name?.split(" ")[0] || DASHBOARD_COPY.greetingFallback;
+  const firstName = user?.name?.split(" ")[0] || DASHBOARD_PAGE_COPY.greetingFallback;
 
   return (
     <Stack spacing={pageStackSpacing}>
       <Box>
         <Typography variant="h5">Olá, {firstName}</Typography>
-        <Typography sx={pageHeaderSubtitleSx}>{DASHBOARD_COPY.subtitle}</Typography>
+        <Typography sx={pageHeaderSubtitleSx}>{DASHBOARD_PAGE_COPY.subtitle}</Typography>
       </Box>
 
       <Box sx={heroCardSx}>
         <Typography variant="h6" fontWeight={800}>
-          {DASHBOARD_COPY.addStockTitle}
+          {DASHBOARD_PAGE_COPY.addStockTitle}
         </Typography>
         <Typography variant="body2" color="text.secondary" mt={0.5}>
-          {DASHBOARD_COPY.addStockSubtitle}
+          {DASHBOARD_PAGE_COPY.addStockSubtitle}
         </Typography>
         <Box sx={heroActionsSx}>
           <Button
             variant="outlined"
             size="large"
             startIcon={<DocumentScannerOutlinedIcon />}
-            onClick={() => info(DASHBOARD_COPY.scannerComingSoon)}
+            onClick={() => info(DASHBOARD_PAGE_COPY.scannerComingSoon)}
             sx={{ justifyContent: "space-between", flex: 1, pr: 1.5 }}
           >
             <Box component="span" sx={{ flex: 1, textAlign: "left" }}>
-              {DASHBOARD_COPY.ctaScanner}
+              {DASHBOARD_PAGE_COPY.ctaScanner}
             </Box>
-            <Chip size="small" label={DASHBOARD_COPY.ctaScannerHint} variant="outlined" />
+            <Chip size="small" label={DASHBOARD_PAGE_COPY.ctaScannerHint} variant="outlined" />
           </Button>
           <Button
             variant="contained"
@@ -164,7 +164,7 @@ export default function DashboardPage() {
             onClick={() => navigate(paths.intake)}
             sx={{ flex: 1 }}
           >
-            {DASHBOARD_COPY.ctaText}
+            {DASHBOARD_PAGE_COPY.ctaText}
           </Button>
         </Box>
       </Box>
@@ -174,20 +174,20 @@ export default function DashboardPage() {
           <CardContent sx={monthSpendContentSx}>
             <Box>
               <Typography variant="body2" color="text.secondary">
-                {DASHBOARD_COPY.monthlySpendTitle}
+                {DASHBOARD_PAGE_COPY.monthlySpendTitle}
               </Typography>
               <Typography variant="h5" fontWeight={800} mt={0.5}>
                 {monthSpend ? formatMoney(monthSpend.total) : formatMoney(0)}
               </Typography>
               {!monthSpend?.count ? (
                 <Typography variant="caption" color="text.secondary">
-                  {DASHBOARD_COPY.monthlySpendEmpty}
+                  {DASHBOARD_PAGE_COPY.monthlySpendEmpty}
                 </Typography>
               ) : null}
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "primary.main" }}>
               <Typography variant="body2" fontWeight={700}>
-                {DASHBOARD_COPY.monthlySpendCta}
+                {DASHBOARD_PAGE_COPY.monthlySpendCta}
               </Typography>
               <ChevronRightIcon fontSize="small" />
             </Box>
@@ -203,10 +203,10 @@ export default function DashboardPage() {
 
       <Box>
         <Typography variant="h6" sx={pageSectionTitleSx}>
-          {DASHBOARD_COPY.alertsTitle}
+          {DASHBOARD_PAGE_COPY.alertsTitle}
         </Typography>
         {recentAlerts.length === 0 ? (
-          <Typography color="text.secondary">{DASHBOARD_COPY.noRecentAlerts}</Typography>
+          <Typography color="text.secondary">{DASHBOARD_PAGE_COPY.noRecentAlerts}</Typography>
         ) : (
           <Stack spacing={alertsListSpacing}>
             {recentAlerts.map((alert) => (
@@ -228,13 +228,13 @@ export default function DashboardPage() {
                       loading={busyId === alert.id}
                       onClick={() => handleMarkRead(alert)}
                     >
-                      {DASHBOARD_COPY.markRead}
+                      {DASHBOARD_PAGE_COPY.markRead}
                     </LoadingButton>
                   )}
                   {(alert.type === types.consumptionNudge ||
                     alert.payload?.action === actions.openQuickConsume) && (
                     <Button size="small" variant="text" onClick={() => navigate(paths.stockOut)}>
-                      {DASHBOARD_COPY.registerStockOut}
+                      {DASHBOARD_PAGE_COPY.registerStockOut}
                     </Button>
                   )}
                   {alert.productId && (
@@ -243,7 +243,7 @@ export default function DashboardPage() {
                       variant="text"
                       onClick={() => navigate(paths.product(alert.productId))}
                     >
-                      {DASHBOARD_COPY.openProduct}
+                      {DASHBOARD_PAGE_COPY.openProduct}
                     </Button>
                   )}
                 </Stack>
@@ -255,10 +255,10 @@ export default function DashboardPage() {
 
       <Box>
         <Typography variant="h6" sx={pageSectionTitleSx}>
-          {DASHBOARD_COPY.attentionTitle}
+          {DASHBOARD_PAGE_COPY.attentionTitle}
         </Typography>
         {criticalProducts.length === 0 ? (
-          <Typography color="text.secondary">{DASHBOARD_COPY.nothingUrgent}</Typography>
+          <Typography color="text.secondary">{DASHBOARD_PAGE_COPY.nothingUrgent}</Typography>
         ) : (
           <Stack spacing={criticalListSpacing}>
             {criticalProducts.map((product) => (

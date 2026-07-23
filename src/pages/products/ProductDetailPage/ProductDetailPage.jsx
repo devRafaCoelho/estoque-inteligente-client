@@ -11,7 +11,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { productService } from "../../../services/productService";
+import { consumeProduct, getProductById, markProductOut } from "../../../services/productService";
 import StockStatusChip from "../../../components/products/StockStatusChip/StockStatusChip";
 import ConsumeProductDialog from "../../../components/products/ConsumeProductDialog/ConsumeProductDialog";
 import { categoryLabel } from "../../../utils/categoryLabels";
@@ -47,7 +47,7 @@ export default function ProductDetailPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await productService.get(id);
+      const data = await getProductById(id);
       setProduct(data.product);
     } catch (err) {
       error(err instanceof ApiError ? err.message : PRODUCT_DETAIL_COPY.loadError);
@@ -63,7 +63,7 @@ export default function ProductDetailPage() {
 
   const handleConsume = async ({ quantity, note }) => {
     try {
-      await productService.consume(id, { quantity: Number(quantity), note });
+      await consumeProduct(id, { quantity: Number(quantity), note });
       success(PRODUCT_DETAIL_COPY.consumeSuccess);
       await load();
     } catch (err) {
@@ -74,7 +74,7 @@ export default function ProductDetailPage() {
 
   const handleMarkOut = async () => {
     try {
-      await productService.markOut(id);
+      await markProductOut(id);
       success(PRODUCT_DETAIL_COPY.markOutSuccess);
       await load();
     } catch (err) {

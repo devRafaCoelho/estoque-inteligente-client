@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { notificationService } from "../../../services/notificationService";
+import { listNotifications, markAllNotificationsRead, markNotificationRead } from "../../../services/notificationService";
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
@@ -47,7 +47,7 @@ export default function NotificationsPage() {
     async ({ silent = false } = {}) => {
       if (!silent) setLoading(true);
       try {
-        const data = await notificationService.list({
+        const data = await listNotifications({
           unreadOnly: filter === filters.unread ? true : undefined,
           limit: listLimit,
         });
@@ -71,7 +71,7 @@ export default function NotificationsPage() {
     if (!notification.unread) return;
     setBusyId(notification.id);
     try {
-      await notificationService.markRead(notification.id);
+      await markNotificationRead(notification.id);
       success(NOTIFICATIONS_PAGE_COPY.markReadSuccess);
       await load({ silent: true });
     } catch (err) {
@@ -84,7 +84,7 @@ export default function NotificationsPage() {
   const handleMarkAllRead = async () => {
     setMarkingAll(true);
     try {
-      await notificationService.markAllRead();
+      await markAllNotificationsRead();
       success(NOTIFICATIONS_PAGE_COPY.markAllReadSuccess);
       await load({ silent: true });
     } catch (err) {
@@ -102,7 +102,7 @@ export default function NotificationsPage() {
     ) {
       if (notification.unread) {
         try {
-          await notificationService.markRead(notification.id);
+          await markNotificationRead(notification.id);
         } catch {
           /* segue para a baixa mesmo se falhar marcar lida */
         }

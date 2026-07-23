@@ -11,7 +11,7 @@ export class ApiError extends Error {
   }
 }
 
-function getToken() {
+function getStoredToken() {
   return sessionStorage.getItem(TOKEN_KEY);
 }
 
@@ -20,36 +20,93 @@ export function clearSessionStorage() {
   sessionStorage.removeItem(USER_KEY);
 }
 
-async function handleResponse(response) {
-  const isJson = response.headers.get("content-type")?.includes("application/json");
-  const body = isJson ? await response.json().catch(() => null) : await response.text();
+function extractErrorMessage(body, fallback) {
+  if (body && typeof body === "object" && (body.error || body.message)) {
+    return body.error || body.message;
+  }
+  return fallback;
+}
+
+async function parseResponseBody(response) {
+  const text = await response.text();
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+/**
+ * @param {string} path
+ * @param {{
+ *   method?: string,
+ *   body?: object,
+ *   headers?: Record<string, string>,
+ * }} [options]
+ */
+export async function apiRequest(path, options = {}) {
+  const { method = "GET", body, headers = {} } = options;
+
+  const requestHeaders = {
+    Accept: "application/json",
+    ...headers,
+  };
+
+  if (body !== undefined) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
+
+  const token = getStoredToken();
+  if (token) {
+    requestHeaders.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method,
+    headers: requestHeaders,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+
+  const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       clearSessionStorage();
-      if (!window.location.pathname.startsWith("/login") && !window.location.pathname.startsWith("/cadastro")) {
+      if (
+        !window.location.pathname.startsWith("/login") &&
+        !window.location.pathname.startsWith("/cadastro")
+      ) {
         window.location.assign("/login");
       }
     }
-    const message = body?.error || body?.message || "Erro na requisição";
-    throw new ApiError(message, response.status, body);
+
+    throw new ApiError(
+      extractErrorMessage(
+        responseBody,
+        `Erro na requisição (${response.status})`,
+      ),
+      response.status,
+      responseBody,
+    );
   }
 
-  return body;
+  if (response.status === 204) {
+    return null;
+  }
+
+  return responseBody;
 }
 
-export async function apiRequest(path, options = {}) {
-  const token = getToken();
-  const headers = {
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
+export const api = {
+  get: (path, options) => apiRequest(path, { ...options, method: "GET" }),
+  post: (path, body, options) =>
+    apiRequest(path, { ...options, method: "POST", body }),
+  patch: (path, body, options) =>
+    apiRequest(path, { ...options, method: "PATCH", body }),
+  put: (path, body, options) =>
+    apiRequest(path, { ...options, method: "PUT", body }),
+  delete: (path, options) => apiRequest(path, { ...options, method: "DELETE" }),
+};
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
-
-  return handleResponse(response);
-}
+export { API_BASE_URL };

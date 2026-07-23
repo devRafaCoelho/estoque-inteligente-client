@@ -1,7 +1,6 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
+import { DASHBOARD_URL } from "./endpoints";
 
-export const dashboardService = {
-  getStats() {
-    return apiRequest("/api/dashboard/stats");
-  },
-};
+export async function getDashboardStats() {
+  return api.get(`${DASHBOARD_URL}/stats`);
+}

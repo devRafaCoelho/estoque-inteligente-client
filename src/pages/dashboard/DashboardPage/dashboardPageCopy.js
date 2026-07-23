@@ -1,4 +1,4 @@
-export const DASHBOARD_COPY = {
+export const DASHBOARD_PAGE_COPY = {
   loadError: "Erro ao carregar dashboard",
   greetingFallback: "você",
   subtitle: "Acompanhe o estoque e registre compras com facilidade",

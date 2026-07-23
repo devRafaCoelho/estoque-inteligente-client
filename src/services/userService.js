@@ -1,32 +1,31 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
+import { USERS_URL } from "./endpoints";
 
-export const userService = {
-  updateMe(payload) {
-    return apiRequest("/api/users/me", {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {object} payload
+ */
+export async function updateMe(payload) {
+  return api.patch(`${USERS_URL}/me`, payload);
+}
 
-  getPreferences() {
-    return apiRequest("/api/users/me/preferences");
-  },
+export async function getMyPreferences() {
+  return api.get(`${USERS_URL}/me/preferences`);
+}
 
-  updatePreferences(payload) {
-    return apiRequest("/api/users/me/preferences", {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {object} payload
+ */
+export async function updateMyPreferences(payload) {
+  return api.patch(`${USERS_URL}/me/preferences`, payload);
+}
 
-  changePassword(payload) {
-    return apiRequest("/api/users/me/password", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {object} payload
+ */
+export async function changeMyPassword(payload) {
+  return api.post(`${USERS_URL}/me/password`, payload);
+}
 
-  deleteAccount() {
-    return apiRequest("/api/users/me", { method: "DELETE" });
-  },
-};
+export async function deleteMyAccount() {
+  return api.delete(`${USERS_URL}/me`);
+}

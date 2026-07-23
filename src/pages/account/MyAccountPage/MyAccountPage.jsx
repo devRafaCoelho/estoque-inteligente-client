@@ -12,7 +12,7 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { accountSchema, changePasswordSchema } from "../../../schemas";
 import { useAuth } from "../../../hooks/useAuth";
-import { userService } from "../../../services/userService";
+import { changeMyPassword, getMyPreferences, updateMe, updateMyPreferences } from "../../../services/userService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import GoogleSignInButton, {
   isGoogleAuthConfigured,
@@ -64,11 +64,11 @@ export default function MyAccountPage() {
   });
 
   useEffect(() => {
-    let active = true;
+    let ativo = true;
     (async () => {
       try {
-        const data = await userService.getPreferences();
-        if (!active) return;
+        const data = await getMyPreferences();
+        if (!ativo) return;
         setPreferences({
           notifyLowStock: data.preferences?.notifyLowStock !== false,
           notifyOutOfStock: data.preferences?.notifyOutOfStock !== false,
@@ -78,20 +78,20 @@ export default function MyAccountPage() {
             MY_ACCOUNT_CONFIG.preferenceDefaults.consumptionNudgeDays,
         });
       } catch (err) {
-        if (active) {
+        if (ativo) {
           error(err instanceof ApiError ? err.message : MY_ACCOUNT_COPY.preferencesLoadError);
         }
       }
     })();
     return () => {
-      active = false;
+      ativo = false;
     };
   }, [error]);
 
   const saveProfile = async (values) => {
     setSavingProfile(true);
     try {
-      const data = await userService.updateMe(values);
+      const data = await updateMe(values);
       updateSessionUser(data.user);
       success(MY_ACCOUNT_COPY.profileSuccess);
     } catch (err) {
@@ -104,7 +104,7 @@ export default function MyAccountPage() {
   const savePassword = async (values) => {
     setSavingPassword(true);
     try {
-      await userService.changePassword({
+      await changeMyPassword({
         currentPassword: values.currentPassword || "",
         newPassword: values.newPassword,
       });
@@ -120,7 +120,7 @@ export default function MyAccountPage() {
   const savePreferences = async () => {
     setSavingPreferences(true);
     try {
-      const data = await userService.updatePreferences({
+      const data = await updateMyPreferences({
         notifyLowStock: preferences.notifyLowStock,
         notifyOutOfStock: preferences.notifyOutOfStock,
         notifyConsumptionNudge: preferences.notifyConsumptionNudge,

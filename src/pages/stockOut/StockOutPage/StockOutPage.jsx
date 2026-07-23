@@ -11,7 +11,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { intakeParseSchema } from "../../../schemas";
-import { stockOutService } from "../../../services/stockOutService";
+import { parseStockOutText } from "../../../services/stockOutService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -41,7 +41,7 @@ export default function StockOutPage() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const data = await stockOutService.parseText(values.text.trim());
+      const data = await parseStockOutText(values.text.trim());
       navigate(STOCK_OUT_PAGE_CONFIG.paths.preview(data.stockOut.id));
     } catch (err) {
       error(err instanceof ApiError ? err.message : STOCK_OUT_PAGE_COPY.parseError);

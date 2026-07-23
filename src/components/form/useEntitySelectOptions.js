@@ -7,6 +7,7 @@ import { buildCodeLabelOptions } from "../../utils/entitySelectOptions";
  * @param {T[]|undefined} params.items — se definido, não faz fetch
  * @param {() => Promise<T[]>} [params.loadItems]
  * @param {(items: T[]) => Array<{ value: string, label: string }>} [params.mapOptions]
+ * @returns {{ options: Array<{ value: string, label: string }>, loading: boolean }}
  */
 export function useEntitySelectOptions({
   items,
@@ -20,23 +21,23 @@ export function useEntitySelectOptions({
   useEffect(() => {
     if (!loadOptions || !loadItems) return undefined;
 
-    let active = true;
+    let ativo = true;
 
-    async function load() {
+    async function carregar() {
       setLoading(true);
       try {
-        const list = await loadItems();
-        if (active) setLoadedItems(list);
+        const lista = await loadItems();
+        if (ativo) setLoadedItems(lista);
       } catch {
-        if (active) setLoadedItems([]);
+        if (ativo) setLoadedItems([]);
       } finally {
-        if (active) setLoading(false);
+        if (ativo) setLoading(false);
       }
     }
 
-    load();
+    carregar();
     return () => {
-      active = false;
+      ativo = false;
     };
   }, [loadOptions, loadItems]);
 

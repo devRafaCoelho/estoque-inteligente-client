@@ -14,7 +14,7 @@ import CheckCircle from "@mui/icons-material/CheckCircle";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { registerSchema } from "../../../schemas";
-import { getStateLabel } from "../../../config/brazilStates";
+import { resolveBrazilianStateLabel } from "../../../utils/entitySelectOptions";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -216,7 +216,7 @@ export default function RegisterPage() {
             <Stack spacing={1.25}>
               {[
                 [REGISTER_PAGE_COPY.summaryName, merged.name],
-                [REGISTER_PAGE_COPY.summaryState, getStateLabel(merged.defaultState)],
+                [REGISTER_PAGE_COPY.summaryState, resolveBrazilianStateLabel(merged.defaultState)],
                 [REGISTER_PAGE_COPY.summaryEmail, merged.email],
               ].map(([label, value]) => (
                 <Stack

@@ -1,34 +1,39 @@
-import { apiRequest } from "./apiClient";
+import { api } from "./apiClient";
+import { INTAKES_URL } from "./endpoints";
 
-export const intakeService = {
-  parseText(text) {
-    return apiRequest("/api/intakes/parse-text", {
-      method: "POST",
-      body: JSON.stringify({ text }),
-    });
-  },
+/**
+ * @param {string} text
+ */
+export async function parseIntakeText(text) {
+  return api.post(`${INTAKES_URL}/parse-text`, { text });
+}
 
-  get(id) {
-    return apiRequest(`/api/intakes/${id}`);
-  },
+/**
+ * @param {string} id
+ */
+export async function getIntakeById(id) {
+  return api.get(`${INTAKES_URL}/${id}`);
+}
 
-  update(id, payload) {
-    return apiRequest(`/api/intakes/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {string} id
+ * @param {object} payload
+ */
+export async function updateIntake(id, payload) {
+  return api.patch(`${INTAKES_URL}/${id}`, payload);
+}
 
-  confirm(id, payload) {
-    return apiRequest(`/api/intakes/${id}/confirm`, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-  },
+/**
+ * @param {string} id
+ * @param {object} payload
+ */
+export async function confirmIntake(id, payload) {
+  return api.post(`${INTAKES_URL}/${id}/confirm`, payload);
+}
 
-  cancel(id) {
-    return apiRequest(`/api/intakes/${id}/cancel`, {
-      method: "POST",
-    });
-  },
-};
+/**
+ * @param {string} id
+ */
+export async function cancelIntake(id) {
+  return api.post(`${INTAKES_URL}/${id}/cancel`, {});
+}
