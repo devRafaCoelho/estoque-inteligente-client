@@ -82,6 +82,31 @@ export const desktopNavButtonSx = (active) => ({
   "&:hover": { bgcolor: "rgba(255,255,255,0.12)" },
 });
 
+export const desktopNavMenuPaperSx = {
+  mt: 1,
+  minWidth: 220,
+  borderRadius: 2,
+  boxShadow: "0 8px 30px rgba(15,61,40,0.18)",
+};
+
+export const desktopNavMenuItemSx = (active) => ({
+  gap: 1,
+  py: 1.1,
+  fontWeight: active ? 700 : 500,
+  color: active ? "primary.dark" : "text.primary",
+  "&.Mui-selected": {
+    bgcolor: "rgba(31,122,77,0.12)",
+  },
+  "&.Mui-selected:hover": {
+    bgcolor: "rgba(31,122,77,0.16)",
+  },
+});
+
+export const desktopNavMenuItemIconSx = (active) => ({
+  minWidth: 36,
+  color: active ? "primary.main" : "text.secondary",
+});
+
 export const mobileDrawerPaperSx = {
   width: 300,
   borderRadius: 0,

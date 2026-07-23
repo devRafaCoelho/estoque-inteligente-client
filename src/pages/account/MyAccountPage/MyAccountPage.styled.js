@@ -60,6 +60,11 @@ export const infoLabelSx = {
   color: "text.secondary",
 };
 
+export const infoIconSx = {
+  fontSize: 16,
+  color: "text.secondary",
+};
+
 export const infoValueSx = {
   pl: "22px",
 };

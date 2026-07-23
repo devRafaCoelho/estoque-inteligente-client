@@ -7,5 +7,10 @@ export function getInitials(name = "") {
 
 export function isPathActive(pathname, path) {
   if (path === "/dashboard") return pathname === "/dashboard";
+  if (path === "/produtos") {
+    if (pathname === "/produtos") return true;
+    if (pathname.startsWith("/produtos/novo")) return false;
+    return pathname.startsWith("/produtos/");
+  }
   return pathname === path || pathname.startsWith(`${path}/`);
 }

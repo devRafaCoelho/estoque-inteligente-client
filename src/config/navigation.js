@@ -4,20 +4,36 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import PlaylistAddOutlinedIcon from "@mui/icons-material/PlaylistAddOutlined";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 
-/** Navegação do header desktop (conta fica no menu do avatar) */
+/**
+ * Navegação do header desktop.
+ * Alertas e Minha conta ficam só no menu do avatar.
+ */
 export const mainNavItems = [
-  { label: "Início", path: "/dashboard", icon: HomeOutlinedIcon },
-  { label: "Produtos", path: "/produtos", icon: Inventory2OutlinedIcon },
-  { label: "Entrada", path: "/entrada", icon: PlaylistAddOutlinedIcon },
-  { label: "Lista", path: "/lista-compras", icon: ShoppingCartOutlinedIcon },
-  { label: "Financeiro", path: "/financeiro", icon: AccountBalanceWalletOutlinedIcon },
-  { label: "Baixa", path: "/baixa", icon: RemoveCircleOutlineIcon },
-  { label: "Alertas", path: "/notificacoes", icon: NotificationsOutlinedIcon },
+  { id: "home", label: "Início", path: "/dashboard", icon: HomeOutlinedIcon },
+  {
+    id: "finance",
+    label: "Financeiro",
+    path: "/financeiro",
+    icon: AccountBalanceWalletOutlinedIcon,
+  },
+  {
+    id: "products",
+    label: "Produtos",
+    icon: Inventory2OutlinedIcon,
+    children: [
+      { label: "Estoque", path: "/produtos", icon: Inventory2OutlinedIcon },
+      { label: "Entrada", path: "/entrada", icon: PlaylistAddOutlinedIcon },
+      { label: "Baixa", path: "/baixa", icon: RemoveCircleOutlineIcon },
+      {
+        label: "Lista de compras",
+        path: "/lista-compras",
+        icon: ShoppingCartOutlinedIcon,
+      },
+    ],
+  },
 ];
 
 /** Bottom nav mobile — `intake` abre sheet; `more` abre menu adicional */
@@ -41,7 +57,7 @@ export const bottomNavItems = [
   { id: "more", label: "Mais", path: null, icon: MoreHorizIcon, action: "more" },
 ];
 
-/** Itens do sheet "Mais" no mobile */
+/** Itens do sheet "Mais" no mobile (conta e alertas ficam no menu do avatar) */
 export const moreMenuItems = [
   { label: "Baixa", path: "/baixa", icon: RemoveCircleOutlineIcon },
   {
@@ -49,10 +65,4 @@ export const moreMenuItems = [
     path: "/financeiro",
     icon: AccountBalanceWalletOutlinedIcon,
   },
-  {
-    label: "Alertas",
-    path: "/notificacoes",
-    icon: NotificationsOutlinedIcon,
-  },
-  { label: "Minha conta", path: "/minha-conta", icon: PersonOutlineIcon },
 ];
