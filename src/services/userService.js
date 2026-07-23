@@ -1,5 +1,6 @@
 import { api } from "./apiClient";
 import { USERS_URL } from "./endpoints";
+import { createCachedLoader } from "../utils/createCachedLoader";
 
 /**
  * @param {object} payload
@@ -8,15 +9,28 @@ export async function updateMe(payload) {
   return api.patch(`${USERS_URL}/me`, payload);
 }
 
-export async function getMyPreferences() {
-  return api.get(`${USERS_URL}/me/preferences`);
+const preferencesLoader = createCachedLoader(() =>
+  api.get(`${USERS_URL}/me/preferences`),
+);
+
+/**
+ * @param {boolean} [force=false]
+ */
+export function getMyPreferences(force = false) {
+  return preferencesLoader.load(force === true);
+}
+
+export function clearMyPreferencesCache() {
+  preferencesLoader.clear();
 }
 
 /**
  * @param {object} payload
  */
 export async function updateMyPreferences(payload) {
-  return api.patch(`${USERS_URL}/me/preferences`, payload);
+  const data = await api.patch(`${USERS_URL}/me/preferences`, payload);
+  preferencesLoader.clear();
+  return data;
 }
 
 /**

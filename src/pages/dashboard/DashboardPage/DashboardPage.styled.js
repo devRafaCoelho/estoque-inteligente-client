@@ -1,5 +1,33 @@
 export const pageStackSpacing = 3;
 
+export const headerRowSx = {
+  display: "flex",
+  flexDirection: { xs: "column", md: "row" },
+  alignItems: { xs: "stretch", md: "flex-start" },
+  justifyContent: "space-between",
+  gap: { xs: 0, md: 2 },
+};
+
+export const headerTextSx = {
+  minWidth: 0,
+  flex: 1,
+};
+
+export const headerIntakeActionsSx = {
+  display: "flex",
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 1,
+  alignItems: "center",
+  justifyContent: { xs: "flex-start", md: "flex-end" },
+  flexShrink: 0,
+  pt: { md: 0.25 },
+};
+
+export const headerIntakeButtonSx = {
+  whiteSpace: "nowrap",
+};
+
 export const statsRowSpacing = 1.5;
 
 export const statsRowDirection = "row";
@@ -21,21 +49,6 @@ export const statCardContentSx = {
 
 export const statValueSx = {
   mt: 1,
-};
-
-export const heroCardSx = {
-  p: { xs: 2, sm: 2.5 },
-  borderRadius: 3,
-  border: "1px solid",
-  borderColor: "primary.light",
-  bgcolor: "rgba(31,122,77,0.06)",
-};
-
-export const heroActionsSx = {
-  mt: 2,
-  display: "flex",
-  flexDirection: { xs: "column", sm: "row" },
-  gap: 1.25,
 };
 
 export const monthSpendCardSx = {

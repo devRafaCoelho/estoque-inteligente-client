@@ -1,6 +1,6 @@
 /** Estilos da página Minha Conta (`MyAccountPage`). */
 
-export const pageStackSpacing = 3;
+export const pageStackSpacing = 2;
 
 export const layoutGridSx = {
   display: "grid",

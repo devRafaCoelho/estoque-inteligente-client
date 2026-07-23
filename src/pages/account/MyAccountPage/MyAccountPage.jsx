@@ -357,21 +357,25 @@ export default function MyAccountPage() {
         </Box>
       </Box>
 
-      <EditProfileDialog
-        open={modalPerfil}
-        onClose={() => setModalPerfil(false)}
-        onSubmit={onSalvarPerfil}
-        submitting={savingProfile}
-        user={user}
-        onLookupError={error}
-      />
+      {modalPerfil ? (
+        <EditProfileDialog
+          open={modalPerfil}
+          onClose={() => setModalPerfil(false)}
+          onSubmit={onSalvarPerfil}
+          submitting={savingProfile}
+          user={user}
+          onLookupError={error}
+        />
+      ) : null}
 
-      <ChangePasswordDialog
-        open={modalSenha}
-        onClose={() => setModalSenha(false)}
-        onSubmit={onAlterarSenha}
-        submitting={savingPassword}
-      />
+      {modalSenha ? (
+        <ChangePasswordDialog
+          open={modalSenha}
+          onClose={() => setModalSenha(false)}
+          onSubmit={onAlterarSenha}
+          submitting={savingPassword}
+        />
+      ) : null}
 
       <HeaderLogoutDialog
         open={modalLogout}

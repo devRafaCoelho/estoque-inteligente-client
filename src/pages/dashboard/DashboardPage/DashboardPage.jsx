@@ -2,18 +2,19 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DocumentScannerOutlinedIcon from "@mui/icons-material/DocumentScannerOutlined";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import ProductCard from "../../../components/products/ProductCard/ProductCard";
 import StockStatusChip from "../../../components/products/StockStatusChip/StockStatusChip";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -29,14 +30,16 @@ import { DASHBOARD_PAGE_COPY } from "./dashboardPageCopy";
 import { DASHBOARD_PAGE_CONFIG } from "./dashboardPageConfig";
 import {
   pageStackSpacing,
+  headerRowSx,
+  headerTextSx,
+  headerIntakeActionsSx,
+  headerIntakeButtonSx,
   statsRowSpacing,
   statsRowDirection,
   statsRowSx,
   statCardSx,
   statCardContentSx,
   statValueSx,
-  heroCardSx,
-  heroActionsSx,
   monthSpendCardSx,
   monthSpendContentSx,
   criticalListSpacing,
@@ -68,9 +71,11 @@ function StatCard({ status, value }) {
 }
 
 export default function DashboardPage() {
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { success, error, info } = useAppSnackbar();
+  const { success, error } = useAppSnackbar();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ ok: 0, low: 0, out: 0 });
   const [criticalProducts, setCriticalProducts] = useState([]);
@@ -135,41 +140,43 @@ export default function DashboardPage() {
 
   return (
     <Stack spacing={pageStackSpacing}>
-      <Box>
-        <Typography variant="h5">Olá, {firstName}</Typography>
-        <Typography sx={pageHeaderSubtitleSx}>{DASHBOARD_PAGE_COPY.subtitle}</Typography>
-      </Box>
-
-      <Box sx={heroCardSx}>
-        <Typography variant="h6" fontWeight={800}>
-          {DASHBOARD_PAGE_COPY.addStockTitle}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" mt={0.5}>
-          {DASHBOARD_PAGE_COPY.addStockSubtitle}
-        </Typography>
-        <Box sx={heroActionsSx}>
-          <Button
-            variant="outlined"
-            size="large"
-            startIcon={<DocumentScannerOutlinedIcon />}
-            onClick={() => info(DASHBOARD_PAGE_COPY.scannerComingSoon)}
-            sx={{ justifyContent: "space-between", flex: 1, pr: 1.5 }}
-          >
-            <Box component="span" sx={{ flex: 1, textAlign: "left" }}>
-              {DASHBOARD_PAGE_COPY.ctaScanner}
-            </Box>
-            <Chip size="small" label={DASHBOARD_PAGE_COPY.ctaScannerHint} variant="outlined" />
-          </Button>
-          <Button
-            variant="contained"
-            size="large"
-            startIcon={<EditNoteOutlinedIcon />}
-            onClick={() => navigate(paths.intake)}
-            sx={{ flex: 1 }}
-          >
-            {DASHBOARD_PAGE_COPY.ctaText}
-          </Button>
+      <Box sx={headerRowSx}>
+        <Box sx={headerTextSx}>
+          <Typography variant="h5">Olá, {firstName}</Typography>
+          <Typography sx={pageHeaderSubtitleSx}>{DASHBOARD_PAGE_COPY.subtitle}</Typography>
         </Box>
+
+        {isDesktop ? (
+          <Box sx={headerIntakeActionsSx}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<DocumentScannerOutlinedIcon />}
+              disabled
+              sx={headerIntakeButtonSx}
+            >
+              {DASHBOARD_PAGE_COPY.ctaScanner}
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<EditNoteOutlinedIcon />}
+              onClick={() => navigate(paths.intake)}
+              sx={headerIntakeButtonSx}
+            >
+              {DASHBOARD_PAGE_COPY.ctaText}
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<Inventory2OutlinedIcon />}
+              onClick={() => navigate(paths.productCreate)}
+              sx={headerIntakeButtonSx}
+            >
+              {DASHBOARD_PAGE_COPY.ctaManual}
+            </Button>
+          </Box>
+        ) : null}
       </Box>
 
       <Card sx={monthSpendCardSx} variant="outlined">
@@ -204,18 +211,11 @@ export default function DashboardPage() {
         <StatCard status={stockStatus.out} value={stats.out} />
       </Stack>
 
-      <Box>
-        <Typography variant="h6" sx={pageSectionTitleSx}>
-          {DASHBOARD_PAGE_COPY.alertsTitle}
-        </Typography>
-        {recentAlerts.length === 0 ? (
-          <EmptyState
-            size="sm"
-            icon={NotificationsNoneOutlinedIcon}
-            title={DASHBOARD_PAGE_COPY.noRecentAlertsTitle}
-            description={DASHBOARD_PAGE_COPY.noRecentAlertsDescription}
-          />
-        ) : (
+      {recentAlerts.length > 0 ? (
+        <Box>
+          <Typography variant="h6" sx={pageSectionTitleSx}>
+            {DASHBOARD_PAGE_COPY.alertsTitle}
+          </Typography>
           <Stack spacing={alertsListSpacing}>
             {recentAlerts.map((alert) => (
               <Box key={alert.id} sx={alertItemSx(alert.unread)}>
@@ -258,8 +258,8 @@ export default function DashboardPage() {
               </Box>
             ))}
           </Stack>
-        )}
-      </Box>
+        </Box>
+      ) : null}
 
       <Box>
         <Typography variant="h6" sx={pageSectionTitleSx}>

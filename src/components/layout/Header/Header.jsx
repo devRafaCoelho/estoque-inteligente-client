@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import AppBar from "@mui/material/AppBar";
@@ -44,24 +44,34 @@ export default function Header() {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const previousPathRef = useRef(undefined);
 
   const userDisplayName = user?.name || "";
   const userInitials = getInitials(userDisplayName) || HEADER_COPY.avatarFallback;
 
   const isActive = (path) => isPathActive(location.pathname, path);
 
-  const fetchUnreadCount = useCallback(async () => {
-    try {
-      const data = await getUnreadNotificationsCount();
-      setUnreadCount(data.unreadCount ?? 0);
-    } catch {
-      // Mantém o último valor conhecido; falha silenciosa no header.
-    }
-  }, []);
-
   useEffect(() => {
-    fetchUnreadCount();
-  }, [fetchUnreadCount, location.pathname]);
+    let ativo = true;
+    const previousPath = previousPathRef.current;
+    const force =
+      previousPath !== undefined && previousPath !== location.pathname;
+    previousPathRef.current = location.pathname;
+
+    async function carregar() {
+      try {
+        const data = await getUnreadNotificationsCount(force);
+        if (ativo) setUnreadCount(data.unreadCount ?? 0);
+      } catch {
+        // Mantém o último valor conhecido; falha silenciosa no header.
+      }
+    }
+
+    carregar();
+    return () => {
+      ativo = false;
+    };
+  }, [location.pathname]);
 
   const handleNavigate = (path) => {
     navigate(path);

@@ -1,6 +1,7 @@
 import { api } from "./apiClient";
 import { NOTIFICATIONS_URL } from "./endpoints";
 import { buildQueryString } from "../utils/queryString";
+import { createCachedLoader } from "../utils/createCachedLoader";
 
 const LIST_QUERY_PARAMS = ["unreadOnly", "limit"];
 
@@ -12,17 +13,32 @@ export async function listNotifications(params = {}) {
   return api.get(query ? `${NOTIFICATIONS_URL}?${query}` : NOTIFICATIONS_URL);
 }
 
-export async function getUnreadNotificationsCount() {
-  return api.get(`${NOTIFICATIONS_URL}/unread-count`);
+const unreadCountLoader = createCachedLoader(() =>
+  api.get(`${NOTIFICATIONS_URL}/unread-count`),
+);
+
+/**
+ * @param {boolean} [force=false]
+ */
+export function getUnreadNotificationsCount(force = false) {
+  return unreadCountLoader.load(force === true);
+}
+
+export function clearUnreadNotificationsCountCache() {
+  unreadCountLoader.clear();
 }
 
 /**
  * @param {string} id
  */
 export async function markNotificationRead(id) {
-  return api.post(`${NOTIFICATIONS_URL}/${id}/read`, {});
+  const data = await api.post(`${NOTIFICATIONS_URL}/${id}/read`, {});
+  clearUnreadNotificationsCountCache();
+  return data;
 }
 
 export async function markAllNotificationsRead() {
-  return api.post(`${NOTIFICATIONS_URL}/read-all`, {});
+  const data = await api.post(`${NOTIFICATIONS_URL}/read-all`, {});
+  clearUnreadNotificationsCountCache();
+  return data;
 }

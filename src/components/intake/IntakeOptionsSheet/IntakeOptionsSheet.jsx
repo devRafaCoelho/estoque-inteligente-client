@@ -3,7 +3,6 @@ import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
 import List from "@mui/material/List";
@@ -12,7 +11,6 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
-import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { INTAKE_OPTIONS_COPY } from "./intakeOptionsCopy";
 import { INTAKE_OPTIONS_CONFIG } from "./intakeOptionsConfig";
 import {
@@ -28,13 +26,9 @@ import {
  */
 export default function IntakeOptionsSheet({ open, onClose }) {
   const navigate = useNavigate();
-  const { info } = useAppSnackbar();
 
   const handleSelect = (option) => {
-    if (option.comingSoon) {
-      info(INTAKE_OPTIONS_COPY.scannerComingSoon);
-      return;
-    }
+    if (option.disabled) return;
     onClose?.();
     if (option.path) navigate(option.path);
   };
@@ -45,7 +39,7 @@ export default function IntakeOptionsSheet({ open, onClose }) {
       label: INTAKE_OPTIONS_COPY.scannerLabel,
       description: INTAKE_OPTIONS_COPY.scannerDescription,
       icon: DocumentScannerOutlinedIcon,
-      comingSoon: true,
+      disabled: true,
     },
     {
       id: "text",
@@ -88,23 +82,18 @@ export default function IntakeOptionsSheet({ open, onClose }) {
         {options.map((option) => {
           const Icon = option.icon;
           return (
-            <ListItemButton key={option.id} onClick={() => handleSelect(option)} sx={{ py: 1.5 }}>
+            <ListItemButton
+              key={option.id}
+              disabled={Boolean(option.disabled)}
+              onClick={() => handleSelect(option)}
+              sx={{ py: 1.5 }}
+            >
               <ListItemIcon sx={{ minWidth: 44, color: "primary.main" }}>
                 <Icon />
               </ListItemIcon>
               <ListItemText
                 primary={
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography fontWeight={700}>{option.label}</Typography>
-                    {option.comingSoon ? (
-                      <Chip
-                        size="small"
-                        label={INTAKE_OPTIONS_COPY.comingSoonChip}
-                        color="default"
-                        variant="outlined"
-                      />
-                    ) : null}
-                  </Box>
+                  <Typography fontWeight={700}>{option.label}</Typography>
                 }
                 secondary={
                   <Typography variant="body2" color="text.secondary" sx={intakeOptionSecondarySx}>

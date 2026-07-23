@@ -9,6 +9,7 @@ import {
   register as registerRequest,
 } from "../services/authService";
 import { clearSessionStorage } from "../services/apiClient";
+import { clearSessionCaches } from "../utils/sessionCaches";
 import { TOKEN_KEY, USER_KEY } from "../config/constants";
 
 export const AuthContext = createContext(null);
@@ -36,6 +37,7 @@ export function AuthProvider({ children }) {
 
   const clearSession = useCallback(() => {
     clearSessionStorage();
+    clearSessionCaches();
     setToken(null);
     setUser(null);
   }, []);
