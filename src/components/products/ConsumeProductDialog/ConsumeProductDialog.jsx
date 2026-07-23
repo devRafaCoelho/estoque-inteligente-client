@@ -9,7 +9,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { consumeSchema } from "../../../schemas";
+import { consumeSchema } from "../../../schemas/products/productSchema";
 import LoadingButton from "../../common/LoadingButton/LoadingButton";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { CONSUME_PRODUCT_DIALOG_COPY } from "./consumeProductDialogCopy";

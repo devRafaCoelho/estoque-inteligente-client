@@ -10,8 +10,9 @@ import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { intakeParseSchema } from "../../../schemas";
+import { textParseSchema } from "../../../schemas/intake/textParseSchema";
 import { parseStockOutText } from "../../../services/stockOutService";
+import { buildStockOutParsePayload } from "../../../utils/stockOut/stockOutForm";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -31,7 +32,7 @@ export default function StockOutPage() {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(intakeParseSchema),
+    resolver: yupResolver(textParseSchema),
     defaultValues: STOCK_OUT_PAGE_CONFIG.defaultValues,
     mode: STOCK_OUT_PAGE_CONFIG.formMode,
   });
@@ -41,7 +42,7 @@ export default function StockOutPage() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const data = await parseStockOutText(values.text.trim());
+      const data = await parseStockOutText(buildStockOutParsePayload(values));
       navigate(STOCK_OUT_PAGE_CONFIG.paths.preview(data.stockOut.id));
     } catch (err) {
       error(err instanceof ApiError ? err.message : STOCK_OUT_PAGE_COPY.parseError);

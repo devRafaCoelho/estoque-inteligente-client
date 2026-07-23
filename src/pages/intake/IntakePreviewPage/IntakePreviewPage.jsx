@@ -20,6 +20,7 @@ import ProductCategorySelectField from "../../../components/form/ProductCategory
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
+import { buildIntakePreviewPayload } from "../../../utils/intake/intakeForm";
 import {
   draftItemCardSx,
   flexGrowSpacerSx,
@@ -105,30 +106,17 @@ export default function IntakePreviewPage() {
     );
   };
 
-  const buildPayload = () => ({
-    storeName: storeName.trim() || null,
-    items: items.map((item, index) => ({
-      id: item.id,
-      productId: item.productId || null,
-      name: item.name,
-      quantity: Number(item.quantity),
-      unit: item.unit,
-      category: item.category || INTAKE_PREVIEW_PAGE_CONFIG.defaultCategory,
-      unitPrice:
-        item.unitPrice === "" || item.unitPrice == null
-          ? null
-          : Number(item.unitPrice),
-      excluded: Boolean(item.excluded),
-      confidence: item.confidence ?? null,
-      matchedExisting: Boolean(item.matchedExisting),
-      sortOrder: index,
-    })),
-  });
+  const getPayload = () =>
+    buildIntakePreviewPayload({
+      storeName,
+      items,
+      defaultCategory: INTAKE_PREVIEW_PAGE_CONFIG.defaultCategory,
+    });
 
   const handleSaveDraft = async () => {
     setSaving(true);
     try {
-      const data = await updateIntake(id, buildPayload());
+      const data = await updateIntake(id, getPayload());
       setIntake(data.intake);
       setItems(data.intake.items || []);
       success(INTAKE_PREVIEW_PAGE_COPY.draftSaved);
@@ -146,7 +134,7 @@ export default function IntakePreviewPage() {
     }
     setConfirming(true);
     try {
-      const data = await confirmIntake(id, buildPayload());
+      const data = await confirmIntake(id, getPayload());
       const count = data.products?.length || activeCount;
       success(
         data.purchase

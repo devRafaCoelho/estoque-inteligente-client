@@ -23,6 +23,7 @@ import StockUnitSelectField from "../../../components/form/StockUnitSelectField"
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { formatQuantity } from "../../../utils/unitLabels";
+import { buildStockOutPreviewPayload } from "../../../utils/stockOut/stockOutForm";
 import {
   draftItemCardSx,
   flexGrowSpacerSx,
@@ -121,22 +122,7 @@ export default function StockOutPreviewPage() {
     );
   };
 
-  const buildPayload = () => ({
-    items: items.map((item, index) => ({
-      id: item.id,
-      productId: item.productId || null,
-      name: item.name,
-      quantity: Number(item.quantity),
-      unit: item.unit,
-      excluded: Boolean(item.excluded),
-      allowZero: Boolean(item.allowZero),
-      confidence: item.confidence ?? null,
-      matchedExisting: Boolean(item.matchedExisting),
-      availableQty: item.availableQty ?? null,
-      warning: item.warning || null,
-      sortOrder: index,
-    })),
-  });
+  const getPayload = () => buildStockOutPreviewPayload({ items });
 
   const handleConfirm = async () => {
     if (activeCount === 0) {
@@ -150,7 +136,7 @@ export default function StockOutPreviewPage() {
     }
     setConfirming(true);
     try {
-      const data = await confirmStockOut(id, buildPayload());
+      const data = await confirmStockOut(id, getPayload());
       success(
         STOCK_OUT_PREVIEW_PAGE_COPY.confirmSuccess(data.products?.length || activeCount),
       );

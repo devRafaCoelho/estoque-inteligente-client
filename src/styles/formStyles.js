@@ -4,6 +4,23 @@
 
 export const formStackSpacing = 2.5;
 
+export const formGridSx = {
+  display: "grid",
+  gap: { xs: 2, sm: 1.5 },
+  gridTemplateColumns: {
+    xs: "1fr",
+    sm: "repeat(2, minmax(0, 1fr))",
+  },
+  overflow: "visible",
+  "& .MuiFormControl-root": {
+    overflow: "visible",
+  },
+};
+
+export const fullWidthFieldSx = {
+  gridColumn: "1 / -1",
+};
+
 export const formFieldRowSx = {
   direction: { xs: "column", sm: "row" },
 };

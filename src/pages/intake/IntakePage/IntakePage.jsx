@@ -10,8 +10,9 @@ import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { intakeParseSchema } from "../../../schemas";
+import { textParseSchema } from "../../../schemas/intake/textParseSchema";
 import { parseIntakeText } from "../../../services/intakeService";
+import { buildIntakeParsePayload } from "../../../utils/intake/intakeForm";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -31,7 +32,7 @@ export default function IntakePage() {
     watch,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(intakeParseSchema),
+    resolver: yupResolver(textParseSchema),
     defaultValues: INTAKE_PAGE_CONFIG.defaultValues,
     mode: INTAKE_PAGE_CONFIG.formMode,
   });
@@ -41,7 +42,7 @@ export default function IntakePage() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const data = await parseIntakeText(values.text.trim());
+      const data = await parseIntakeText(buildIntakeParsePayload(values));
       navigate(INTAKE_PAGE_CONFIG.paths.preview(data.intake.id));
     } catch (err) {
       error(err instanceof ApiError ? err.message : INTAKE_PAGE_COPY.parseError);

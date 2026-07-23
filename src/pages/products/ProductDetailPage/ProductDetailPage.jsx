@@ -16,6 +16,7 @@ import StockStatusChip from "../../../components/products/StockStatusChip/StockS
 import ConsumeProductDialog from "../../../components/products/ConsumeProductDialog/ConsumeProductDialog";
 import { categoryLabel } from "../../../utils/categoryLabels";
 import { formatQuantity } from "../../../utils/unitLabels";
+import { buildConsumeProductPayload } from "../../../utils/products/productForm";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import {
@@ -61,9 +62,9 @@ export default function ProductDetailPage() {
     load();
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleConsume = async ({ quantity, note }) => {
+  const handleConsume = async (values) => {
     try {
-      await consumeProduct(id, { quantity: Number(quantity), note });
+      await consumeProduct(id, buildConsumeProductPayload(values));
       success(PRODUCT_DETAIL_COPY.consumeSuccess);
       await load();
     } catch (err) {

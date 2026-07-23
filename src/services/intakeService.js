@@ -2,10 +2,10 @@ import { api } from "./apiClient";
 import { INTAKES_URL } from "./endpoints";
 
 /**
- * @param {string} text
+ * @param {{ text: string }} payload
  */
-export async function parseIntakeText(text) {
-  return api.post(`${INTAKES_URL}/parse-text`, { text });
+export async function parseIntakeText(payload) {
+  return api.post(`${INTAKES_URL}/parse-text`, payload);
 }
 
 /**

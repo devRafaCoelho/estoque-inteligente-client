@@ -13,8 +13,9 @@ import Link from "@mui/material/Link";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { registerSchema } from "../../../schemas";
+import { registerSchema } from "../../../schemas/auth/registerSchema";
 import { resolveBrazilianStateLabel } from "../../../utils/entitySelectOptions";
+import { buildRegisterPayload } from "../../../utils/auth/authForm";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -77,11 +78,10 @@ export default function RegisterPage() {
   const handleBack = () => setActiveStep((step) => step - 1);
 
   const handleFinish = async () => {
-    const payload = { ...allData, ...getValues() };
+    const formData = { ...allData, ...getValues() };
     setLoading(true);
     try {
-      const { confirmPassword, ...body } = payload;
-      const data = await registerUser(body);
+      const data = await registerUser(buildRegisterPayload(formData));
       if (data.isNewUser) success(REGISTER_PAGE_COPY.successNewUser);
       else success(REGISTER_PAGE_COPY.successRegister);
       navigate(REGISTER_PAGE_CONFIG.dashboardPath);

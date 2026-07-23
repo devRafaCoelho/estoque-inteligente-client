@@ -2,10 +2,10 @@ import { api } from "./apiClient";
 import { STOCK_OUTS_URL } from "./endpoints";
 
 /**
- * @param {string} text
+ * @param {{ text: string }} payload
  */
-export async function parseStockOutText(text) {
-  return api.post(`${STOCK_OUTS_URL}/parse-text`, { text });
+export async function parseStockOutText(payload) {
+  return api.post(`${STOCK_OUTS_URL}/parse-text`, payload);
 }
 
 /**

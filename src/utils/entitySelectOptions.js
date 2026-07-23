@@ -28,7 +28,7 @@ export function buildCodeLabelOptions(entities = []) {
 }
 
 /**
- * UFs: "SP — São Paulo"
+ * UFs: "SP - São Paulo"
  * @param {Array<{ code: string, name: string }>} states
  * @returns {Array<{ value: string, label: string }>}
  */
@@ -36,7 +36,7 @@ export function buildBrazilianStateOptions(states = []) {
   return states
     .map((state) => ({
       value: state.code,
-      label: state.name ? `${state.code} — ${state.name}` : state.code,
+      label: state.name ? `${state.code} - ${state.name}` : state.code,
     }))
     .filter((option) => Boolean(option.value) && Boolean(option.label));
 }
@@ -64,7 +64,7 @@ export function resolveBrazilianStateLabel(code, states) {
   const list = states?.length ? states : FALLBACK_BRAZILIAN_STATES;
   const found = list.find((state) => state.code === code);
   if (!found) return code;
-  return found.name ? `${found.code} — ${found.name}` : found.code;
+  return found.name ? `${found.code} - ${found.name}` : found.code;
 }
 
 /** Fallback estático só para exibição quando a lista da API ainda não está em memória. */

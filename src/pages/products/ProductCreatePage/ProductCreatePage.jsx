@@ -15,9 +15,10 @@ import LoadingButton from "../../../components/common/LoadingButton/LoadingButto
 import ProductCategorySelectField from "../../../components/form/ProductCategorySelectField";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
-import { productSchema } from "../../../schemas";
+import { productSchema } from "../../../schemas/products/productSchema";
 import { ApiError } from "../../../services/apiClient";
 import { createProductsBatch } from "../../../services/productService";
+import { buildCreateProductsBatchPayload } from "../../../utils/products/productForm";
 import { categoryLabel } from "../../../utils/categoryLabels";
 import { unitLabel } from "../../../utils/unitLabels";
 import { formStackSpacing } from "../../../styles/formStyles";
@@ -121,15 +122,9 @@ export default function ProductCreatePage() {
     if (!staged.length) return;
     setSaving(true);
     try {
-      const products = staged.map(({ name, category, quantity, unit, minQuantity, notes }) => ({
-        name,
-        category,
-        quantity,
-        unit,
-        minQuantity,
-        notes,
-      }));
-      const result = await createProductsBatch(products);
+      const result = await createProductsBatch(
+        buildCreateProductsBatchPayload(staged),
+      );
 
       if (result.createdCount > 0 && result.errorCount === 0) {
         success(PRODUCT_CREATE_COPY.successAll(result.createdCount));

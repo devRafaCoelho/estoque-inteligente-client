@@ -15,7 +15,7 @@ export const headerMenuButtonSx = {
   zIndex: 1,
 };
 
-export const headerLogoSx = (isMobile) => ({
+export const headerLogoSx = {
   height: { xs: 36, sm: 42, md: 36 },
   width: "auto",
   maxWidth: { xs: "52vw", sm: 220, md: 200 },
@@ -23,14 +23,8 @@ export const headerLogoSx = (isMobile) => ({
   display: "block",
   cursor: "pointer",
   flexShrink: 0,
-  ...(isMobile
-    ? {
-        position: "absolute",
-        left: "50%",
-        transform: "translateX(-50%)",
-      }
-    : { mr: 2 }),
-});
+  mr: 2,
+};
 
 export const headerActionsSx = {
   ml: "auto",

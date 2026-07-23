@@ -6,7 +6,8 @@ import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { loginSchema } from "../../../schemas";
+import { loginSchema } from "../../../schemas/auth/loginSchema";
+import { buildLoginPayload } from "../../../utils/auth/authForm";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -76,7 +77,7 @@ export default function LoginPage() {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      await login(values);
+      await login(buildLoginPayload(values));
       success(LOGIN_PAGE_COPY.successLogin);
       navigate(LOGIN_PAGE_CONFIG.dashboardPath);
     } catch (err) {

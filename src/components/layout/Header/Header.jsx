@@ -99,7 +99,7 @@ export default function Header() {
             src={brandLogo}
             alt={HEADER_COPY.logoAlt}
             onClick={() => navigate(HEADER_PATHS.dashboard)}
-            sx={headerLogoSx(isMobile)}
+            sx={headerLogoSx}
           />
 
           {!isMobile && (
