@@ -12,6 +12,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { cancelIntake, confirmIntake, getIntakeById, updateIntake } from "../../../services/intakeService";
+import { listProducts } from "../../../services/productService";
 import { listProductCategories } from "../../../services/productCategoryService";
 import { listStockUnits } from "../../../services/stockUnitService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -80,11 +81,25 @@ export default function IntakePreviewPage() {
     };
   }, []);
 
+  const enrichItemsWithStock = useCallback((intakeItems, catalog) => {
+    const byId = new Map((catalog || []).map((product) => [product.id, product]));
+    return (intakeItems || []).map((item) => {
+      const product = item.productId ? byId.get(item.productId) : null;
+      return {
+        ...item,
+        availableQty: product != null ? product.quantity : null,
+      };
+    });
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getIntakeById(id);
-      const nextItems = data.intake.items || [];
+      const [data, catalog] = await Promise.all([
+        getIntakeById(id),
+        listProducts({ active: true }).catch(() => ({ products: [] })),
+      ]);
+      const nextItems = enrichItemsWithStock(data.intake.items || [], catalog.products || []);
       setIntake(data.intake);
       setItems(nextItems);
       setStoreName(data.intake.storeName || "");
@@ -95,7 +110,7 @@ export default function IntakePreviewPage() {
     } finally {
       setLoading(false);
     }
-  }, [id, error, navigate]);
+  }, [id, error, navigate, enrichItemsWithStock]);
 
   useEffect(() => {
     load();
@@ -279,12 +294,14 @@ export default function IntakePreviewPage() {
                 stockUnits,
               )}
               chips={
-                item.matchedExisting ? (
+                item.availableQty != null ? (
                   <Chip
                     size="small"
-                    color="primary"
+                    color="default"
                     variant="outlined"
-                    label={INTAKE_PREVIEW_PAGE_COPY.matchedExisting}
+                    label={INTAKE_PREVIEW_PAGE_COPY.stockChip(
+                      formatQuantity(item.availableQty, item.unit, stockUnits),
+                    )}
                   />
                 ) : null
               }

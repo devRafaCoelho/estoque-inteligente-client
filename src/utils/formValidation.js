@@ -9,12 +9,23 @@ export function isFilled(value) {
 }
 
 /**
+ * Número informado (aceita 0). String vazia / null não contam.
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+export function isNumberFilled(value) {
+  if (value === "" || value == null) return false;
+  const n = Number(value);
+  return Number.isFinite(n);
+}
+
+/**
  * @param {unknown} value
  * @returns {boolean}
  */
 export function isPositiveNumber(value) {
-  const n = Number(value);
-  return Number.isFinite(n) && n > 0;
+  if (!isNumberFilled(value)) return false;
+  return Number(value) > 0;
 }
 
 /**
@@ -22,6 +33,6 @@ export function isPositiveNumber(value) {
  * @returns {boolean}
  */
 export function isNonNegativeNumber(value) {
-  const n = Number(value);
-  return Number.isFinite(n) && n >= 0;
+  if (!isNumberFilled(value)) return false;
+  return Number(value) >= 0;
 }

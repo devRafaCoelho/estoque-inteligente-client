@@ -19,6 +19,7 @@ export const INTAKE_PREVIEW_PAGE_COPY = {
   rawInputLabel: "Texto original",
   storeLabel: "Estabelecimento (opcional)",
   matchedExisting: "Já no estoque",
+  stockChip: (qty) => `Estoque: ${qty}`,
   excluirAria: "Excluir item",
   removeConfirmTitle: "Remover item?",
   removeConfirmDescription: (name) =>

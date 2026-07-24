@@ -1,31 +1,25 @@
-import { useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { Controller, useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
-import ProductCategorySelectField from "../../../components/form/ProductCategorySelectField";
-import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
+import EmptyState from "../../../components/common/EmptyState/EmptyState";
+import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import ProductFormDialog from "../../../components/products/ProductFormDialog/ProductFormDialog";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
-import { productSchema } from "../../../schemas/products/productSchema";
 import { ApiError } from "../../../services/apiClient";
 import { createProductsBatch } from "../../../services/productService";
-import { buildCreateProductsBatchPayload } from "../../../utils/products/productForm";
 import { categoryLabel } from "../../../utils/categoryLabels";
+import { buildCreateProductsBatchPayload } from "../../../utils/products/productForm";
 import { unitLabel } from "../../../utils/unitLabels";
-import {
-  isFilled,
-  isNonNegativeNumber,
-} from "../../../utils/formValidation";
 import { formStackSpacing } from "../../../styles/formStyles";
 import {
   pageHeaderSubtitleSx,
@@ -35,13 +29,11 @@ import {
 import { PRODUCT_CREATE_CONFIG } from "./productCreateConfig";
 import { PRODUCT_CREATE_COPY } from "./productCreateCopy";
 import {
-  formSectionSx,
-  quantityRowSpacing,
+  headerActionsSx,
   stageItemActionsSx,
   stageItemContentSx,
   stageItemSx,
   stageListSpacing,
-  unitSelectSx,
 } from "./ProductCreatePage.styled";
 
 function normalizeName(name) {
@@ -53,43 +45,46 @@ function normalizeName(name) {
 export default function ProductCreatePage() {
   const navigate = useNavigate();
   const { success, error } = useAppSnackbar();
-  const nameInputRef = useRef(null);
 
   const [staged, setStaged] = useState([]);
-  const [editingId, setEditingId] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
   const [itemToRemove, setItemToRemove] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const {
-    register,
-    control,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { errors, isDirty },
-  } = useForm({
-    resolver: yupResolver(productSchema),
-    defaultValues: { ...PRODUCT_CREATE_CONFIG.defaultValues },
-  });
+  const isEditing = Boolean(editingItem);
+  const formInitialValues = useMemo(() => {
+    if (!editingItem) {
+      return { ...PRODUCT_CREATE_CONFIG.defaultValues };
+    }
+    return {
+      name: editingItem.name,
+      category: editingItem.category,
+      quantity: editingItem.quantity,
+      unit: editingItem.unit,
+      minQuantity: editingItem.minQuantity,
+      notes: editingItem.notes || "",
+    };
+  }, [editingItem]);
 
-  const { ref: nameRegisterRef, ...nameRegister } = register("name");
-  const watched = watch();
-  const requiredFilled =
-    isFilled(watched.name) &&
-    isFilled(watched.category) &&
-    isFilled(watched.unit) &&
-    isNonNegativeNumber(watched.quantity) &&
-    isNonNegativeNumber(watched.minQuantity);
-  const canAddToStage = editingId ? requiredFilled && isDirty : requiredFilled;
-
-  const resetForm = () => {
-    reset({ ...PRODUCT_CREATE_CONFIG.defaultValues });
-    setEditingId(null);
-    window.setTimeout(() => nameInputRef.current?.focus(), 0);
+  const openCreateForm = () => {
+    setEditingItem(null);
+    setFormOpen(true);
   };
 
-  const addToStage = (values) => {
+  const openEditForm = (item) => {
+    setEditingItem(item);
+    setFormOpen(true);
+  };
+
+  const closeForm = () => {
+    setFormOpen(false);
+    setEditingItem(null);
+  };
+
+  const handleFormSubmit = (values) => {
     const nameKey = normalizeName(values.name);
+    const editingId = editingItem?.id ?? null;
     const duplicate = staged.some(
       (item) => item.id !== editingId && normalizeName(item.name) === nameKey,
     );
@@ -114,35 +109,14 @@ export default function ProductCreatePage() {
     } else {
       setStaged((prev) => [...prev, { id: crypto.randomUUID(), ...payload }]);
     }
-    resetForm();
-  };
-
-  const startEdit = (item) => {
-    setEditingId(item.id);
-    reset({
-      name: item.name,
-      category: item.category,
-      quantity: item.quantity,
-      unit: item.unit,
-      minQuantity: item.minQuantity,
-      notes: item.notes || "",
-    });
-    window.setTimeout(() => nameInputRef.current?.focus(), 0);
-  };
-
-  const requestRemoveItem = (item) => {
-    setItemToRemove(item);
-  };
-
-  const cancelRemoveItem = () => {
-    setItemToRemove(null);
+    closeForm();
   };
 
   const confirmRemoveItem = () => {
     if (!itemToRemove) return;
     const { id } = itemToRemove;
     setStaged((prev) => prev.filter((item) => item.id !== id));
-    if (editingId === id) resetForm();
+    if (editingItem?.id === id) closeForm();
     setItemToRemove(null);
   };
 
@@ -197,13 +171,31 @@ export default function ProductCreatePage() {
         </Box>
       </Stack>
 
+      <Box sx={headerActionsSx}>
+        <Button
+          variant="outlined"
+          size="large"
+          startIcon={<AddIcon />}
+          onClick={openCreateForm}
+          fullWidth
+          sx={{ width: { sm: "auto" } }}
+        >
+          {PRODUCT_CREATE_COPY.addProduct}
+        </Button>
+      </Box>
+
       <Box>
         <Typography sx={pageSectionTitleSx}>
           {PRODUCT_CREATE_COPY.stageTitle}
           {staged.length ? ` (${staged.length})` : ""}
         </Typography>
         {staged.length === 0 ? (
-          <Typography color="text.secondary">{PRODUCT_CREATE_COPY.stageEmpty}</Typography>
+          <EmptyState
+            size="sm"
+            icon={Inventory2OutlinedIcon}
+            title={PRODUCT_CREATE_COPY.stageEmptyTitle}
+            description={PRODUCT_CREATE_COPY.stageEmptyDescription}
+          />
         ) : (
           <Stack spacing={stageListSpacing}>
             {staged.map((item) => (
@@ -217,133 +209,28 @@ export default function ProductCreatePage() {
                     {item.minQuantity}
                   </Typography>
                 </Box>
-                <Stack direction="row" spacing={0.5} sx={stageItemActionsSx}>
-                  <Button
+                <Stack direction="row" spacing={0.25} sx={stageItemActionsSx}>
+                  <IconButton
                     size="small"
-                    startIcon={<EditOutlinedIcon />}
-                    onClick={() => startEdit(item)}
+                    color="primary"
+                    onClick={() => openEditForm(item)}
+                    aria-label={PRODUCT_CREATE_COPY.editItem}
                   >
-                    {PRODUCT_CREATE_COPY.editItem}
-                  </Button>
-                  <Button
+                    <EditOutlinedIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton
                     size="small"
                     color="error"
-                    startIcon={<DeleteOutlineIcon />}
-                    onClick={() => requestRemoveItem(item)}
+                    onClick={() => setItemToRemove(item)}
+                    aria-label={PRODUCT_CREATE_COPY.removeItem}
                   >
-                    {PRODUCT_CREATE_COPY.removeItem}
-                  </Button>
+                    <DeleteOutlineIcon fontSize="small" />
+                  </IconButton>
                 </Stack>
               </Box>
             ))}
           </Stack>
         )}
-      </Box>
-
-      <ConfirmDialog
-        open={Boolean(itemToRemove)}
-        onClose={cancelRemoveItem}
-        title={PRODUCT_CREATE_COPY.deleteConfirmTitle}
-        description={
-          itemToRemove
-            ? PRODUCT_CREATE_COPY.deleteConfirmDescription(itemToRemove.name)
-            : ""
-        }
-        onConfirm={confirmRemoveItem}
-        confirmLabel={PRODUCT_CREATE_COPY.deleteConfirmLabel}
-        cancelLabel={PRODUCT_CREATE_COPY.deleteCancelLabel}
-      />
-
-      <Box
-        component="form"
-        key={editingId || "new-item"}
-        sx={formSectionSx}
-        onSubmit={handleSubmit(addToStage)}
-      >
-        <Typography variant="subtitle1" fontWeight={800} mb={1.5}>
-          {editingId ? PRODUCT_CREATE_COPY.updateStage : PRODUCT_CREATE_COPY.addToStage}
-        </Typography>
-
-        <Stack spacing={formStackSpacing}>
-          <TextField
-            label={PRODUCT_CREATE_COPY.nameLabel}
-            error={Boolean(errors.name)}
-            helperText={errors.name?.message}
-            inputRef={(el) => {
-              nameInputRef.current = el;
-              nameRegisterRef(el);
-            }}
-            {...nameRegister}
-          />
-          <Controller
-            name="category"
-            control={control}
-            render={({ field }) => (
-              <ProductCategorySelectField
-                label={PRODUCT_CREATE_COPY.categoryLabel}
-                value={field.value ?? ""}
-                onChange={field.onChange}
-                onBlur={field.onBlur}
-                error={Boolean(errors.category)}
-                helperText={errors.category?.message}
-                required
-              />
-            )}
-          />
-          <Stack direction="row" spacing={quantityRowSpacing} alignItems="flex-start">
-            <TextField
-              label={PRODUCT_CREATE_COPY.quantityLabel}
-              type="number"
-              fullWidth
-              inputProps={PRODUCT_CREATE_CONFIG.quantityInputProps}
-              error={Boolean(errors.quantity)}
-              helperText={errors.quantity?.message}
-              {...register("quantity")}
-            />
-            <Box sx={unitSelectSx}>
-              <Controller
-                name="unit"
-                control={control}
-                render={({ field }) => (
-                  <StockUnitSelectField
-                    label={PRODUCT_CREATE_COPY.unitLabel}
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    error={Boolean(errors.unit)}
-                    helperText={errors.unit?.message}
-                    required
-                  />
-                )}
-              />
-            </Box>
-          </Stack>
-          <TextField
-            label={PRODUCT_CREATE_COPY.minQuantityLabel}
-            type="number"
-            inputProps={PRODUCT_CREATE_CONFIG.minQuantityInputProps}
-            error={Boolean(errors.minQuantity)}
-            helperText={errors.minQuantity?.message}
-            {...register("minQuantity")}
-          />
-          <TextField
-            label={PRODUCT_CREATE_COPY.notesLabel}
-            multiline
-            minRows={2}
-            {...register("notes")}
-          />
-
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
-            <Button type="submit" variant="outlined" size="large" fullWidth disabled={!canAddToStage}>
-              {editingId ? PRODUCT_CREATE_COPY.updateStage : PRODUCT_CREATE_COPY.addToStage}
-            </Button>
-            {editingId ? (
-              <Button type="button" variant="text" size="large" onClick={resetForm}>
-                {PRODUCT_CREATE_COPY.cancelEdit}
-              </Button>
-            ) : null}
-          </Stack>
-        </Stack>
       </Box>
 
       <LoadingButton
@@ -355,6 +242,28 @@ export default function ProductCreatePage() {
       >
         {PRODUCT_CREATE_COPY.saveAll(staged.length || 0)}
       </LoadingButton>
+
+      <ProductFormDialog
+        open={formOpen}
+        onClose={closeForm}
+        onSubmit={handleFormSubmit}
+        initialValues={formInitialValues}
+        isEditing={isEditing}
+      />
+
+      <ConfirmDialog
+        open={Boolean(itemToRemove)}
+        onClose={() => setItemToRemove(null)}
+        title={PRODUCT_CREATE_COPY.deleteConfirmTitle}
+        description={
+          itemToRemove
+            ? PRODUCT_CREATE_COPY.deleteConfirmDescription(itemToRemove.name)
+            : ""
+        }
+        onConfirm={confirmRemoveItem}
+        confirmLabel={PRODUCT_CREATE_COPY.deleteConfirmLabel}
+        cancelLabel={PRODUCT_CREATE_COPY.deleteCancelLabel}
+      />
     </Stack>
   );
 }

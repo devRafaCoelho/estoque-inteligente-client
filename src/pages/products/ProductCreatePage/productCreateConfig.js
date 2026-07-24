@@ -6,11 +6,9 @@ export const PRODUCT_CREATE_CONFIG = {
   defaultValues: {
     name: "",
     category: "grocery",
-    quantity: 0,
+    quantity: "",
     unit: "un",
     minQuantity: 1,
     notes: "",
   },
-  quantityInputProps: { step: "any", min: 0 },
-  minQuantityInputProps: { step: "any", min: 0 },
 };

@@ -55,10 +55,20 @@ export default function ReviewItemAccordion({
           <Box sx={reviewItemSummaryActionsSx}>
             {chips}
             <IconButton
+              component="span"
+              role="button"
+              tabIndex={0}
               size="small"
               onClick={(event) => {
                 event.stopPropagation();
                 onDelete();
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  onDelete();
+                }
               }}
               aria-label={deleteAriaLabel}
             >

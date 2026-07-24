@@ -1,17 +1,11 @@
 export const PRODUCT_CREATE_COPY = {
   title: "Cadastro manual",
   subtitle: "Monte a lista e salve tudo de uma vez",
-  nameLabel: "Nome",
-  categoryLabel: "Categoria",
-  quantityLabel: "Quantidade",
-  unitLabel: "Unidade",
-  minQuantityLabel: "Quantidade mínima",
-  notesLabel: "Observações",
-  addToStage: "Adicionar à lista",
-  updateStage: "Atualizar item",
-  cancelEdit: "Cancelar edição",
+  addProduct: "Adicionar produto",
   stageTitle: "Na lista",
-  stageEmpty: "Nenhum produto na lista ainda. Preencha o formulário e toque em “Adicionar à lista”.",
+  stageEmptyTitle: "Nenhum produto na lista",
+  stageEmptyDescription:
+    "Toque em “Adicionar produto” para incluir o primeiro item.",
   removeItem: "Remover",
   editItem: "Editar",
   deleteConfirmTitle: "Remover da lista?",
@@ -25,5 +19,4 @@ export const PRODUCT_CREATE_COPY = {
     `${ok} criado(s). ${fail} não puderam ser salvos — confira os nomes duplicados.`,
   error: "Erro ao criar produtos",
   duplicateInStage: "Este nome já está na lista",
-  loadMetaError: "Não foi possível carregar categorias e unidades",
 };
