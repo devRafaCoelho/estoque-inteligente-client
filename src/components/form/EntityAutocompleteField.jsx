@@ -41,6 +41,7 @@ function dedupeOptions(options) {
  * @param {boolean} [props.loading]
  * @param {boolean} [props.disabled]
  * @param {string} [props.noOptionsText]
+ * @param {'small'|'medium'} [props.size]
  * @param {AutocompleteOption[]} props.options
  * @param {string} [props.valueLabel] — label de fallback quando `value` ainda não está em `options`
  * @param {string} [props.fieldKey] — remonta o campo ao abrir/resetar formulários
@@ -61,6 +62,7 @@ function EntityAutocompleteFieldInner({
   loading = false,
   disabled = false,
   noOptionsText = "Nenhuma opção encontrada",
+  size = "medium",
   options = [],
   valueLabel,
 }) {
@@ -99,6 +101,7 @@ function EntityAutocompleteFieldInner({
 
   return (
     <Autocomplete
+      size={size}
       options={displayOptions}
       value={selectedOption}
       inputValue={inputValue}
@@ -115,11 +118,12 @@ function EntityAutocompleteFieldInner({
       filterOptions={filterOptions}
       noOptionsText={noOptionsText}
       slotProps={FORM_AUTOCOMPLETE_SLOT_PROPS}
+      fullWidth={fullWidth}
       renderInput={(params) => (
         <TextField
           {...params}
           label={label}
-          fullWidth={fullWidth}
+          size={size}
           error={error}
           helperText={helperText}
           required={required}

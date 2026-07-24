@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -9,39 +8,44 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import UndoIcon from "@mui/icons-material/Undo";
 import { cancelStockOut, confirmStockOut, getStockOutById } from "../../../services/stockOutService";
 import { listProducts } from "../../../services/productService";
 import { listStockUnits } from "../../../services/stockUnitService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
+import ReviewItemAccordion from "../../../components/common/ReviewItemAccordion/ReviewItemAccordion";
+import {
+  reviewItemFieldsSpacing,
+  reviewItemQtyUnitRowProps,
+} from "../../../components/common/ReviewItemAccordion/ReviewItemAccordion.styled";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { buildStockOutPreviewPayload } from "../../../utils/stockOut/stockOutForm";
 import {
-  draftItemCardSx,
-  flexGrowSpacerSx,
+  pageBackHeaderSx,
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
+  rawInputBoxSx,
+  rawInputOffsetSx,
 } from "../../../styles/pageStyles";
 import { STOCK_OUT_PREVIEW_PAGE_COPY } from "./stockOutPreviewPageCopy";
+import { STOCK_OUT_PREVIEW_PAGE_CONFIG } from "./stockOutPreviewPageConfig";
 import {
-  STOCK_OUT_PREVIEW_PAGE_CONFIG,
-  warningLabel,
-} from "./stockOutPreviewPageConfig";
-import {
-  chipRowProps,
-  fieldRowProps,
-  itemInnerStackSpacing,
+  allowZeroLabelSx,
   lockedStackSpacing,
   stockOutPreviewStackSpacing,
 } from "./StockOutPreviewPage.styled";
+
+function onlyMatchedItems(items = []) {
+  return items.filter((item) => item.productId);
+}
 
 export default function StockOutPreviewPage() {
   const { id } = useParams();
@@ -51,6 +55,9 @@ export default function StockOutPreviewPage() {
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
   const [stockOut, setStockOut] = useState(null);
   const [items, setItems] = useState([]);
   const [products, setProducts] = useState([]);
@@ -77,9 +84,11 @@ export default function StockOutPreviewPage() {
         getStockOutById(id),
         listProducts({ active: true }),
       ]);
+      const nextItems = onlyMatchedItems(draft.stockOut.items || []);
       setStockOut(draft.stockOut);
-      setItems(draft.stockOut.items || []);
+      setItems(nextItems);
       setProducts(catalog.products || []);
+      setExpandedId(nextItems[0]?.id ?? null);
     } catch (err) {
       error(err instanceof ApiError ? err.message : STOCK_OUT_PREVIEW_PAGE_COPY.loadError);
       navigate(STOCK_OUT_PREVIEW_PAGE_CONFIG.paths.baixa);
@@ -92,7 +101,7 @@ export default function StockOutPreviewPage() {
     load();
   }, [load]);
 
-  const activeCount = useMemo(() => items.filter((item) => !item.excluded).length, [items]);
+  const activeCount = items.length;
 
   const updateItem = (itemId, patch) => {
     setItems((prev) =>
@@ -122,6 +131,28 @@ export default function StockOutPreviewPage() {
     );
   };
 
+  const requestRemoveItem = (item) => {
+    setItemToRemove(item);
+  };
+
+  const cancelRemoveItem = () => {
+    setItemToRemove(null);
+  };
+
+  const confirmRemoveItem = () => {
+    if (!itemToRemove) return;
+    const removedId = itemToRemove.id;
+    setItems((prev) => {
+      const next = prev.filter((item) => item.id !== removedId);
+      setExpandedId((current) => {
+        if (current !== removedId) return current;
+        return next[0]?.id ?? null;
+      });
+      return next;
+    });
+    setItemToRemove(null);
+  };
+
   const getPayload = () => buildStockOutPreviewPayload({ items });
 
   const handleConfirm = async () => {
@@ -129,7 +160,7 @@ export default function StockOutPreviewPage() {
       error(STOCK_OUT_PREVIEW_PAGE_COPY.selectItemError);
       return;
     }
-    const unresolved = items.filter((item) => !item.excluded && !item.productId);
+    const unresolved = items.filter((item) => !item.productId);
     if (unresolved.length) {
       error(STOCK_OUT_PREVIEW_PAGE_COPY.linkProductError);
       return;
@@ -152,6 +183,7 @@ export default function StockOutPreviewPage() {
     setCancelling(true);
     try {
       await cancelStockOut(id);
+      setCancelConfirmOpen(false);
       success(STOCK_OUT_PREVIEW_PAGE_COPY.cancelled);
       navigate(STOCK_OUT_PREVIEW_PAGE_CONFIG.paths.baixa);
     } catch (err) {
@@ -198,114 +230,126 @@ export default function StockOutPreviewPage() {
         >
           <ArrowBackIcon />
         </IconButton>
-        <Box>
+        <Box sx={pageBackHeaderSx}>
           <Typography variant="h5">{STOCK_OUT_PREVIEW_PAGE_COPY.title}</Typography>
-          <Typography variant="body2" sx={pageHeaderSubtitleSx}>
+          <Typography variant="body2" sx={pageHeaderSubtitleSx} noWrap>
             {STOCK_OUT_PREVIEW_PAGE_COPY.subtitle}
           </Typography>
         </Box>
       </Stack>
 
       {stockOut.rawInput && (
-        <Alert severity="info" variant="outlined">
-          {stockOut.rawInput}
-        </Alert>
+        <Box sx={rawInputOffsetSx}>
+          <Box sx={rawInputBoxSx}>
+            <Typography variant="caption" color="text.secondary" fontWeight={700}>
+              {STOCK_OUT_PREVIEW_PAGE_COPY.rawInputLabel}
+            </Typography>
+            <Typography variant="body2">{stockOut.rawInput}</Typography>
+          </Box>
+        </Box>
       )}
 
-      <Stack spacing={1.5}>
-        {items.map((item) => (
-          <Box key={item.id} sx={draftItemCardSx(item.excluded, "warning.light")}>
-            <Stack spacing={itemInnerStackSpacing}>
-              <Stack {...chipRowProps}>
-                {item.warning && (
+      <Box>
+        {items.length === 0 ? (
+          <Typography color="text.secondary">{STOCK_OUT_PREVIEW_PAGE_COPY.emptyItems}</Typography>
+        ) : (
+          items.map((item) => (
+            <ReviewItemAccordion
+              key={item.id}
+              expanded={expandedId === item.id}
+              onExpandedChange={(isExpanded) =>
+                setExpandedId(isExpanded ? item.id : null)
+              }
+              title={item.name || STOCK_OUT_PREVIEW_PAGE_COPY.productLabel}
+              subtitle={formatQuantity(
+                item.quantity,
+                item.unit || STOCK_OUT_PREVIEW_PAGE_CONFIG.defaultUnit,
+                stockUnits,
+              )}
+              chips={
+                item.availableQty != null ? (
                   <Chip
                     size="small"
                     color={
                       item.warning === STOCK_OUT_PREVIEW_PAGE_CONFIG.warningExceedsStock
                         ? "warning"
-                        : "error"
+                        : "default"
                     }
-                    label={warningLabel(item.warning)}
-                  />
-                )}
-                {item.availableQty != null && (
-                  <Chip
-                    size="small"
                     variant="outlined"
                     label={STOCK_OUT_PREVIEW_PAGE_COPY.stockChip(
-                      formatQuantity(item.availableQty, item.unit),
+                      formatQuantity(item.availableQty, item.unit, stockUnits),
                     )}
                   />
-                )}
-                <Box sx={flexGrowSpacerSx} />
-                <IconButton
-                  size="small"
-                  onClick={() => updateItem(item.id, { excluded: !item.excluded })}
-                >
-                  {item.excluded ? <UndoIcon fontSize="small" /> : <DeleteOutlineIcon fontSize="small" />}
-                </IconButton>
-              </Stack>
-
-              <TextField
-                select
-                label={STOCK_OUT_PREVIEW_PAGE_COPY.productLabel}
-                size="small"
-                value={item.productId || ""}
-                disabled={item.excluded}
-                onChange={(e) => updateItem(item.id, { productId: e.target.value || null })}
-                fullWidth
-              >
-                <MenuItem value="">
-                  <em>{STOCK_OUT_PREVIEW_PAGE_COPY.selectProduct}</em>
-                </MenuItem>
-                {products.map((product) => (
-                  <MenuItem key={product.id} value={product.id}>
-                    {product.name} ({formatQuantity(product.quantity, product.unit)})
-                  </MenuItem>
-                ))}
-              </TextField>
-
-              <Stack {...fieldRowProps}>
+                ) : null
+              }
+              onDelete={() => requestRemoveItem(item)}
+              deleteAriaLabel={STOCK_OUT_PREVIEW_PAGE_COPY.excluirAria}
+              expandAriaLabel={STOCK_OUT_PREVIEW_PAGE_COPY.expandItemAria}
+            >
+              <Stack spacing={reviewItemFieldsSpacing}>
                 <TextField
-                  label={STOCK_OUT_PREVIEW_PAGE_COPY.qtyLabel}
-                  type="number"
-                  size="small"
-                  value={item.quantity}
-                  disabled={item.excluded}
-                  inputProps={{ step: "any", min: 0 }}
-                  onChange={(e) => updateItem(item.id, { quantity: e.target.value })}
+                  select
+                  label={STOCK_OUT_PREVIEW_PAGE_COPY.productLabel}
+                  value={item.productId || ""}
+                  onChange={(e) =>
+                    updateItem(item.id, { productId: e.target.value || null })
+                  }
                   fullWidth
-                />
-                <StockUnitSelectField
-                  label={STOCK_OUT_PREVIEW_PAGE_COPY.unitLabel}
-                  value={item.unit || STOCK_OUT_PREVIEW_PAGE_CONFIG.defaultUnit}
-                  disabled={item.excluded}
-                  onChange={(value) => updateItem(item.id, { unit: value })}
-                  stockUnits={stockUnits}
-                />
-              </Stack>
+                >
+                  <MenuItem value="">
+                    <em>{STOCK_OUT_PREVIEW_PAGE_COPY.selectProduct}</em>
+                  </MenuItem>
+                  {products.map((product) => (
+                    <MenuItem key={product.id} value={product.id}>
+                      {product.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
 
-              {item.warning === STOCK_OUT_PREVIEW_PAGE_CONFIG.warningExceedsStock &&
-                !item.excluded && (
+                <Stack {...reviewItemQtyUnitRowProps}>
+                  <TextField
+                    label={STOCK_OUT_PREVIEW_PAGE_COPY.qtyLabel}
+                    type="number"
+                    value={item.quantity}
+                    inputProps={{ step: "any", min: 0 }}
+                    onChange={(e) => updateItem(item.id, { quantity: e.target.value })}
+                    sx={{ flex: 1, minWidth: 0 }}
+                  />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <StockUnitSelectField
+                      label={STOCK_OUT_PREVIEW_PAGE_COPY.unitLabel}
+                      value={item.unit || STOCK_OUT_PREVIEW_PAGE_CONFIG.defaultUnit}
+                      onChange={(value) => updateItem(item.id, { unit: value })}
+                      stockUnits={stockUnits}
+                    />
+                  </Box>
+                </Stack>
+
+                {item.warning === STOCK_OUT_PREVIEW_PAGE_CONFIG.warningExceedsStock && (
                   <FormControlLabel
+                    sx={allowZeroLabelSx}
                     control={
                       <Checkbox
+                        size="small"
                         checked={Boolean(item.allowZero)}
-                        onChange={(e) => updateItem(item.id, { allowZero: e.target.checked })}
+                        onChange={(e) =>
+                          updateItem(item.id, { allowZero: e.target.checked })
+                        }
                       />
                     }
                     label={STOCK_OUT_PREVIEW_PAGE_COPY.allowZeroLabel}
                   />
                 )}
-            </Stack>
-          </Box>
-        ))}
-      </Stack>
+              </Stack>
+            </ReviewItemAccordion>
+          ))
+        )}
+      </Box>
 
       <Divider />
 
       <Typography variant="body2" color="text.secondary">
-        {STOCK_OUT_PREVIEW_PAGE_COPY.itemsSummary(activeCount, items.length)}
+        {STOCK_OUT_PREVIEW_PAGE_COPY.itemsSummary(activeCount)}
       </Typography>
 
       <LoadingButton
@@ -318,11 +362,41 @@ export default function StockOutPreviewPage() {
         {STOCK_OUT_PREVIEW_PAGE_COPY.confirm}
       </LoadingButton>
 
-      <Button color="inherit" disabled={confirming || cancelling} onClick={handleCancel}>
-        {cancelling
-          ? STOCK_OUT_PREVIEW_PAGE_COPY.cancelling
-          : STOCK_OUT_PREVIEW_PAGE_COPY.cancel}
+      <Button
+        color="inherit"
+        disabled={confirming || cancelling}
+        onClick={() => setCancelConfirmOpen(true)}
+      >
+        {STOCK_OUT_PREVIEW_PAGE_COPY.cancel}
       </Button>
+
+      <ConfirmDialog
+        open={Boolean(itemToRemove)}
+        onClose={cancelRemoveItem}
+        title={STOCK_OUT_PREVIEW_PAGE_COPY.removeConfirmTitle}
+        description={
+          itemToRemove
+            ? STOCK_OUT_PREVIEW_PAGE_COPY.removeConfirmDescription(itemToRemove.name)
+            : ""
+        }
+        onConfirm={confirmRemoveItem}
+        confirmLabel={STOCK_OUT_PREVIEW_PAGE_COPY.removeConfirmLabel}
+        cancelLabel={STOCK_OUT_PREVIEW_PAGE_COPY.removeCancelLabel}
+      />
+
+      <ConfirmDialog
+        open={cancelConfirmOpen}
+        onClose={() => {
+          if (cancelling) return;
+          setCancelConfirmOpen(false);
+        }}
+        title={STOCK_OUT_PREVIEW_PAGE_COPY.cancelConfirmTitle}
+        description={STOCK_OUT_PREVIEW_PAGE_COPY.cancelConfirmDescription}
+        onConfirm={handleCancel}
+        confirmLoading={cancelling}
+        confirmLabel={STOCK_OUT_PREVIEW_PAGE_COPY.cancelConfirmLabel}
+        cancelLabel={STOCK_OUT_PREVIEW_PAGE_COPY.cancelDismissLabel}
+      />
     </Stack>
   );
 }

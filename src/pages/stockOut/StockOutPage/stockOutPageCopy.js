@@ -4,7 +4,9 @@ export const STOCK_OUT_PAGE_COPY = {
   subtitle: "Descreva o que foi consumido",
   textLabel: "O que você usou?",
   textPlaceholder: "Ex.: dê baixa em 1 leite, 200g de queijo",
-  submit: "Interpretar baixa",
+  textHelper:
+    'Separe os itens por vírgula ou "e". Frases mais soltas também funcionam.',
+  submit: "Revisar itens",
   parseError: "Não foi possível interpretar a baixa",
   intakePrompt: "Quer registrar uma compra?",
   intakeLink: "Entrada por texto",

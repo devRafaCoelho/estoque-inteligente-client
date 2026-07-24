@@ -38,6 +38,7 @@ export default function IntakePage() {
   });
 
   const text = watch("text");
+  const { ref: textRef, ...textField } = register("text");
 
   const onSubmit = async (values) => {
     setLoading(true);
@@ -76,7 +77,13 @@ export default function IntakePage() {
         fullWidth
         error={Boolean(errors.text)}
         helperText={errors.text?.message || INTAKE_PAGE_COPY.textHelper}
-        {...register("text")}
+        value={text ?? ""}
+        inputRef={textRef}
+        slotProps={{ inputLabel: { shrink: true } }}
+        {...textField}
+        onChange={(e) =>
+          setValue("text", e.target.value, { shouldValidate: true, shouldDirty: true })
+        }
       />
 
       <Stack {...examplesRowSx}>
@@ -85,7 +92,13 @@ export default function IntakePage() {
             key={example}
             label={example}
             variant="outlined"
-            onClick={() => setValue("text", example, { shouldValidate: true, shouldDirty: true })}
+            onClick={() =>
+              setValue("text", example, {
+                shouldValidate: true,
+                shouldDirty: true,
+                shouldTouch: true,
+              })
+            }
             sx={exampleChipSx}
           />
         ))}

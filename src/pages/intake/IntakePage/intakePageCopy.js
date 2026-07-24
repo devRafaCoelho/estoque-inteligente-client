@@ -5,8 +5,8 @@ export const INTAKE_PAGE_COPY = {
   textLabel: "O que você comprou?",
   textPlaceholder: "Ex.: 2kg arroz, 1 leite, 500g feijão",
   textHelper:
-    'Separe os itens por vírgula ou "e". Com AI_API_KEY (Gemini) no servidor, a IA interpreta frases mais soltas.',
-  submit: "Interpretar compra",
+    'Separe os itens por vírgula ou "e". Frases mais soltas também funcionam.',
+  submit: "Revisar itens",
   parseError: "Não foi possível interpretar o texto",
   stockOutPrompt: "Quer dar baixa?",
   stockOutLink: "Baixa por texto",

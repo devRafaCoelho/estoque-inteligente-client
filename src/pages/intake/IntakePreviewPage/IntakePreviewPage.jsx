@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -6,40 +6,40 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import UndoIcon from "@mui/icons-material/Undo";
 import { cancelIntake, confirmIntake, getIntakeById, updateIntake } from "../../../services/intakeService";
 import { listProductCategories } from "../../../services/productCategoryService";
 import { listStockUnits } from "../../../services/stockUnitService";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
+import ReviewItemAccordion from "../../../components/common/ReviewItemAccordion/ReviewItemAccordion";
+import {
+  reviewItemFieldsSpacing,
+  reviewItemQtyUnitRowProps,
+} from "../../../components/common/ReviewItemAccordion/ReviewItemAccordion.styled";
 import ProductCategorySelectField from "../../../components/form/ProductCategorySelectField";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { buildIntakePreviewPayload } from "../../../utils/intake/intakeForm";
+import { moneyToDisplay, parseMoneyInput } from "../../../utils/moneyInput";
+import { formatQuantity } from "../../../utils/unitLabels";
 import {
-  draftItemCardSx,
-  flexGrowSpacerSx,
   pageBackHeaderSx,
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
   rawInputBoxSx,
+  rawInputOffsetSx,
 } from "../../../styles/pageStyles";
 import { INTAKE_PREVIEW_PAGE_COPY } from "./intakePreviewPageCopy";
-import {
-  INTAKE_PREVIEW_PAGE_CONFIG,
-  confidenceLabel,
-} from "./intakePreviewPageConfig";
+import { INTAKE_PREVIEW_PAGE_CONFIG } from "./intakePreviewPageConfig";
 import {
   actionsRowProps,
-  chipRowProps,
-  fieldRowProps,
   intakePreviewStackSpacing,
-  itemInnerStackSpacing,
   lockedStackSpacing,
 } from "./IntakePreviewPage.styled";
 
@@ -52,6 +52,9 @@ export default function IntakePreviewPage() {
   const [saving, setSaving] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
+  const [itemToRemove, setItemToRemove] = useState(null);
+  const [expandedId, setExpandedId] = useState(null);
   const [intake, setIntake] = useState(null);
   const [items, setItems] = useState([]);
   const [storeName, setStoreName] = useState("");
@@ -80,9 +83,11 @@ export default function IntakePreviewPage() {
     setLoading(true);
     try {
       const data = await getIntakeById(id);
+      const nextItems = data.intake.items || [];
       setIntake(data.intake);
-      setItems(data.intake.items || []);
+      setItems(nextItems);
       setStoreName(data.intake.storeName || "");
+      setExpandedId(nextItems[0]?.id ?? null);
     } catch (err) {
       error(err instanceof ApiError ? err.message : INTAKE_PREVIEW_PAGE_COPY.loadError);
       navigate(INTAKE_PREVIEW_PAGE_CONFIG.paths.entrada);
@@ -95,15 +100,34 @@ export default function IntakePreviewPage() {
     load();
   }, [load]);
 
-  const activeCount = useMemo(
-    () => items.filter((item) => !item.excluded).length,
-    [items],
-  );
+  const activeCount = items.length;
 
   const updateItem = (itemId, patch) => {
     setItems((prev) =>
       prev.map((item) => (item.id === itemId ? { ...item, ...patch } : item)),
     );
+  };
+
+  const requestRemoveItem = (item) => {
+    setItemToRemove(item);
+  };
+
+  const cancelRemoveItem = () => {
+    setItemToRemove(null);
+  };
+
+  const confirmRemoveItem = () => {
+    if (!itemToRemove) return;
+    const removedId = itemToRemove.id;
+    setItems((prev) => {
+      const next = prev.filter((item) => item.id !== removedId);
+      setExpandedId((current) => {
+        if (current !== removedId) return current;
+        return next[0]?.id ?? null;
+      });
+      return next;
+    });
+    setItemToRemove(null);
   };
 
   const getPayload = () =>
@@ -153,6 +177,7 @@ export default function IntakePreviewPage() {
     setCancelling(true);
     try {
       await cancelIntake(id);
+      setCancelConfirmOpen(false);
       success(INTAKE_PREVIEW_PAGE_COPY.cancelled);
       navigate(INTAKE_PREVIEW_PAGE_CONFIG.paths.entrada);
     } catch (err) {
@@ -209,11 +234,13 @@ export default function IntakePreviewPage() {
       </Stack>
 
       {intake.rawInput && (
-        <Box sx={rawInputBoxSx}>
-          <Typography variant="caption" color="text.secondary" fontWeight={700}>
-            {INTAKE_PREVIEW_PAGE_COPY.rawInputLabel}
-          </Typography>
-          <Typography variant="body2">{intake.rawInput}</Typography>
+        <Box sx={rawInputOffsetSx}>
+          <Box sx={rawInputBoxSx}>
+            <Typography variant="caption" color="text.secondary" fontWeight={700}>
+              {INTAKE_PREVIEW_PAGE_COPY.rawInputLabel}
+            </Typography>
+            <Typography variant="body2">{intake.rawInput}</Typography>
+          </Box>
         </Box>
       )}
 
@@ -224,93 +251,98 @@ export default function IntakePreviewPage() {
         fullWidth
       />
 
-      <Stack spacing={1.5}>
-        {items.map((item) => {
-          const conf = confidenceLabel(item.confidence);
-          return (
-            <Box key={item.id} sx={draftItemCardSx(item.excluded, "primary.light")}>
-              <Stack spacing={itemInnerStackSpacing}>
-                <Stack {...chipRowProps}>
-                  {item.matchedExisting && (
-                    <Chip
-                      size="small"
-                      color="primary"
-                      variant="outlined"
-                      label={INTAKE_PREVIEW_PAGE_COPY.matchedExisting}
-                    />
-                  )}
-                  {conf && (
-                    <Chip size="small" color={conf.color} variant="outlined" label={conf.label} />
-                  )}
-                  <Box sx={flexGrowSpacerSx} />
-                  <IconButton
+      <Box>
+        {items.length === 0 ? (
+          <Typography color="text.secondary">{INTAKE_PREVIEW_PAGE_COPY.emptyItems}</Typography>
+        ) : (
+          items.map((item) => (
+            <ReviewItemAccordion
+              key={item.id}
+              expanded={expandedId === item.id}
+              onExpandedChange={(isExpanded) =>
+                setExpandedId(isExpanded ? item.id : null)
+              }
+              title={item.name || INTAKE_PREVIEW_PAGE_COPY.nameLabel}
+              subtitle={formatQuantity(
+                item.quantity,
+                item.unit || INTAKE_PREVIEW_PAGE_CONFIG.defaultUnit,
+                stockUnits,
+              )}
+              chips={
+                item.matchedExisting ? (
+                  <Chip
                     size="small"
-                    onClick={() => updateItem(item.id, { excluded: !item.excluded })}
-                    aria-label={
-                      item.excluded
-                        ? INTAKE_PREVIEW_PAGE_COPY.reincluirAria
-                        : INTAKE_PREVIEW_PAGE_COPY.excluirAria
-                    }
-                  >
-                    {item.excluded ? <UndoIcon fontSize="small" /> : <DeleteOutlineIcon fontSize="small" />}
-                  </IconButton>
-                </Stack>
-
+                    color="primary"
+                    variant="outlined"
+                    label={INTAKE_PREVIEW_PAGE_COPY.matchedExisting}
+                  />
+                ) : null
+              }
+              onDelete={() => requestRemoveItem(item)}
+              deleteAriaLabel={INTAKE_PREVIEW_PAGE_COPY.excluirAria}
+              expandAriaLabel={INTAKE_PREVIEW_PAGE_COPY.expandItemAria}
+            >
+              <Stack spacing={reviewItemFieldsSpacing}>
                 <TextField
                   label={INTAKE_PREVIEW_PAGE_COPY.nameLabel}
-                  size="small"
                   value={item.name}
-                  disabled={item.excluded}
                   onChange={(e) => updateItem(item.id, { name: e.target.value })}
                   fullWidth
                 />
 
-                <Stack {...fieldRowProps}>
+                <Stack {...reviewItemQtyUnitRowProps}>
                   <TextField
                     label={INTAKE_PREVIEW_PAGE_COPY.qtyLabel}
                     type="number"
-                    size="small"
                     value={item.quantity}
-                    disabled={item.excluded}
                     inputProps={{ step: "any", min: 0 }}
                     onChange={(e) => updateItem(item.id, { quantity: e.target.value })}
-                    fullWidth
+                    sx={{ flex: 1, minWidth: 0 }}
                   />
-                  <StockUnitSelectField
-                    label={INTAKE_PREVIEW_PAGE_COPY.unitLabel}
-                    value={item.unit || INTAKE_PREVIEW_PAGE_CONFIG.defaultUnit}
-                    disabled={item.excluded}
-                    onChange={(value) => updateItem(item.id, { unit: value })}
-                    stockUnits={stockUnits}
-                  />
-                  <ProductCategorySelectField
-                    label={INTAKE_PREVIEW_PAGE_COPY.categoryLabel}
-                    value={item.category || INTAKE_PREVIEW_PAGE_CONFIG.defaultCategory}
-                    disabled={item.excluded}
-                    onChange={(value) => updateItem(item.id, { category: value })}
-                    productCategories={productCategories}
-                  />
-                  <TextField
-                    label={INTAKE_PREVIEW_PAGE_COPY.unitPriceLabel}
-                    type="number"
-                    size="small"
-                    value={item.unitPrice ?? ""}
-                    disabled={item.excluded}
-                    inputProps={{ step: "0.01", min: 0 }}
-                    onChange={(e) => updateItem(item.id, { unitPrice: e.target.value })}
-                    fullWidth
-                  />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <StockUnitSelectField
+                      label={INTAKE_PREVIEW_PAGE_COPY.unitLabel}
+                      value={item.unit || INTAKE_PREVIEW_PAGE_CONFIG.defaultUnit}
+                      onChange={(value) => updateItem(item.id, { unit: value })}
+                      stockUnits={stockUnits}
+                    />
+                  </Box>
                 </Stack>
+
+                <ProductCategorySelectField
+                  label={INTAKE_PREVIEW_PAGE_COPY.categoryLabel}
+                  value={item.category || INTAKE_PREVIEW_PAGE_CONFIG.defaultCategory}
+                  onChange={(value) => updateItem(item.id, { category: value })}
+                  productCategories={productCategories}
+                />
+
+                <TextField
+                  label={INTAKE_PREVIEW_PAGE_COPY.unitPriceLabel}
+                  value={moneyToDisplay(item.unitPrice)}
+                  onChange={(e) =>
+                    updateItem(item.id, { unitPrice: parseMoneyInput(e.target.value) })
+                  }
+                  fullWidth
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">R$</InputAdornment>
+                      ),
+                      inputMode: "numeric",
+                    },
+                  }}
+                />
               </Stack>
-            </Box>
-          );
-        })}
-      </Stack>
+            </ReviewItemAccordion>
+          ))
+        )}
+      </Box>
 
       <Divider />
 
       <Typography variant="body2" color="text.secondary">
-        {INTAKE_PREVIEW_PAGE_COPY.itemsSummary(activeCount, items.length)}
+        {INTAKE_PREVIEW_PAGE_COPY.itemsSummary(activeCount)}
       </Typography>
 
       <Stack {...actionsRowProps}>
@@ -328,7 +360,7 @@ export default function IntakePreviewPage() {
           variant="outlined"
           size="large"
           loading={saving}
-          disabled={confirming || cancelling}
+          disabled={activeCount === 0 || confirming || cancelling}
           onClick={handleSaveDraft}
           fullWidth
         >
@@ -339,10 +371,38 @@ export default function IntakePreviewPage() {
       <Button
         color="inherit"
         disabled={confirming || saving || cancelling}
-        onClick={handleCancel}
+        onClick={() => setCancelConfirmOpen(true)}
       >
-        {cancelling ? INTAKE_PREVIEW_PAGE_COPY.cancelling : INTAKE_PREVIEW_PAGE_COPY.cancel}
+        {INTAKE_PREVIEW_PAGE_COPY.cancel}
       </Button>
+
+      <ConfirmDialog
+        open={Boolean(itemToRemove)}
+        onClose={cancelRemoveItem}
+        title={INTAKE_PREVIEW_PAGE_COPY.removeConfirmTitle}
+        description={
+          itemToRemove
+            ? INTAKE_PREVIEW_PAGE_COPY.removeConfirmDescription(itemToRemove.name)
+            : ""
+        }
+        onConfirm={confirmRemoveItem}
+        confirmLabel={INTAKE_PREVIEW_PAGE_COPY.removeConfirmLabel}
+        cancelLabel={INTAKE_PREVIEW_PAGE_COPY.removeCancelLabel}
+      />
+
+      <ConfirmDialog
+        open={cancelConfirmOpen}
+        onClose={() => {
+          if (cancelling) return;
+          setCancelConfirmOpen(false);
+        }}
+        title={INTAKE_PREVIEW_PAGE_COPY.cancelConfirmTitle}
+        description={INTAKE_PREVIEW_PAGE_COPY.cancelConfirmDescription}
+        onConfirm={handleCancel}
+        confirmLoading={cancelling}
+        confirmLabel={INTAKE_PREVIEW_PAGE_COPY.cancelConfirmLabel}
+        cancelLabel={INTAKE_PREVIEW_PAGE_COPY.cancelDismissLabel}
+      />
     </Stack>
   );
 }

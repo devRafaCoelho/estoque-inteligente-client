@@ -17,6 +17,7 @@ import { useEntitySelectOptions } from "./useEntitySelectOptions";
  * @param {boolean} [props.required]
  * @param {boolean} [props.fullWidth]
  * @param {boolean} [props.disabled]
+ * @param {'small'|'medium'} [props.size]
  * @param {ProductCategory[]} [props.productCategories]
  */
 export default function ProductCategorySelectField({
@@ -29,6 +30,7 @@ export default function ProductCategorySelectField({
   required = false,
   fullWidth = true,
   disabled = false,
+  size = "medium",
   productCategories,
 }) {
   const { options, loading } = useEntitySelectOptions({
@@ -47,6 +49,7 @@ export default function ProductCategorySelectField({
       required={required}
       fullWidth={fullWidth}
       disabled={disabled}
+      size={size}
       options={options}
       loading={loading}
       noOptionsText="Nenhuma categoria encontrada"

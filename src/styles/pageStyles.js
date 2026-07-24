@@ -51,12 +51,18 @@ export const pageBackHeaderSx = {
 };
 
 export const rawInputBoxSx = {
-  px: 1.5,
+  px: 2,
+  pl: 2.5,
   py: 1.25,
-  borderRadius: 2,
+  borderRadius: "16px",
   bgcolor: "background.paper",
   border: "1px solid",
   borderColor: "divider",
+};
+
+/** Alinha o bloco com o título ao lado do botão voltar. */
+export const rawInputOffsetSx = {
+  ml: { xs: 0, sm: 6 },
 };
 
 export const draftItemCardSx = (excluded, accentBorderColor = "primary.light") => ({

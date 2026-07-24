@@ -17,6 +17,7 @@ import { useEntitySelectOptions } from "./useEntitySelectOptions";
  * @param {boolean} [props.required]
  * @param {boolean} [props.fullWidth]
  * @param {boolean} [props.disabled]
+ * @param {'small'|'medium'} [props.size]
  * @param {StockUnit[]} [props.stockUnits]
  */
 export default function StockUnitSelectField({
@@ -29,6 +30,7 @@ export default function StockUnitSelectField({
   required = false,
   fullWidth = true,
   disabled = false,
+  size = "medium",
   stockUnits,
 }) {
   const { options, loading } = useEntitySelectOptions({
@@ -47,6 +49,7 @@ export default function StockUnitSelectField({
       required={required}
       fullWidth={fullWidth}
       disabled={disabled}
+      size={size}
       options={options}
       loading={loading}
       noOptionsText="Nenhuma unidade encontrada"
