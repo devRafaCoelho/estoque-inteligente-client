@@ -5,6 +5,14 @@ import { createCachedLoader } from "../utils/createCachedLoader";
 
 const LIST_QUERY_PARAMS = ["unreadOnly", "limit"];
 
+/** Disparado quando o contador de não lidas muda (badge do header). */
+export const UNREAD_NOTIFICATIONS_CHANGED_EVENT = "estoque:unread-notifications-changed";
+
+function emitUnreadNotificationsChanged() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(UNREAD_NOTIFICATIONS_CHANGED_EVENT));
+}
+
 /**
  * @param {Record<string, unknown>} [params]
  */
@@ -34,11 +42,13 @@ export function clearUnreadNotificationsCountCache() {
 export async function markNotificationRead(id) {
   const data = await api.post(`${NOTIFICATIONS_URL}/${id}/read`, {});
   clearUnreadNotificationsCountCache();
+  emitUnreadNotificationsChanged();
   return data;
 }
 
 export async function markAllNotificationsRead() {
   const data = await api.post(`${NOTIFICATIONS_URL}/read-all`, {});
   clearUnreadNotificationsCountCache();
+  emitUnreadNotificationsChanged();
   return data;
 }

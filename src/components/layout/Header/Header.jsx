@@ -14,7 +14,10 @@ import { useTheme } from "@mui/material/styles";
 import brandLogo from "../../../assets/brand-logo.png";
 import { mainNavItems } from "../../../config/navigation";
 import { useAuth } from "../../../hooks/useAuth";
-import { getUnreadNotificationsCount } from "../../../services/notificationService";
+import {
+  getUnreadNotificationsCount,
+  UNREAD_NOTIFICATIONS_CHANGED_EVENT,
+} from "../../../services/notificationService";
 import HeaderDesktopNav from "./components/HeaderDesktopNav";
 import HeaderLogoutDialog from "./components/HeaderLogoutDialog";
 import HeaderProfileMenu from "./components/HeaderProfileMenu";
@@ -51,6 +54,15 @@ export default function Header() {
 
   const isActive = (path) => isPathActive(location.pathname, path);
 
+  const refreshUnreadCount = useCallback(async (force = false) => {
+    try {
+      const data = await getUnreadNotificationsCount(force);
+      setUnreadCount(data.unreadCount ?? 0);
+    } catch {
+      // Mantém o último valor conhecido; falha silenciosa no header.
+    }
+  }, []);
+
   useEffect(() => {
     let ativo = true;
     const previousPath = previousPathRef.current;
@@ -58,20 +70,29 @@ export default function Header() {
       previousPath !== undefined && previousPath !== location.pathname;
     previousPathRef.current = location.pathname;
 
-    async function carregar() {
+    (async () => {
       try {
         const data = await getUnreadNotificationsCount(force);
         if (ativo) setUnreadCount(data.unreadCount ?? 0);
       } catch {
         // Mantém o último valor conhecido; falha silenciosa no header.
       }
-    }
+    })();
 
-    carregar();
     return () => {
       ativo = false;
     };
   }, [location.pathname]);
+
+  useEffect(() => {
+    const onUnreadChanged = () => {
+      refreshUnreadCount(true);
+    };
+    window.addEventListener(UNREAD_NOTIFICATIONS_CHANGED_EVENT, onUnreadChanged);
+    return () => {
+      window.removeEventListener(UNREAD_NOTIFICATIONS_CHANGED_EVENT, onUnreadChanged);
+    };
+  }, [refreshUnreadCount]);
 
   const handleNavigate = (path) => {
     navigate(path);

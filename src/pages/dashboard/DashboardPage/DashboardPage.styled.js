@@ -28,7 +28,7 @@ export const headerIntakeButtonSx = {
   whiteSpace: "nowrap",
 };
 
-export const statsRowSpacing = 1.5;
+export const statsRowSpacing = 1;
 
 export const statsRowDirection = "row";
 
