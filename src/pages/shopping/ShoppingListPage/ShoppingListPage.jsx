@@ -18,6 +18,7 @@ import {
 import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/ShoppingChecklist";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import {
@@ -42,6 +43,7 @@ export default function ShoppingListPage() {
   const [generating, setGenerating] = useState(false);
   const [adding, setAdding] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [itemToDelete, setItemToDelete] = useState(null);
   const [list, setList] = useState(null);
   const [viewMode, setViewMode] = useState(SHOPPING_LIST_PAGE_CONFIG.defaultViewMode);
   const [addText, setAddText] = useState("");
@@ -113,10 +115,21 @@ export default function ShoppingListPage() {
     }
   };
 
-  const handleDelete = async (item) => {
-    setBusyId(item.id);
+  const handleDeleteRequest = (item) => {
+    setItemToDelete(item);
+  };
+
+  const handleDeleteCancel = () => {
+    if (busyId) return;
+    setItemToDelete(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+    setBusyId(itemToDelete.id);
     try {
-      await deleteShoppingListItem(item.id);
+      await deleteShoppingListItem(itemToDelete.id);
+      setItemToDelete(null);
       await load();
       success(SHOPPING_LIST_PAGE_COPY.itemRemoved);
     } catch (err) {
@@ -246,18 +259,33 @@ export default function ShoppingListPage() {
             title={list?.title}
             items={items}
             onToggle={handleToggle}
-            onDelete={handleDelete}
+            onDelete={handleDeleteRequest}
             busyId={busyId}
           />
         ) : (
           <ShoppingChecklist
             items={items}
             onToggle={handleToggle}
-            onDelete={handleDelete}
+            onDelete={handleDeleteRequest}
             busyId={busyId}
           />
         )}
       </Stack>
+
+      <ConfirmDialog
+        open={Boolean(itemToDelete)}
+        onClose={handleDeleteCancel}
+        title={SHOPPING_LIST_PAGE_COPY.deleteConfirmTitle}
+        description={
+          itemToDelete
+            ? SHOPPING_LIST_PAGE_COPY.deleteConfirmDescription(itemToDelete.name)
+            : ""
+        }
+        onConfirm={handleDeleteConfirm}
+        confirmLoading={Boolean(itemToDelete && busyId === itemToDelete.id)}
+        confirmLabel={SHOPPING_LIST_PAGE_COPY.deleteConfirmLabel}
+        cancelLabel={SHOPPING_LIST_PAGE_COPY.deleteCancelLabel}
+      />
     </Stack>
   );
 }

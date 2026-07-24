@@ -12,6 +12,7 @@ import Typography from "@mui/material/Typography";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
 import ProductCategorySelectField from "../../../components/form/ProductCategorySelectField";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
@@ -33,6 +34,7 @@ import {
   formSectionSx,
   quantityRowSpacing,
   stageItemActionsSx,
+  stageItemContentSx,
   stageItemSx,
   stageListSpacing,
   unitSelectSx,
@@ -51,6 +53,7 @@ export default function ProductCreatePage() {
 
   const [staged, setStaged] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [itemToRemove, setItemToRemove] = useState(null);
   const [saving, setSaving] = useState(false);
 
   const {
@@ -113,9 +116,20 @@ export default function ProductCreatePage() {
     window.setTimeout(() => nameInputRef.current?.focus(), 0);
   };
 
-  const removeItem = (id) => {
+  const requestRemoveItem = (item) => {
+    setItemToRemove(item);
+  };
+
+  const cancelRemoveItem = () => {
+    setItemToRemove(null);
+  };
+
+  const confirmRemoveItem = () => {
+    if (!itemToRemove) return;
+    const { id } = itemToRemove;
     setStaged((prev) => prev.filter((item) => item.id !== id));
     if (editingId === id) resetForm();
+    setItemToRemove(null);
   };
 
   const saveAll = async () => {
@@ -180,12 +194,16 @@ export default function ProductCreatePage() {
           <Stack spacing={stageListSpacing}>
             {staged.map((item) => (
               <Box key={item.id} sx={stageItemSx}>
-                <Typography fontWeight={700}>{item.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {categoryLabel(item.category)} · {item.quantity} {unitLabel(item.unit)} · mín.{" "}
-                  {item.minQuantity}
-                </Typography>
-                <Stack direction="row" spacing={1} sx={stageItemActionsSx}>
+                <Box sx={stageItemContentSx}>
+                  <Typography fontWeight={700} noWrap>
+                    {item.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" noWrap>
+                    {categoryLabel(item.category)} · {item.quantity} {unitLabel(item.unit)} · mín.{" "}
+                    {item.minQuantity}
+                  </Typography>
+                </Box>
+                <Stack direction="row" spacing={0.5} sx={stageItemActionsSx}>
                   <Button
                     size="small"
                     startIcon={<EditOutlinedIcon />}
@@ -197,7 +215,7 @@ export default function ProductCreatePage() {
                     size="small"
                     color="error"
                     startIcon={<DeleteOutlineIcon />}
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => requestRemoveItem(item)}
                   >
                     {PRODUCT_CREATE_COPY.removeItem}
                   </Button>
@@ -207,6 +225,20 @@ export default function ProductCreatePage() {
           </Stack>
         )}
       </Box>
+
+      <ConfirmDialog
+        open={Boolean(itemToRemove)}
+        onClose={cancelRemoveItem}
+        title={PRODUCT_CREATE_COPY.deleteConfirmTitle}
+        description={
+          itemToRemove
+            ? PRODUCT_CREATE_COPY.deleteConfirmDescription(itemToRemove.name)
+            : ""
+        }
+        onConfirm={confirmRemoveItem}
+        confirmLabel={PRODUCT_CREATE_COPY.deleteConfirmLabel}
+        cancelLabel={PRODUCT_CREATE_COPY.deleteCancelLabel}
+      />
 
       <Box
         component="form"

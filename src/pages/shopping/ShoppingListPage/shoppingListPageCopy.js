@@ -7,6 +7,11 @@ export const SHOPPING_LIST_PAGE_COPY = {
   toggleError: "Erro ao atualizar item",
   itemRemoved: "Item removido",
   deleteError: "Erro ao remover item",
+  deleteConfirmTitle: "Remover item?",
+  deleteConfirmDescription: (name) =>
+    `Deseja remover “${name}” da lista de compras? Essa ação não pode ser desfeita.`,
+  deleteConfirmLabel: "Remover",
+  deleteCancelLabel: "Cancelar",
   itemsAdded: (count) => `${count} itens adicionados à lista`,
   itemAdded: "Item adicionado",
   addError: "Erro ao adicionar item",

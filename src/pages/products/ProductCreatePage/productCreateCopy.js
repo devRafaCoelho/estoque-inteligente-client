@@ -14,6 +14,11 @@ export const PRODUCT_CREATE_COPY = {
   stageEmpty: "Nenhum produto na lista ainda. Preencha o formulário e toque em “Adicionar à lista”.",
   removeItem: "Remover",
   editItem: "Editar",
+  deleteConfirmTitle: "Remover da lista?",
+  deleteConfirmDescription: (name) =>
+    `Deseja remover “${name}” da lista antes de salvar?`,
+  deleteConfirmLabel: "Remover",
+  deleteCancelLabel: "Cancelar",
   saveAll: (n) => (n === 1 ? "Salvar 1 produto" : `Salvar ${n} produtos`),
   successAll: (n) => (n === 1 ? "1 produto criado" : `${n} produtos criados`),
   partialSuccess: (ok, fail) =>
