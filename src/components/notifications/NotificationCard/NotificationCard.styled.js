@@ -1,3 +1,5 @@
+import { cardBorderRadius } from "../../../styles/surfaceStyles";
+
 const TONE_STYLES = {
   error: {
     unreadBg: "rgba(211, 47, 47, 0.06)",
@@ -21,7 +23,7 @@ export const notificationCardSx = (tone = "default", unread = false) => {
   const palette = TONE_STYLES[tone] || TONE_STYLES.default;
   return {
     p: 1.5,
-    borderRadius: "16px",
+    borderRadius: cardBorderRadius,
     bgcolor: unread ? palette.unreadBg : "background.paper",
     border: "1px solid",
     borderColor: unread ? palette.unreadBorder : "divider",

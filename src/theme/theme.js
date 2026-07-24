@@ -1,4 +1,5 @@
 import { createTheme } from "@mui/material/styles";
+import { CARD_BORDER_RADIUS_PX } from "../styles/surfaceStyles";
 
 const theme = createTheme({
   palette: {
@@ -74,7 +75,7 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 16,
+          borderRadius: CARD_BORDER_RADIUS_PX,
           boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
           border: "1px solid rgba(0,0,0,0.06)",
         },

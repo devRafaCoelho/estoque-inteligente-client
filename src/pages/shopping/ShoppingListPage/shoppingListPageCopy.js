@@ -14,6 +14,9 @@ export const SHOPPING_LIST_PAGE_COPY = {
   deleteCancelLabel: "Cancelar",
   itemsAdded: (count) => `${count} itens adicionados à lista`,
   itemAdded: "Item adicionado",
+  itemsMerged: "Itens iguais foram somados na lista",
+  itemsAddedAndMerged: (added, merged) =>
+    `${added} novo(s) · ${merged} somado(s) na lista`,
   addError: "Erro ao adicionar item",
   title: "Lista de compras",
   subtitle: "Monte a lista pelo estoque ou por texto",

@@ -161,17 +161,24 @@ export default function ShoppingListPage() {
     try {
       const data = await addShoppingListItem({ text });
       setAddText("");
-      if (data.items?.length) {
+      if (data.list) {
+        applyList(data.list);
+      } else if (data.items?.length) {
         patchListItems((items) => [...items, ...data.items]);
       } else {
         await load({ silent: true });
       }
-      const count = data.items?.length || 1;
-      success(
-        count > 1
-          ? SHOPPING_LIST_PAGE_COPY.itemsAdded(count)
-          : SHOPPING_LIST_PAGE_COPY.itemAdded,
-      );
+      const created = data.createdCount ?? data.items?.length ?? 1;
+      const updated = data.updatedCount ?? 0;
+      if (updated > 0 && created === 0) {
+        success(SHOPPING_LIST_PAGE_COPY.itemsMerged);
+      } else if (updated > 0 && created > 0) {
+        success(SHOPPING_LIST_PAGE_COPY.itemsAddedAndMerged(created, updated));
+      } else if (created > 1) {
+        success(SHOPPING_LIST_PAGE_COPY.itemsAdded(created));
+      } else {
+        success(SHOPPING_LIST_PAGE_COPY.itemAdded);
+      }
     } catch (err) {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.addError);
     } finally {

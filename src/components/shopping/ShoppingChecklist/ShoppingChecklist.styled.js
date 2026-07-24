@@ -1,15 +1,14 @@
 /** Estilos do ShoppingChecklist. */
 
+import { listItemSurfaceSx } from "../../../styles/surfaceStyles";
+
 export const checklistItemSx = (checked) => ({
   display: "flex",
   alignItems: "center",
   gap: 1,
   px: 1.25,
   py: 1,
-  borderRadius: 2,
-  bgcolor: "background.paper",
-  border: "1px solid",
-  borderColor: "divider",
+  ...listItemSurfaceSx,
   opacity: checked ? 0.55 : 1,
 });
 

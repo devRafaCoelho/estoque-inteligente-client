@@ -1,3 +1,5 @@
+import { listItemSurfaceSx } from "../../../styles/surfaceStyles";
+
 export const pageStackSpacing = 3;
 
 export const summaryRowDirection = "column";
@@ -23,10 +25,7 @@ export const deltaSx = (positive) => ({
 });
 
 export const sectionCardSx = {
-  border: "1px solid",
-  borderColor: "divider",
-  borderRadius: "16px",
-  bgcolor: "background.paper",
+  ...listItemSurfaceSx,
   p: 1.75,
 };
 
@@ -82,10 +81,7 @@ export const seriesBarSx = (ratio) => ({
 
 export const tipItemSx = {
   p: 1.5,
-  borderRadius: "16px",
-  border: "1px solid",
-  borderColor: "divider",
-  bgcolor: "background.paper",
+  ...listItemSurfaceSx,
 };
 
 export const recentItemSx = {

@@ -1,5 +1,7 @@
 /** Estilos do ReviewItemAccordion (revisão de entrada/baixa). */
 
+import { cardBorderRadius } from "../../../styles/surfaceStyles";
+
 export const reviewItemWrapSx = {
   mb: 2,
   "&:last-child": {
@@ -10,7 +12,7 @@ export const reviewItemWrapSx = {
 export const reviewItemAccordionSx = (accentBorderColor = "primary.light") => ({
   border: "1px solid",
   borderColor: accentBorderColor,
-  borderRadius: "16px",
+  borderRadius: cardBorderRadius,
   overflow: "hidden",
   boxShadow: "none",
   bgcolor: "background.paper",
@@ -19,7 +21,7 @@ export const reviewItemAccordionSx = (accentBorderColor = "primary.light") => ({
     margin: "0 !important",
   },
   "&.MuiAccordion-root, &:first-of-type, &:last-of-type": {
-    borderRadius: "16px",
+    borderRadius: cardBorderRadius,
   },
 });
 

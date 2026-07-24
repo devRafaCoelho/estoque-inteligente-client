@@ -2,6 +2,8 @@
  * Estilos compartilhados entre páginas (cabeçalhos, loading, toolbars).
  */
 
+import { listItemSurfaceSx } from "./surfaceStyles";
+
 export const pageLoadingBoxSx = {
   display: "grid",
   placeItems: "center",
@@ -54,10 +56,7 @@ export const rawInputBoxSx = {
   px: 2,
   pl: 2.5,
   py: 1.25,
-  borderRadius: "16px",
-  bgcolor: "background.paper",
-  border: "1px solid",
-  borderColor: "divider",
+  ...listItemSurfaceSx,
 };
 
 /** Alinha o bloco com o título ao lado do botão voltar. */
@@ -67,9 +66,7 @@ export const rawInputOffsetSx = {
 
 export const draftItemCardSx = (excluded, accentBorderColor = "primary.light") => ({
   p: 1.5,
-  borderRadius: 2,
-  bgcolor: "background.paper",
-  border: "1px solid",
+  ...listItemSurfaceSx,
   borderColor: excluded ? "divider" : accentBorderColor,
   opacity: excluded ? 0.55 : 1,
 });

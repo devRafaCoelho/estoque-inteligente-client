@@ -1,3 +1,5 @@
+import { listItemSurfaceSx } from "../../../styles/surfaceStyles";
+
 export const pageHeaderRowSx = {
   display: "flex",
   flexDirection: { xs: "column", sm: "row" },
@@ -30,10 +32,7 @@ export const stageItemSx = {
   gap: 1,
   py: 1.25,
   px: 1.5,
-  borderRadius: "16px",
-  border: "1px solid",
-  borderColor: "divider",
-  bgcolor: "background.paper",
+  ...listItemSurfaceSx,
 };
 
 export const stageItemContentSx = {
