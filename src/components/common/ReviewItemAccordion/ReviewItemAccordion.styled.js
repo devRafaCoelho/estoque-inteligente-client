@@ -76,3 +76,16 @@ export const reviewItemQtyUnitRowProps = {
   direction: "row",
   spacing: 1.5,
 };
+
+// Evita quebra de HMR se algum módulo antigo ainda pedir este nome.
+export const reviewItemDeleteSx = {};
+export const reviewItemSummaryChipsSx = {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 0.75,
+  useFlexGap: true,
+};
+export const reviewItemSummaryMainSx = {
+  minWidth: 0,
+  flex: 1,
+};

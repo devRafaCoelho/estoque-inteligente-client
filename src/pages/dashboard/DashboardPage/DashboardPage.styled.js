@@ -73,22 +73,3 @@ export const monthSpendContentSx = {
 export const criticalListSpacing = 1.5;
 
 export const alertsListSpacing = 1.25;
-
-export const alertItemSx = (unread) => ({
-  p: 1.5,
-  borderRadius: 2,
-  bgcolor: unread ? "rgba(31,122,77,0.06)" : "background.paper",
-  border: "1px solid",
-  borderColor: unread ? "primary.light" : "divider",
-});
-
-export const alertItemTitleSx = {
-  fontWeight: 700,
-};
-
-export const alertActionsSx = {
-  mt: 1,
-  flexWrap: "wrap",
-};
-
-export const alertActionsSpacing = 1;

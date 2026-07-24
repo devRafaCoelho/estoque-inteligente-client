@@ -44,7 +44,7 @@ import {
 } from "./StockOutPreviewPage.styled";
 
 function onlyMatchedItems(items = []) {
-  return items.filter((item) => item.productId);
+  return items.filter((item) => Boolean(item.productId));
 }
 
 export default function StockOutPreviewPage() {

@@ -17,8 +17,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import ProductCard from "../../../components/products/ProductCard/ProductCard";
 import StockStatusChip from "../../../components/products/StockStatusChip/StockStatusChip";
-import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
+import NotificationCard from "../../../components/notifications/NotificationCard/NotificationCard";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -44,10 +44,6 @@ import {
   monthSpendContentSx,
   criticalListSpacing,
   alertsListSpacing,
-  alertItemSx,
-  alertItemTitleSx,
-  alertActionsSx,
-  alertActionsSpacing,
 } from "./DashboardPage.styled";
 
 function formatMoney(value, { locale, currency } = DASHBOARD_PAGE_CONFIG) {
@@ -83,7 +79,7 @@ export default function DashboardPage() {
   const [monthSpend, setMonthSpend] = useState(null);
   const [busyId, setBusyId] = useState(null);
 
-  const { stockStatus, paths, locale, types, actions } = DASHBOARD_PAGE_CONFIG;
+  const { stockStatus, paths, locale } = DASHBOARD_PAGE_CONFIG;
 
   const load = useCallback(
     async ({ silent = false } = {}) => {
@@ -218,44 +214,15 @@ export default function DashboardPage() {
           </Typography>
           <Stack spacing={alertsListSpacing}>
             {recentAlerts.map((alert) => (
-              <Box key={alert.id} sx={alertItemSx(alert.unread)}>
-                <Typography variant="subtitle1" sx={alertItemTitleSx}>
-                  {alert.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {alert.body}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.75 }}>
-                  {new Date(alert.createdAt).toLocaleString(locale)}
-                </Typography>
-                <Stack direction="row" spacing={alertActionsSpacing} sx={alertActionsSx}>
-                  {alert.unread && (
-                    <LoadingButton
-                      size="small"
-                      variant="text"
-                      loading={busyId === alert.id}
-                      onClick={() => handleMarkRead(alert)}
-                    >
-                      {DASHBOARD_PAGE_COPY.markRead}
-                    </LoadingButton>
-                  )}
-                  {(alert.type === types.consumptionNudge ||
-                    alert.payload?.action === actions.openQuickConsume) && (
-                    <Button size="small" variant="text" onClick={() => navigate(paths.stockOut)}>
-                      {DASHBOARD_PAGE_COPY.registerStockOut}
-                    </Button>
-                  )}
-                  {alert.productId && (
-                    <Button
-                      size="small"
-                      variant="text"
-                      onClick={() => navigate(paths.product(alert.productId))}
-                    >
-                      {DASHBOARD_PAGE_COPY.openProduct}
-                    </Button>
-                  )}
-                </Stack>
-              </Box>
+              <NotificationCard
+                key={alert.id}
+                notification={alert}
+                locale={locale}
+                busy={busyId === alert.id}
+                onMarkRead={() => handleMarkRead(alert)}
+                onRegisterStockOut={() => navigate(paths.stockOut)}
+                onOpenProduct={() => navigate(paths.product(alert.productId))}
+              />
             ))}
           </Stack>
         </Box>

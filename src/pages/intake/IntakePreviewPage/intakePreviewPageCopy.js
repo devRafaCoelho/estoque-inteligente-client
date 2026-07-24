@@ -14,7 +14,7 @@ export const INTAKE_PREVIEW_PAGE_COPY = {
   statusCancelled: "Entrada cancelada",
   statusLocked: "Este rascunho não pode mais ser editado.",
   viewProducts: "Ver produtos",
-  title: "Conferir compra",
+  title: "Conferir entrada",
   subtitle: "Revise os itens antes de gravar no estoque",
   rawInputLabel: "Texto original",
   storeLabel: "Estabelecimento (opcional)",

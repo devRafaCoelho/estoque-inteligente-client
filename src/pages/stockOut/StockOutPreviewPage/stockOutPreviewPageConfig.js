@@ -9,3 +9,8 @@ export const STOCK_OUT_PREVIEW_PAGE_CONFIG = {
     produtos: "/produtos",
   },
 };
+
+/** @deprecated mantido só por compatibilidade de HMR */
+export function warningLabel(warning) {
+  return warning || "";
+}

@@ -53,6 +53,23 @@ const theme = createTheme({
         },
       },
     },
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        label: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          lineHeight: 1,
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
+      },
+    },
     MuiBottomNavigationAction: {
       styleOverrides: {
         root: {

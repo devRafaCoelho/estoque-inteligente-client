@@ -1,19 +1,25 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
+import NotificationCard from "../../../components/notifications/NotificationCard/NotificationCard";
+import {
+  isConsumptionNudge,
+} from "../../../components/notifications/NotificationCard/notificationCardConfig";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import MarkEmailReadOutlinedIcon from "@mui/icons-material/MarkEmailReadOutlined";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { listNotifications, markAllNotificationsRead, markNotificationRead } from "../../../services/notificationService";
+import {
+  listNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "../../../services/notificationService";
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
@@ -22,12 +28,7 @@ import {
 import { NOTIFICATIONS_PAGE_CONFIG } from "./notificationsPageConfig";
 import { NOTIFICATIONS_PAGE_COPY } from "./notificationsPageCopy";
 import {
-  alertActionsSpacing,
-  alertActionsSx,
-  alertCardClickableSx,
-  alertCardSx,
-  alertTitleSx,
-  filterGroupSx,
+  filterChipsSx,
   listSpacing,
   pageStackSpacing,
   toolbarRowProps,
@@ -43,8 +44,7 @@ export default function NotificationsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState(NOTIFICATIONS_PAGE_CONFIG.defaultFilter);
 
-  const { filters, listLimit, productPath, stockOutPath, locale, types, actions } =
-    NOTIFICATIONS_PAGE_CONFIG;
+  const { filters, listLimit, productPath, stockOutPath, locale } = NOTIFICATIONS_PAGE_CONFIG;
 
   const load = useCallback(
     async ({ silent = false } = {}) => {
@@ -69,8 +69,7 @@ export default function NotificationsPage() {
     load();
   }, [load]);
 
-  const handleMarkRead = async (notification, event) => {
-    event?.stopPropagation();
+  const handleMarkRead = async (notification) => {
     if (!notification.unread) return;
     setBusyId(notification.id);
     try {
@@ -98,11 +97,7 @@ export default function NotificationsPage() {
   };
 
   const handleOpen = async (notification) => {
-    const action = notification.payload?.action;
-    if (
-      notification.type === types.consumptionNudge ||
-      action === actions.openQuickConsume
-    ) {
+    if (isConsumptionNudge(notification)) {
       if (notification.unread) {
         try {
           await markNotificationRead(notification.id);
@@ -139,6 +134,11 @@ export default function NotificationsPage() {
           description: NOTIFICATIONS_PAGE_COPY.emptyAllDescription,
         };
 
+  const filterOptions = [
+    { value: filters.all, label: NOTIFICATIONS_PAGE_COPY.filterAll },
+    { value: filters.unread, label: NOTIFICATIONS_PAGE_COPY.filterUnread },
+  ];
+
   return (
     <Stack spacing={pageStackSpacing}>
       <Box>
@@ -147,18 +147,21 @@ export default function NotificationsPage() {
       </Box>
 
       <Stack {...toolbarRowProps}>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={filter}
-          onChange={(_e, value) => {
-            if (value) setFilter(value);
-          }}
-          sx={filterGroupSx}
-        >
-          <ToggleButton value={filters.all}>{NOTIFICATIONS_PAGE_COPY.filterAll}</ToggleButton>
-          <ToggleButton value={filters.unread}>{NOTIFICATIONS_PAGE_COPY.filterUnread}</ToggleButton>
-        </ToggleButtonGroup>
+        <Box sx={filterChipsSx} role="group" aria-label={NOTIFICATIONS_PAGE_COPY.title}>
+          {filterOptions.map((option) => {
+            const selected = filter === option.value;
+            return (
+              <Chip
+                key={option.value}
+                label={option.label}
+                clickable
+                color={selected ? "primary" : "default"}
+                variant={selected ? "filled" : "outlined"}
+                onClick={() => setFilter(option.value)}
+              />
+            );
+          })}
+        </Box>
 
         <Box sx={pageToolbarActionsSx}>
           <Typography variant="body2" color="text.secondary">
@@ -185,74 +188,19 @@ export default function NotificationsPage() {
       ) : (
         <Stack spacing={listSpacing}>
           {notifications.map((notification) => {
-            const isNudge =
-              notification.type === types.consumptionNudge ||
-              notification.payload?.action === actions.openQuickConsume;
-            const clickable = Boolean(notification.productId) || isNudge;
+            const clickable =
+              Boolean(notification.productId) || isConsumptionNudge(notification);
             return (
-              <Box
+              <NotificationCard
                 key={notification.id}
-                sx={{
-                  ...alertCardSx(notification.unread),
-                  ...(clickable ? alertCardClickableSx : null),
-                }}
-                onClick={() => handleOpen(notification)}
-                role={clickable ? "button" : undefined}
-                tabIndex={clickable ? 0 : undefined}
-                onKeyDown={(event) => {
-                  if (!clickable) return;
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    handleOpen(notification);
-                  }
-                }}
-              >
-                <Typography variant="subtitle1" sx={alertTitleSx(notification.unread)}>
-                  {notification.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {notification.body}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.75 }}>
-                  {new Date(notification.createdAt).toLocaleString(locale)}
-                </Typography>
-                <Stack direction="row" spacing={alertActionsSpacing} sx={alertActionsSx}>
-                  {notification.unread && (
-                    <LoadingButton
-                      size="small"
-                      variant="text"
-                      loading={busyId === notification.id}
-                      onClick={(event) => handleMarkRead(notification, event)}
-                    >
-                      {NOTIFICATIONS_PAGE_COPY.markRead}
-                    </LoadingButton>
-                  )}
-                  {isNudge && (
-                    <Button
-                      size="small"
-                      variant="text"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleOpen(notification);
-                      }}
-                    >
-                      {NOTIFICATIONS_PAGE_COPY.registerStockOut}
-                    </Button>
-                  )}
-                  {notification.productId && (
-                    <Button
-                      size="small"
-                      variant="text"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        navigate(productPath(notification.productId));
-                      }}
-                    >
-                      {NOTIFICATIONS_PAGE_COPY.openProduct}
-                    </Button>
-                  )}
-                </Stack>
-              </Box>
+                notification={notification}
+                locale={locale}
+                busy={busyId === notification.id}
+                onMarkRead={() => handleMarkRead(notification)}
+                onRegisterStockOut={() => handleOpen(notification)}
+                onOpenProduct={() => navigate(productPath(notification.productId))}
+                onClick={clickable ? () => handleOpen(notification) : undefined}
+              />
             );
           })}
         </Stack>

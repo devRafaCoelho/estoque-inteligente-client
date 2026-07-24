@@ -11,12 +11,6 @@ export const DASHBOARD_PAGE_CONFIG = {
   },
   locale: "pt-BR",
   currency: "BRL",
-  types: {
-    consumptionNudge: "consumption_nudge",
-  },
-  actions: {
-    openQuickConsume: "open_quick_consume",
-  },
   stockStatus: {
     ok: "ok",
     low: "low",
