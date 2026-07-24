@@ -4,6 +4,7 @@ export const googleSignInWrapperSx = (disabled) => ({
   minHeight: 44,
   opacity: disabled ? 0.6 : 1,
   pointerEvents: disabled ? "none" : "auto",
+  cursor: disabled ? "default" : "pointer",
 });
 
 /** Visual alinhado ao padrão Toolpad Sign-in (outlined full-width). */
@@ -14,6 +15,10 @@ export const googleSignInButtonSx = {
   justifyContent: "center",
   gap: 1,
   fontWeight: 700,
+  cursor: "pointer",
+  "&.Mui-disabled": {
+    cursor: "pointer",
+  },
   "&:hover": {
     borderColor: "text.primary",
     bgcolor: "grey.50",
@@ -30,6 +35,9 @@ export const googleSignInOverlaySx = {
   display: "flex",
   alignItems: "stretch",
   justifyContent: "stretch",
+  "&, & *": {
+    cursor: "pointer !important",
+  },
   "& > div": {
     width: "100% !important",
     height: "100% !important",
