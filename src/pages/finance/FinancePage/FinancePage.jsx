@@ -224,16 +224,22 @@ export default function FinancePage() {
               description={FINANCE_PAGE_COPY.emptyTipsDescription}
             />
           ) : (
-            tips.map((tip) => (
-              <Alert
-                key={tip.id}
-                severity={tip.severity || "info"}
-                variant="outlined"
-                sx={tipItemSx}
-              >
-                {tip.message}
-              </Alert>
-            ))
+            tips.map((tip) => {
+              const message =
+                tip.category && tip.message
+                  ? tip.message.replaceAll(`"${tip.category}"`, `"${categoryLabel(tip.category)}"`)
+                  : tip.message;
+              return (
+                <Alert
+                  key={tip.id}
+                  severity={tip.severity || "info"}
+                  variant="outlined"
+                  sx={tipItemSx}
+                >
+                  {message}
+                </Alert>
+              );
+            })
           )}
         </Stack>
       </Box>

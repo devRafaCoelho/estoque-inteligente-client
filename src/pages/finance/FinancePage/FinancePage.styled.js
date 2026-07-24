@@ -25,7 +25,7 @@ export const deltaSx = (positive) => ({
 export const sectionCardSx = {
   border: "1px solid",
   borderColor: "divider",
-  borderRadius: 2,
+  borderRadius: "16px",
   bgcolor: "background.paper",
   p: 1.75,
 };
@@ -82,7 +82,7 @@ export const seriesBarSx = (ratio) => ({
 
 export const tipItemSx = {
   p: 1.5,
-  borderRadius: 2,
+  borderRadius: "16px",
   border: "1px solid",
   borderColor: "divider",
   bgcolor: "background.paper",
