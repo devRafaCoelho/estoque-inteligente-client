@@ -4,8 +4,6 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import "@fontsource/caveat/400.css";
 import "@fontsource/caveat/700.css";
@@ -30,11 +28,12 @@ import {
 import { SHOPPING_LIST_PAGE_COPY } from "./shoppingListPageCopy";
 import { SHOPPING_LIST_PAGE_CONFIG } from "./shoppingListPageConfig";
 import {
+  actionButtonSx,
   addSectionSpacing,
   examplesRowSx,
+  listToolbarRowProps,
   shoppingListStackSpacing,
-  toolbarRowProps,
-  viewToggleSx,
+  viewModeChipsSx,
 } from "./ShoppingListPage.styled";
 
 export default function ShoppingListPage() {
@@ -89,15 +88,16 @@ export default function ShoppingListPage() {
     }
   };
 
-  const handleViewMode = async (_e, value) => {
+  const handleViewMode = async (value) => {
     if (!value || value === viewMode) return;
+    const previous = viewMode;
     setViewMode(value);
     try {
       const data = await setShoppingListViewMode(value);
       applyList(data.list);
     } catch (err) {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.viewModeError);
-      setViewMode(viewMode);
+      setViewMode(previous);
     }
   };
 
@@ -164,53 +164,14 @@ export default function ShoppingListPage() {
         <Typography sx={pageHeaderSubtitleSx}>{SHOPPING_LIST_PAGE_COPY.subtitle}</Typography>
       </Box>
 
-      <Stack {...toolbarRowProps}>
-        <LoadingButton
-          variant="contained"
-          loading={generating}
-          onClick={handleGenerate}
-          fullWidth
-        >
-          {SHOPPING_LIST_PAGE_COPY.generate}
-        </LoadingButton>
-        <ToggleButtonGroup
-          exclusive
-          size="small"
-          value={viewMode}
-          onChange={handleViewMode}
-          sx={viewToggleSx}
-        >
-          <ToggleButton value={SHOPPING_LIST_PAGE_CONFIG.defaultViewMode}>
-            {SHOPPING_LIST_PAGE_COPY.viewList}
-          </ToggleButton>
-          <ToggleButton value={SHOPPING_LIST_PAGE_CONFIG.paperViewMode}>
-            {SHOPPING_LIST_PAGE_COPY.viewPaper}
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Stack>
-
-      {list?.stats && (
-        <Typography variant="body2" color="text.secondary">
-          {SHOPPING_LIST_PAGE_COPY.stats(list.stats.pending, list.stats.checked)}
-        </Typography>
-      )}
-
-      {viewMode === SHOPPING_LIST_PAGE_CONFIG.paperViewMode ? (
-        <PaperShoppingList
-          title={list?.title}
-          items={items}
-          onToggle={handleToggle}
-          onDelete={handleDelete}
-          busyId={busyId}
-        />
-      ) : (
-        <ShoppingChecklist
-          items={items}
-          onToggle={handleToggle}
-          onDelete={handleDelete}
-          busyId={busyId}
-        />
-      )}
+      <LoadingButton
+        variant="contained"
+        loading={generating}
+        onClick={handleGenerate}
+        sx={actionButtonSx}
+      >
+        {SHOPPING_LIST_PAGE_COPY.generate}
+      </LoadingButton>
 
       <Stack spacing={addSectionSpacing}>
         <Typography variant="h6">{SHOPPING_LIST_PAGE_COPY.addSectionTitle}</Typography>
@@ -221,7 +182,7 @@ export default function ShoppingListPage() {
           value={addText}
           onChange={(e) => setAddText(e.target.value)}
           multiline
-          minRows={3}
+          minRows={2}
           fullWidth
         />
         <Stack {...examplesRowSx}>
@@ -236,14 +197,66 @@ export default function ShoppingListPage() {
           ))}
         </Stack>
         <LoadingButton
-          variant="contained"
+          variant="outlined"
           size="large"
           loading={adding}
           disabled={!addText.trim()}
           onClick={handleAdd}
+          sx={actionButtonSx}
         >
           {SHOPPING_LIST_PAGE_COPY.addSubmit}
         </LoadingButton>
+      </Stack>
+
+      <Stack spacing={1}>
+        <Stack {...listToolbarRowProps}>
+          <Box sx={viewModeChipsSx} role="group" aria-label={SHOPPING_LIST_PAGE_COPY.viewModeAria}>
+            {[
+              {
+                value: SHOPPING_LIST_PAGE_CONFIG.defaultViewMode,
+                label: SHOPPING_LIST_PAGE_COPY.viewList,
+              },
+              {
+                value: SHOPPING_LIST_PAGE_CONFIG.paperViewMode,
+                label: SHOPPING_LIST_PAGE_COPY.viewPaper,
+              },
+            ].map((option) => {
+              const selected = viewMode === option.value;
+              return (
+                <Chip
+                  key={option.value}
+                  label={option.label}
+                  clickable
+                  color={selected ? "primary" : "default"}
+                  variant={selected ? "filled" : "outlined"}
+                  onClick={() => handleViewMode(option.value)}
+                />
+              );
+            })}
+          </Box>
+          {list?.stats && (
+            <Typography variant="body2" color="text.secondary">
+              {SHOPPING_LIST_PAGE_COPY.stats(list.stats.pending, list.stats.checked)}
+            </Typography>
+          )}
+        </Stack>
+
+        {viewMode === SHOPPING_LIST_PAGE_CONFIG.paperViewMode ? (
+          <PaperShoppingList
+            title={list?.title}
+            items={items}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+            busyId={busyId}
+          />
+        ) : (
+          <ShoppingChecklist
+            items={items}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+            busyId={busyId}
+          />
+        )}
       </Stack>
     </Stack>
   );

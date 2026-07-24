@@ -7,11 +7,13 @@ export const paperRootSx = {
   px: { xs: 2, sm: 3 },
   py: 2.5,
   borderRadius: 1,
-  bgcolor: "#f7f1e3",
-  color: "#2c2416",
-  boxShadow: "0 10px 28px rgba(44, 36, 22, 0.12)",
+  bgcolor: "#ffffff",
+  color: "#1f1f1f",
+  border: "1px solid",
+  borderColor: "divider",
+  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.06)",
   backgroundImage:
-    "repeating-linear-gradient(transparent, transparent 31px, rgba(90, 70, 40, 0.12) 32px)",
+    "repeating-linear-gradient(transparent, transparent 31px, rgba(0, 0, 0, 0.06) 32px)",
   backgroundPosition: "0 12px",
   minHeight: 280,
   "&::before": {

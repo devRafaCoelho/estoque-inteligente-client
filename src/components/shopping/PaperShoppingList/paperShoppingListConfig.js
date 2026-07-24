@@ -1,3 +1,3 @@
 export const PAPER_SHOPPING_LIST_CONFIG = {
-  paperInk: "#5b4636",
+  paperInk: "#4a4a4a",
 };
