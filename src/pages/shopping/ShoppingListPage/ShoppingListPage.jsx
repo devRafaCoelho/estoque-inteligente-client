@@ -13,7 +13,6 @@ import {
   generateShoppingList,
   getActiveShoppingList,
   setShoppingListViewMode,
-  updateShoppingListItem,
 } from "../../../services/shoppingListService";
 import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/ShoppingChecklist";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
@@ -51,23 +50,42 @@ export default function ShoppingListPage() {
   const applyList = useCallback((next) => {
     setList(next);
     setViewMode(
-      next?.viewMode === SHOPPING_LIST_PAGE_CONFIG.paperViewMode
-        ? SHOPPING_LIST_PAGE_CONFIG.paperViewMode
+      next?.viewMode === SHOPPING_LIST_PAGE_CONFIG.listViewMode
+        ? SHOPPING_LIST_PAGE_CONFIG.listViewMode
         : SHOPPING_LIST_PAGE_CONFIG.defaultViewMode,
     );
   }, []);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getActiveShoppingList();
-      applyList(data.list);
-    } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.loadError);
-    } finally {
-      setLoading(false);
-    }
-  }, [applyList, error]);
+  const patchListItems = useCallback((mapItems) => {
+    setList((prev) => {
+      if (!prev) return prev;
+      const items = mapItems(prev.items || []);
+      return {
+        ...prev,
+        items,
+        stats: {
+          total: items.length,
+          checked: items.filter((item) => item.checked).length,
+          pending: items.filter((item) => !item.checked).length,
+        },
+      };
+    });
+  }, []);
+
+  const load = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!silent) setLoading(true);
+      try {
+        const data = await getActiveShoppingList();
+        applyList(data.list);
+      } catch (err) {
+        error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.loadError);
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [applyList, error],
+  );
 
   useEffect(() => {
     load();
@@ -103,16 +121,12 @@ export default function ShoppingListPage() {
     }
   };
 
-  const handleToggle = async (item) => {
-    setBusyId(item.id);
-    try {
-      await updateShoppingListItem(item.id, { checked: !item.checked });
-      await load();
-    } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.toggleError);
-    } finally {
-      setBusyId(null);
-    }
+  const handleToggle = (item) => {
+    patchListItems((items) =>
+      items.map((row) =>
+        row.id === item.id ? { ...row, checked: !item.checked } : row,
+      ),
+    );
   };
 
   const handleDeleteRequest = (item) => {
@@ -126,11 +140,12 @@ export default function ShoppingListPage() {
 
   const handleDeleteConfirm = async () => {
     if (!itemToDelete) return;
-    setBusyId(itemToDelete.id);
+    const removedId = itemToDelete.id;
+    setBusyId(removedId);
     try {
-      await deleteShoppingListItem(itemToDelete.id);
+      await deleteShoppingListItem(removedId);
       setItemToDelete(null);
-      await load();
+      patchListItems((items) => items.filter((row) => row.id !== removedId));
       success(SHOPPING_LIST_PAGE_COPY.itemRemoved);
     } catch (err) {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.deleteError);
@@ -146,7 +161,11 @@ export default function ShoppingListPage() {
     try {
       const data = await addShoppingListItem({ text });
       setAddText("");
-      await load();
+      if (data.items?.length) {
+        patchListItems((items) => [...items, ...data.items]);
+      } else {
+        await load({ silent: true });
+      }
       const count = data.items?.length || 1;
       success(
         count > 1
@@ -226,12 +245,12 @@ export default function ShoppingListPage() {
           <Box sx={viewModeChipsSx} role="group" aria-label={SHOPPING_LIST_PAGE_COPY.viewModeAria}>
             {[
               {
-                value: SHOPPING_LIST_PAGE_CONFIG.defaultViewMode,
-                label: SHOPPING_LIST_PAGE_COPY.viewList,
-              },
-              {
                 value: SHOPPING_LIST_PAGE_CONFIG.paperViewMode,
                 label: SHOPPING_LIST_PAGE_COPY.viewPaper,
+              },
+              {
+                value: SHOPPING_LIST_PAGE_CONFIG.listViewMode,
+                label: SHOPPING_LIST_PAGE_COPY.viewList,
               },
             ].map((option) => {
               const selected = viewMode === option.value;

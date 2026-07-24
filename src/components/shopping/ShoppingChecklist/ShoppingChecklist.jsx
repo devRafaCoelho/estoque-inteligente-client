@@ -18,6 +18,13 @@ import {
   checklistNameSx,
 } from "./ShoppingChecklist.styled";
 
+function stockStatusFor(origin) {
+  return (
+    SHOPPING_CHECKLIST_CONFIG.stockStatusByOrigin[origin] ||
+    SHOPPING_CHECKLIST_CONFIG.defaultStockStatus
+  );
+}
+
 export default function ShoppingChecklist({ items, onToggle, onDelete, busyId }) {
   if (!items?.length) {
     return (
@@ -32,7 +39,9 @@ export default function ShoppingChecklist({ items, onToggle, onDelete, busyId })
 
   return (
     <Stack spacing={1}>
-      {items.map((item) => (
+      {items.map((item) => {
+        const stockStatus = stockStatusFor(item.origin);
+        return (
         <Box key={item.id} sx={checklistItemSx(item.checked)}>
           <Checkbox
             checked={Boolean(item.checked)}
@@ -60,14 +69,9 @@ export default function ShoppingChecklist({ items, onToggle, onDelete, busyId })
               )}
               <Chip
                 size="small"
-                color={
-                  SHOPPING_CHECKLIST_CONFIG.priorityColor[item.priority] ||
-                  SHOPPING_CHECKLIST_CONFIG.defaultPriorityColor
-                }
+                color={SHOPPING_CHECKLIST_CONFIG.stockStatusColor[stockStatus]}
                 variant="outlined"
-                label={
-                  SHOPPING_CHECKLIST_COPY.originLabels[item.origin] || item.origin
-                }
+                label={SHOPPING_CHECKLIST_COPY.stockStatusLabels[stockStatus]}
               />
             </Stack>
           </Box>
@@ -80,7 +84,8 @@ export default function ShoppingChecklist({ items, onToggle, onDelete, busyId })
             <DeleteOutlineIcon fontSize="small" />
           </IconButton>
         </Box>
-      ))}
+        );
+      })}
     </Stack>
   );
 }

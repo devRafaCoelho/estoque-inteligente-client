@@ -1,8 +1,12 @@
 export const SHOPPING_CHECKLIST_CONFIG = {
-  priorityColor: {
-    high: "error",
-    medium: "warning",
-    low: "default",
+  stockStatusByOrigin: {
+    out_of_stock: "out_of_stock",
+    low_stock: "low_stock",
   },
-  defaultPriorityColor: "default",
+  defaultStockStatus: "in_stock",
+  stockStatusColor: {
+    out_of_stock: "error",
+    low_stock: "warning",
+    in_stock: "default",
+  },
 };

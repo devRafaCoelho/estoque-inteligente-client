@@ -24,12 +24,13 @@ import { formStackSpacing } from "../../../styles/formStyles";
 import {
   pageHeaderSubtitleSx,
   pageSectionTitleSx,
-  pageToolbarRowSx,
 } from "../../../styles/pageStyles";
 import { PRODUCT_CREATE_CONFIG } from "./productCreateConfig";
 import { PRODUCT_CREATE_COPY } from "./productCreateCopy";
 import {
-  headerActionsSx,
+  addProductButtonSx,
+  pageHeaderLeftSx,
+  pageHeaderRowSx,
   stageItemActionsSx,
   stageItemContentSx,
   stageItemSx,
@@ -161,24 +162,22 @@ export default function ProductCreatePage() {
 
   return (
     <Stack spacing={formStackSpacing}>
-      <Stack direction="row" alignItems="center" spacing={1} sx={pageToolbarRowSx}>
-        <IconButton onClick={() => navigate(PRODUCT_CREATE_CONFIG.paths.list)}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Box>
-          <Typography variant="h5">{PRODUCT_CREATE_COPY.title}</Typography>
-          <Typography sx={pageHeaderSubtitleSx}>{PRODUCT_CREATE_COPY.subtitle}</Typography>
+      <Box sx={pageHeaderRowSx}>
+        <Box sx={pageHeaderLeftSx}>
+          <IconButton onClick={() => navigate(PRODUCT_CREATE_CONFIG.paths.list)}>
+            <ArrowBackIcon />
+          </IconButton>
+          <Box minWidth={0}>
+            <Typography variant="h5">{PRODUCT_CREATE_COPY.title}</Typography>
+            <Typography sx={pageHeaderSubtitleSx}>{PRODUCT_CREATE_COPY.subtitle}</Typography>
+          </Box>
         </Box>
-      </Stack>
-
-      <Box sx={headerActionsSx}>
         <Button
           variant="outlined"
           size="large"
           startIcon={<AddIcon />}
           onClick={openCreateForm}
-          fullWidth
-          sx={{ width: { sm: "auto" } }}
+          sx={addProductButtonSx}
         >
           {PRODUCT_CREATE_COPY.addProduct}
         </Button>
