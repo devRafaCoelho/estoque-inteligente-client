@@ -1,7 +1,8 @@
 import * as yup from "yup";
 
 export const registerDadosSchema = yup.object({
-  name: yup.string().trim().min(2, "Nome muito curto").required("Informe o nome"),
+  firstName: yup.string().trim().min(2, "Nome muito curto").required("Informe o nome"),
+  lastName: yup.string().trim().min(1, "Informe o sobrenome").required("Informe o sobrenome"),
   defaultState: yup
     .string()
     .length(2, "Selecione a UF")

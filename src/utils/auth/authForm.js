@@ -6,12 +6,13 @@ export function buildLoginPayload(formData) {
 }
 
 /**
- * Cadastro inicial (um único `name` → firstName no back).
+ * Cadastro inicial com nome e sobrenome separados.
  * @param {object} formData
  */
 export function buildRegisterPayload(formData) {
   return {
-    name: String(formData.name || "").trim(),
+    firstName: String(formData.firstName || "").trim(),
+    lastName: String(formData.lastName || "").trim(),
     email: String(formData.email || "").trim().toLowerCase(),
     password: formData.password,
     defaultState: formData.defaultState || null,

@@ -60,7 +60,10 @@ export default function RegisterPage() {
   const watched = watch();
   const merged = useMemo(() => ({ ...allData, ...watched }), [allData, watched]);
 
-  const canProceedStep0 = isFilled(watched.name) && isFilled(watched.defaultState);
+  const canProceedStep0 =
+    isFilled(watched.firstName) &&
+    isFilled(watched.lastName) &&
+    isFilled(watched.defaultState);
   const canProceedStep1 =
     isFilled(watched.email) &&
     isFilled(watched.password) &&
@@ -150,11 +153,20 @@ export default function RegisterPage() {
         {activeStep === 0 && (
           <Stack spacing={2} component="form" noValidate>
             <TextField
-              label={REGISTER_PAGE_COPY.nameLabel}
+              label={REGISTER_PAGE_COPY.firstNameLabel}
               fullWidth
-              error={Boolean(errors.name)}
-              helperText={errors.name?.message}
-              {...register("name")}
+              autoComplete="given-name"
+              error={Boolean(errors.firstName)}
+              helperText={errors.firstName?.message}
+              {...register("firstName")}
+            />
+            <TextField
+              label={REGISTER_PAGE_COPY.lastNameLabel}
+              fullWidth
+              autoComplete="family-name"
+              error={Boolean(errors.lastName)}
+              helperText={errors.lastName?.message}
+              {...register("lastName")}
             />
             <Controller
               name="defaultState"
@@ -215,7 +227,8 @@ export default function RegisterPage() {
             </Stack>
             <Stack spacing={1.25}>
               {[
-                [REGISTER_PAGE_COPY.summaryName, merged.name],
+                [REGISTER_PAGE_COPY.summaryFirstName, merged.firstName],
+                [REGISTER_PAGE_COPY.summaryLastName, merged.lastName],
                 [REGISTER_PAGE_COPY.summaryState, resolveBrazilianStateLabel(merged.defaultState)],
                 [REGISTER_PAGE_COPY.summaryEmail, merged.email],
               ].map(([label, value]) => (

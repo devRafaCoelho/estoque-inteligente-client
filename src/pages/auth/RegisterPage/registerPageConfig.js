@@ -2,7 +2,8 @@ export const REGISTER_PAGE_CONFIG = {
   dashboardPath: "/dashboard",
   loginPath: "/login",
   defaultValues: {
-    name: "",
+    firstName: "",
+    lastName: "",
     defaultState: "",
     email: "",
     password: "",
@@ -11,7 +12,7 @@ export const REGISTER_PAGE_CONFIG = {
   formMode: "onTouched",
   stackSpacing: 2.5,
   stepFields: [
-    ["name", "defaultState"],
+    ["firstName", "lastName", "defaultState"],
     ["email", "password", "confirmPassword"],
   ],
 };
