@@ -1,13 +1,13 @@
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import LoadingButton from "../../../common/LoadingButton/LoadingButton";
+import ConfirmDialog from "../../../common/ConfirmDialog/ConfirmDialog";
 import { HEADER_COPY } from "../headerCopy";
-import { logoutDialogActionsSx } from "../Header.styled";
 
+/**
+ * @param {Object} props
+ * @param {boolean} props.open
+ * @param {() => void} props.onCancel
+ * @param {() => void | Promise<void>} props.onConfirm
+ * @param {boolean} [props.loading]
+ */
 export default function HeaderLogoutDialog({
   open,
   onCancel,
@@ -15,31 +15,16 @@ export default function HeaderLogoutDialog({
   loading = false,
 }) {
   return (
-    <Dialog
+    <ConfirmDialog
       open={open}
-      onClose={loading ? undefined : onCancel}
-      aria-labelledby="logout-dialog-title"
-      aria-describedby="logout-dialog-description"
-    >
-      <DialogTitle id="logout-dialog-title">{HEADER_COPY.logoutTitle}</DialogTitle>
-      <DialogContent>
-        <DialogContentText id="logout-dialog-description">
-          {HEADER_COPY.logoutDescription}
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions sx={logoutDialogActionsSx}>
-        <Button onClick={onCancel} variant="outlined" disabled={loading}>
-          {HEADER_COPY.logoutCancel}
-        </Button>
-        <LoadingButton
-          onClick={onConfirm}
-          variant="contained"
-          color="error"
-          loading={loading}
-        >
-          {HEADER_COPY.logoutConfirm}
-        </LoadingButton>
-      </DialogActions>
-    </Dialog>
+      onClose={onCancel}
+      title={HEADER_COPY.logoutTitle}
+      description={HEADER_COPY.logoutDescription}
+      onConfirm={onConfirm}
+      confirmLoading={loading}
+      cancelLabel={HEADER_COPY.logoutCancel}
+      confirmLabel={HEADER_COPY.logoutConfirm}
+      confirmColor="error"
+    />
   );
 }

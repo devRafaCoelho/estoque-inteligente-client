@@ -64,6 +64,9 @@ export default function MyAccountPage() {
   const [preferences, setPreferences] = useState({
     ...MY_ACCOUNT_CONFIG.preferenceDefaults,
   });
+  const [savedPreferences, setSavedPreferences] = useState({
+    ...MY_ACCOUNT_CONFIG.preferenceDefaults,
+  });
 
   const providers = user?.authProviders || [];
   const hasGoogle = providers.includes(MY_ACCOUNT_CONFIG.providers.google);
@@ -78,14 +81,16 @@ export default function MyAccountPage() {
       try {
         const data = await getMyPreferences();
         if (!ativo) return;
-        setPreferences({
+        const nextPreferences = {
           notifyLowStock: data.preferences?.notifyLowStock !== false,
           notifyOutOfStock: data.preferences?.notifyOutOfStock !== false,
           notifyConsumptionNudge: data.preferences?.notifyConsumptionNudge !== false,
           consumptionNudgeDays:
             data.preferences?.consumptionNudgeDays ||
             MY_ACCOUNT_CONFIG.preferenceDefaults.consumptionNudgeDays,
-        });
+        };
+        setPreferences(nextPreferences);
+        setSavedPreferences(nextPreferences);
       } catch (err) {
         if (ativo) {
           error(
@@ -150,6 +155,12 @@ export default function MyAccountPage() {
         notifyConsumptionNudge: data.preferences.notifyConsumptionNudge,
         consumptionNudgeDays: data.preferences.consumptionNudgeDays,
       });
+      setSavedPreferences({
+        notifyLowStock: data.preferences.notifyLowStock,
+        notifyOutOfStock: data.preferences.notifyOutOfStock,
+        notifyConsumptionNudge: data.preferences.notifyConsumptionNudge,
+        consumptionNudgeDays: data.preferences.consumptionNudgeDays,
+      });
       success(MY_ACCOUNT_PAGE_COPY.preferencesSuccess);
     } catch (err) {
       error(
@@ -161,6 +172,19 @@ export default function MyAccountPage() {
       setSavingPreferences(false);
     }
   };
+
+  const nudgeDays = Number(preferences.consumptionNudgeDays);
+  const preferencesDirty =
+    preferences.notifyLowStock !== savedPreferences.notifyLowStock ||
+    preferences.notifyOutOfStock !== savedPreferences.notifyOutOfStock ||
+    preferences.notifyConsumptionNudge !== savedPreferences.notifyConsumptionNudge ||
+    Number(preferences.consumptionNudgeDays) !== Number(savedPreferences.consumptionNudgeDays);
+  const canSavePreferences =
+    preferencesDirty &&
+    (!preferences.notifyConsumptionNudge ||
+      (Number.isFinite(nudgeDays) &&
+        nudgeDays >= MY_ACCOUNT_CONFIG.nudgeDaysMin &&
+        nudgeDays <= MY_ACCOUNT_CONFIG.nudgeDaysMax));
 
   const handleLinkGoogle = async (idToken) => {
     setLinking(true);
@@ -319,6 +343,7 @@ export default function MyAccountPage() {
                 <LoadingButton
                   variant="contained"
                   loading={savingPreferences}
+                  disabled={!canSavePreferences}
                   onClick={savePreferences}
                 >
                   {MY_ACCOUNT_PAGE_COPY.savePreferences}

@@ -28,6 +28,7 @@ import { ApiError } from "../../../services/apiClient";
 import { buildIntakePreviewPayload } from "../../../utils/intake/intakeForm";
 import { moneyToDisplay, parseMoneyInput } from "../../../utils/moneyInput";
 import { formatQuantity } from "../../../utils/unitLabels";
+import { isFilled, isPositiveNumber } from "../../../utils/formValidation";
 import {
   pageBackHeaderSx,
   pageHeaderSubtitleSx,
@@ -101,6 +102,15 @@ export default function IntakePreviewPage() {
   }, [load]);
 
   const activeCount = items.length;
+  const itemsReady =
+    activeCount > 0 &&
+    items.every(
+      (item) =>
+        isFilled(item.name) &&
+        isPositiveNumber(item.quantity) &&
+        isFilled(item.unit) &&
+        isFilled(item.category),
+    );
 
   const updateItem = (itemId, patch) => {
     setItems((prev) =>
@@ -350,7 +360,7 @@ export default function IntakePreviewPage() {
           variant="contained"
           size="large"
           loading={confirming}
-          disabled={activeCount === 0 || saving || cancelling}
+          disabled={!itemsReady || saving || cancelling}
           onClick={handleConfirm}
           fullWidth
         >
@@ -360,7 +370,7 @@ export default function IntakePreviewPage() {
           variant="outlined"
           size="large"
           loading={saving}
-          disabled={activeCount === 0 || confirming || cancelling}
+          disabled={!itemsReady || confirming || cancelling}
           onClick={handleSaveDraft}
           fullWidth
         >

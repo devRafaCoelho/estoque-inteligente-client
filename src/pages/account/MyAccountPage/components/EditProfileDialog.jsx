@@ -21,6 +21,7 @@ import {
   buildUpdateMePayload,
   mapUserToAccountFormValues,
 } from "../../../../utils/account/accountForm";
+import { isFilled } from "../../../../utils/formValidation";
 import { EDIT_PROFILE_DIALOG_COPY } from "../myAccountCopy";
 
 const FORM_ID = "edit-profile-form";
@@ -58,7 +59,10 @@ export default function EditProfileDialog({
   });
 
   const zipCodeValue = watch("zipCode");
+  const firstName = watch("firstName");
+  const lastName = watch("lastName");
   const loading = submitting || isSubmitting;
+  const canSubmit = isFilled(firstName) && isFilled(lastName) && isDirty;
 
   useEffect(() => {
     if (open) {
@@ -119,6 +123,7 @@ export default function EditProfileDialog({
       isSubmitting={loading}
       cancelButtonLabel={EDIT_PROFILE_DIALOG_COPY.cancelar}
       submitLabel={EDIT_PROFILE_DIALOG_COPY.salvar}
+      submitDisabled={!canSubmit}
       hasUnsavedChanges={isDirty}
       maxWidth="sm"
     >

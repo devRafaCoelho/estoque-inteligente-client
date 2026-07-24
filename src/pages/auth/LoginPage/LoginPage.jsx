@@ -17,10 +17,7 @@ import SocialAuthButtons from "../../../components/auth/SocialAuthButtons/Social
 import { ApiError } from "../../../services/apiClient";
 import { LOGIN_PAGE_CONFIG } from "./loginPageConfig";
 import { LOGIN_PAGE_COPY } from "./loginPageCopy";
-
-function isFilled(value) {
-  return Boolean(String(value || "").trim());
-}
+import { isFilled } from "../../../utils/formValidation";
 
 export default function LoginPage() {
   const { login, loginWithGoogle, loginWithApple } = useAuth();

@@ -22,6 +22,10 @@ import { createProductsBatch } from "../../../services/productService";
 import { buildCreateProductsBatchPayload } from "../../../utils/products/productForm";
 import { categoryLabel } from "../../../utils/categoryLabels";
 import { unitLabel } from "../../../utils/unitLabels";
+import {
+  isFilled,
+  isNonNegativeNumber,
+} from "../../../utils/formValidation";
 import { formStackSpacing } from "../../../styles/formStyles";
 import {
   pageHeaderSubtitleSx,
@@ -61,14 +65,22 @@ export default function ProductCreatePage() {
     control,
     handleSubmit,
     reset,
-    setValue,
-    formState: { errors },
+    watch,
+    formState: { errors, isDirty },
   } = useForm({
     resolver: yupResolver(productSchema),
     defaultValues: { ...PRODUCT_CREATE_CONFIG.defaultValues },
   });
 
   const { ref: nameRegisterRef, ...nameRegister } = register("name");
+  const watched = watch();
+  const requiredFilled =
+    isFilled(watched.name) &&
+    isFilled(watched.category) &&
+    isFilled(watched.unit) &&
+    isNonNegativeNumber(watched.quantity) &&
+    isNonNegativeNumber(watched.minQuantity);
+  const canAddToStage = editingId ? requiredFilled && isDirty : requiredFilled;
 
   const resetForm = () => {
     reset({ ...PRODUCT_CREATE_CONFIG.defaultValues });
@@ -107,12 +119,14 @@ export default function ProductCreatePage() {
 
   const startEdit = (item) => {
     setEditingId(item.id);
-    setValue("name", item.name);
-    setValue("category", item.category);
-    setValue("quantity", item.quantity);
-    setValue("unit", item.unit);
-    setValue("minQuantity", item.minQuantity);
-    setValue("notes", item.notes || "");
+    reset({
+      name: item.name,
+      category: item.category,
+      quantity: item.quantity,
+      unit: item.unit,
+      minQuantity: item.minQuantity,
+      notes: item.notes || "",
+    });
     window.setTimeout(() => nameInputRef.current?.focus(), 0);
   };
 
@@ -320,7 +334,7 @@ export default function ProductCreatePage() {
           />
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25}>
-            <Button type="submit" variant="outlined" size="large" fullWidth>
+            <Button type="submit" variant="outlined" size="large" fullWidth disabled={!canAddToStage}>
               {editingId ? PRODUCT_CREATE_COPY.updateStage : PRODUCT_CREATE_COPY.addToStage}
             </Button>
             {editingId ? (

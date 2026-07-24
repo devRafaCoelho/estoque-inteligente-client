@@ -109,7 +109,7 @@ export default function IntakePage() {
         variant="contained"
         size="large"
         loading={loading}
-        disabled={!String(text || "").trim()}
+        disabled={String(text || "").trim().length < 3}
       >
         {INTAKE_PAGE_COPY.submit}
       </LoadingButton>

@@ -31,10 +31,7 @@ import {
   confirmationIconSx,
   confirmationRowSx,
 } from "./RegisterPage.styled";
-
-function isFilled(value) {
-  return Boolean(String(value || "").trim());
-}
+import { isFilled } from "../../../utils/formValidation";
 
 export default function RegisterPage() {
   const { register: registerUser, loginWithGoogle, loginWithApple } = useAuth();
@@ -260,6 +257,16 @@ export default function RegisterPage() {
               variant="contained"
               fullWidth
               loading={loading}
+              disabled={
+                !(
+                  isFilled(merged.firstName) &&
+                  isFilled(merged.lastName) &&
+                  isFilled(merged.defaultState) &&
+                  isFilled(merged.email) &&
+                  isFilled(merged.password) &&
+                  isFilled(merged.confirmPassword)
+                )
+              }
               onClick={handleFinish}
             >
               {REGISTER_PAGE_COPY.submit}

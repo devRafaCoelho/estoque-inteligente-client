@@ -28,6 +28,7 @@ import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { buildStockOutPreviewPayload } from "../../../utils/stockOut/stockOutForm";
+import { isFilled, isPositiveNumber } from "../../../utils/formValidation";
 import {
   pageBackHeaderSx,
   pageHeaderSubtitleSx,
@@ -102,6 +103,9 @@ export default function StockOutPreviewPage() {
   }, [load]);
 
   const activeCount = items.length;
+  const itemsReady =
+    activeCount > 0 &&
+    items.every((item) => Boolean(item.productId) && isPositiveNumber(item.quantity) && isFilled(item.unit));
 
   const updateItem = (itemId, patch) => {
     setItems((prev) =>
@@ -356,7 +360,7 @@ export default function StockOutPreviewPage() {
         variant="contained"
         size="large"
         loading={confirming}
-        disabled={activeCount === 0 || cancelling}
+        disabled={!itemsReady || cancelling}
         onClick={handleConfirm}
       >
         {STOCK_OUT_PREVIEW_PAGE_COPY.confirm}

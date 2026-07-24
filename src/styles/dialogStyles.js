@@ -64,6 +64,7 @@ export const cancelConfirmDialogActionsSx = {
   gap: 1.5,
   flexDirection: { xs: "column", md: "row" },
   justifyContent: { md: "flex-end" },
+  alignItems: "stretch",
   "& .MuiButton-root": {
     whiteSpace: "nowrap",
     width: { xs: "100%", md: "auto" },

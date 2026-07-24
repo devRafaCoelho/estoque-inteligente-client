@@ -137,7 +137,7 @@ export default function FormDialog({
             type="submit"
             form={formId}
             variant="contained"
-            startIcon={submitStartIcon ?? <SaveIcon />}
+            startIcon={submitStartIcon === undefined ? <SaveIcon /> : submitStartIcon}
             loading={isSubmitting}
             disabled={submitDisabled}
           >

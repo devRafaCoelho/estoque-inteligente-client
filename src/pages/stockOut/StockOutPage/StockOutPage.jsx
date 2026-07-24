@@ -108,7 +108,7 @@ export default function StockOutPage() {
         variant="contained"
         size="large"
         loading={loading}
-        disabled={!String(text || "").trim()}
+        disabled={String(text || "").trim().length < 3}
       >
         {STOCK_OUT_PAGE_COPY.submit}
       </LoadingButton>

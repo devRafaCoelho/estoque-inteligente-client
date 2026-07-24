@@ -1,20 +1,18 @@
-import { useState } from "react";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
+import { useEffect, useState } from "react";
 import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import FormDialog from "../../common/FormDialog/FormDialog";
 import { consumeSchema } from "../../../schemas/products/productSchema";
-import LoadingButton from "../../common/LoadingButton/LoadingButton";
 import { formatQuantity } from "../../../utils/unitLabels";
+import { isPositiveNumber } from "../../../utils/formValidation";
 import { CONSUME_PRODUCT_DIALOG_COPY } from "./consumeProductDialogCopy";
 import { CONSUME_PRODUCT_DIALOG_CONFIG } from "./consumeProductDialogConfig";
-import { dialogActionsSx, formStackSpacing } from "./ConsumeProductDialog.styled";
+import { formStackSpacing } from "./ConsumeProductDialog.styled";
+
+const FORM_ID = "consume-product-form";
 
 export default function ConsumeProductDialog({ open, onClose, product, onConfirm }) {
   const [loading, setLoading] = useState(false);
@@ -22,58 +20,75 @@ export default function ConsumeProductDialog({ open, onClose, product, onConfirm
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    watch,
+    formState: { errors, isDirty },
   } = useForm({
     resolver: yupResolver(consumeSchema),
     defaultValues: { ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues },
   });
 
-  const submit = async (values) => {
+  const quantity = watch("quantity");
+  const canSubmit = isPositiveNumber(quantity);
+
+  useEffect(() => {
+    if (open) {
+      reset({ ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues });
+    }
+  }, [open, reset]);
+
+  if (!product) return null;
+
+  const handleDiscard = () => {
+    reset({ ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues });
+  };
+
+  const handleFormSubmit = handleSubmit(async (values) => {
     setLoading(true);
     try {
       await onConfirm(values);
-      reset();
+      reset({ ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues });
       onClose();
     } finally {
       setLoading(false);
     }
-  };
-
-  if (!product) return null;
+  });
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth={CONSUME_PRODUCT_DIALOG_CONFIG.maxWidth}>
-      <DialogTitle>
-        {CONSUME_PRODUCT_DIALOG_COPY.titlePrefix} {product.name}
-      </DialogTitle>
-      <form onSubmit={handleSubmit(submit)}>
-        <DialogContent>
-          <Stack spacing={formStackSpacing}>
-            <Typography variant="body2" color="text.secondary">
-              {CONSUME_PRODUCT_DIALOG_COPY.currentStockPrefix}{" "}
-              {formatQuantity(product.quantity, product.unit)}
-            </Typography>
-            <TextField
-              label={CONSUME_PRODUCT_DIALOG_COPY.quantityLabel}
-              type="number"
-              inputProps={CONSUME_PRODUCT_DIALOG_CONFIG.quantityInputProps}
-              error={Boolean(errors.quantity)}
-              helperText={errors.quantity?.message}
-              {...register("quantity")}
-            />
-            <TextField
-              label={CONSUME_PRODUCT_DIALOG_COPY.noteLabel}
-              {...register("note")}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions sx={dialogActionsSx}>
-          <Button onClick={onClose}>{CONSUME_PRODUCT_DIALOG_COPY.cancel}</Button>
-          <LoadingButton type="submit" variant="contained" loading={loading}>
-            {CONSUME_PRODUCT_DIALOG_COPY.confirm}
-          </LoadingButton>
-        </DialogActions>
-      </form>
-    </Dialog>
+    <FormDialog
+      open={open}
+      onClose={onClose}
+      onDiscard={handleDiscard}
+      title={`${CONSUME_PRODUCT_DIALOG_COPY.titlePrefix} ${product.name}`}
+      formId={FORM_ID}
+      onSubmit={handleFormSubmit}
+      isSubmitting={loading}
+      cancelButtonLabel={CONSUME_PRODUCT_DIALOG_COPY.cancel}
+      submitLabel={CONSUME_PRODUCT_DIALOG_COPY.confirm}
+      submitDisabled={!canSubmit}
+      hasUnsavedChanges={isDirty}
+      maxWidth={CONSUME_PRODUCT_DIALOG_CONFIG.maxWidth}
+      submitStartIcon={null}
+    >
+      <Stack spacing={formStackSpacing}>
+        <Typography variant="body2" color="text.secondary">
+          {CONSUME_PRODUCT_DIALOG_COPY.currentStockPrefix}{" "}
+          {formatQuantity(product.quantity, product.unit)}
+        </Typography>
+        <TextField
+          label={CONSUME_PRODUCT_DIALOG_COPY.quantityLabel}
+          type="number"
+          fullWidth
+          inputProps={CONSUME_PRODUCT_DIALOG_CONFIG.quantityInputProps}
+          error={Boolean(errors.quantity)}
+          helperText={errors.quantity?.message}
+          {...register("quantity")}
+        />
+        <TextField
+          label={CONSUME_PRODUCT_DIALOG_COPY.noteLabel}
+          fullWidth
+          {...register("note")}
+        />
+      </Stack>
+    </FormDialog>
   );
 }

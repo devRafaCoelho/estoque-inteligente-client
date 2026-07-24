@@ -10,6 +10,7 @@ import {
   buildChangePasswordPayload,
   CHANGE_PASSWORD_FORM_DEFAULT_VALUES,
 } from "../../../../utils/account/accountForm";
+import { isFilled } from "../../../../utils/formValidation";
 import { CHANGE_PASSWORD_DIALOG_COPY } from "../myAccountCopy";
 
 const FORM_ID = "change-password-form";
@@ -31,6 +32,7 @@ export default function ChangePasswordDialog({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
     resolver: yupResolver(changePasswordSchema),
@@ -44,6 +46,14 @@ export default function ChangePasswordDialog({
   }, [open, reset]);
 
   const loading = submitting || isSubmitting;
+  const newPassword = watch("newPassword");
+  const confirmPassword = watch("confirmPassword");
+  const canSubmit =
+    isDirty &&
+    isFilled(newPassword) &&
+    String(newPassword).length >= 8 &&
+    isFilled(confirmPassword) &&
+    String(newPassword) === String(confirmPassword);
 
   const handleDiscard = () => {
     reset(CHANGE_PASSWORD_FORM_DEFAULT_VALUES);
@@ -64,6 +74,7 @@ export default function ChangePasswordDialog({
       isSubmitting={loading}
       cancelButtonLabel={CHANGE_PASSWORD_DIALOG_COPY.cancelar}
       submitLabel={CHANGE_PASSWORD_DIALOG_COPY.salvar}
+      submitDisabled={!canSubmit}
       hasUnsavedChanges={isDirty}
       maxWidth="xs"
     >

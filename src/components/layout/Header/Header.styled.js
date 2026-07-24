@@ -174,12 +174,6 @@ export const profileMenuLogoutItemSx = {
   color: "error.main",
 };
 
-export const logoutDialogActionsSx = {
-  px: 3,
-  pb: 2,
-  gap: 1,
-};
-
 export const brandLockupRootSx = (centered, height, clickable = false) => ({
   display: "flex",
   alignItems: "center",
