@@ -81,7 +81,10 @@ export default function ConsumeProductDialog({ open, onClose, product, onConfirm
           inputProps={CONSUME_PRODUCT_DIALOG_CONFIG.quantityInputProps}
           error={Boolean(errors.quantity)}
           helperText={errors.quantity?.message}
-          {...register("quantity")}
+          {...register("quantity", {
+            setValueAs: (value) =>
+              value === "" || value == null ? undefined : Number(value),
+          })}
         />
         <TextField
           label={CONSUME_PRODUCT_DIALOG_COPY.noteLabel}

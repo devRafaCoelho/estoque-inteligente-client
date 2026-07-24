@@ -25,6 +25,5 @@ export const SHOPPING_LIST_PAGE_COPY = {
   addSectionTitle: "Adicionar por texto",
   addLabel: "O que você precisa comprar?",
   addPlaceholder: "Ex.: 2kg de arroz, 1 lata de leite em pó",
-  addHelper: 'Separe por vírgula ou "e" — igual à tela de entrada',
   addSubmit: "Adicionar",
 };

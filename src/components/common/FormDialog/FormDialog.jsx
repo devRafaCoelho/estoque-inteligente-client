@@ -18,6 +18,7 @@ import {
   dialogTitleSx,
   responsiveDialogSx,
 } from "../../../styles/dialogStyles";
+import { refreshMuiInputNotches } from "../../../utils/refreshMuiInputNotches";
 import ConfirmDialog from "../ConfirmDialog/ConfirmDialog";
 import LoadingButton from "../LoadingButton/LoadingButton";
 import { FORM_DIALOG_COPY } from "./formDialogCopy";
@@ -104,6 +105,9 @@ export default function FormDialog({
         maxWidth={maxWidth}
         fullWidth
         sx={responsiveDialogSx(isMobile)}
+        slotProps={{
+          transition: { onEntered: refreshMuiInputNotches },
+        }}
       >
         <DialogTitle sx={dialogTitleSx(isMobile)}>
           {title}

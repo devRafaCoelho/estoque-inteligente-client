@@ -8,7 +8,6 @@ export const REGISTER_PAGE_COPY = {
   statePlaceholder: "Selecione",
   emailLabel: "E-mail",
   passwordLabel: "Senha",
-  passwordHelper: "Mínimo de 8 caracteres",
   confirmPasswordLabel: "Confirmar senha",
   confirmTitle: "Confirme seus dados",
   confirmSubtitle: "Revise as informações antes de finalizar o cadastro",

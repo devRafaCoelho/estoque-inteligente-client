@@ -147,7 +147,6 @@ export default function EditProfileDialog({
           fullWidth
           value={user?.email ?? ""}
           disabled
-          helperText={EDIT_PROFILE_DIALOG_COPY.emailHelper}
           sx={fullWidthFieldSx}
         />
         <Controller
@@ -193,9 +192,7 @@ export default function EditProfileDialog({
               onChange={(e) => field.onChange(digitsOnly(e.target.value).slice(0, 8))}
               onBlur={field.onBlur}
               error={Boolean(errors.zipCode)}
-              helperText={
-                errors.zipCode?.message || EDIT_PROFILE_DIALOG_COPY.zipCodeHelper
-              }
+              helperText={errors.zipCode?.message}
               inputProps={{ inputMode: "numeric" }}
               InputProps={{
                 endAdornment: lookingUpCep ? (
@@ -221,7 +218,6 @@ export default function EditProfileDialog({
               inputRef={field.ref}
               error={Boolean(errors.street)}
               helperText={errors.street?.message}
-              InputLabelProps={{ shrink: Boolean(field.value) || undefined }}
               sx={fullWidthFieldSx}
             />
           )}
@@ -246,7 +242,6 @@ export default function EditProfileDialog({
               inputRef={field.ref}
               error={Boolean(errors.complement)}
               helperText={errors.complement?.message}
-              InputLabelProps={{ shrink: Boolean(field.value) || undefined }}
             />
           )}
         />
@@ -263,7 +258,6 @@ export default function EditProfileDialog({
               inputRef={field.ref}
               error={Boolean(errors.neighborhood)}
               helperText={errors.neighborhood?.message}
-              InputLabelProps={{ shrink: Boolean(field.value) || undefined }}
               sx={fullWidthFieldSx}
             />
           )}
@@ -281,7 +275,6 @@ export default function EditProfileDialog({
               inputRef={field.ref}
               error={Boolean(errors.city)}
               helperText={errors.city?.message}
-              InputLabelProps={{ shrink: Boolean(field.value) || undefined }}
             />
           )}
         />

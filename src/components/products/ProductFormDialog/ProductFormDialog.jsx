@@ -129,7 +129,10 @@ export default function ProductFormDialog({
             inputProps={PRODUCT_FORM_DIALOG_CONFIG.quantityInputProps}
             error={Boolean(errors.quantity)}
             helperText={errors.quantity?.message}
-            {...register("quantity")}
+            {...register("quantity", {
+              setValueAs: (value) =>
+                value === "" || value == null ? undefined : Number(value),
+            })}
           />
           <Box sx={unitFieldSx}>
             <Controller
@@ -157,7 +160,10 @@ export default function ProductFormDialog({
           inputProps={PRODUCT_FORM_DIALOG_CONFIG.minQuantityInputProps}
           error={Boolean(errors.minQuantity)}
           helperText={errors.minQuantity?.message}
-          {...register("minQuantity")}
+          {...register("minQuantity", {
+            setValueAs: (value) =>
+              value === "" || value == null ? undefined : Number(value),
+          })}
         />
         <TextField
           label={PRODUCT_FORM_DIALOG_COPY.notesLabel}

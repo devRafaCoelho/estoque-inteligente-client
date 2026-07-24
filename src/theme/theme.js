@@ -33,6 +33,33 @@ const theme = createTheme({
     borderRadius: 14,
   },
   components: {
+    MuiTextField: {
+      defaultProps: {
+        variant: "outlined",
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        notchedOutline: {
+          // Safari/iOS: transição da legend gera notch desalinhado com o label
+          "& legend": {
+            transition: "none",
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        outlined: ({ theme }) => ({
+          // Cobre a borda se a legend medir errado (comum com web fonts no iPhone)
+          "&.MuiInputLabel-shrink": {
+            backgroundColor: theme.palette.background.paper,
+            paddingInline: 4,
+            marginLeft: -4,
+          },
+        }),
+      },
+    },
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {

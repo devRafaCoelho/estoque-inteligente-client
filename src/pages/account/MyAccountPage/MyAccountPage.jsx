@@ -326,7 +326,6 @@ export default function MyAccountPage() {
                 <TextField
                   type="number"
                   label={MY_ACCOUNT_PAGE_COPY.consumptionNudgeDays}
-                  helperText={MY_ACCOUNT_PAGE_COPY.consumptionNudgeDaysHelper}
                   disabled={!preferences.notifyConsumptionNudge}
                   value={preferences.consumptionNudgeDays}
                   onChange={(e) =>

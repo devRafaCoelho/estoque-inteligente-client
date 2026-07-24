@@ -198,7 +198,7 @@ export default function RegisterPage() {
               label={REGISTER_PAGE_COPY.passwordLabel}
               autoComplete="new-password"
               error={errors.password}
-              helperText={errors.password?.message || REGISTER_PAGE_COPY.passwordHelper}
+              helperText={errors.password?.message}
               registerProps={register("password")}
             />
             <PasswordTextField

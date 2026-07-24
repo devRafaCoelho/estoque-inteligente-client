@@ -210,12 +210,12 @@ export default function ShoppingListPage() {
         <TextField
           label={SHOPPING_LIST_PAGE_COPY.addLabel}
           placeholder={SHOPPING_LIST_PAGE_COPY.addPlaceholder}
-          helperText={SHOPPING_LIST_PAGE_COPY.addHelper}
           value={addText}
           onChange={(e) => setAddText(e.target.value)}
           multiline
           minRows={2}
           fullWidth
+          slotProps={{ inputLabel: { shrink: true } }}
         />
         <Stack {...examplesRowSx}>
           {SHOPPING_LIST_PAGE_CONFIG.examples.map((example) => (

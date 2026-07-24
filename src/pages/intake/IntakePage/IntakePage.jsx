@@ -76,7 +76,7 @@ export default function IntakePage() {
         minRows={4}
         fullWidth
         error={Boolean(errors.text)}
-        helperText={errors.text?.message || INTAKE_PAGE_COPY.textHelper}
+        helperText={errors.text?.message}
         value={text ?? ""}
         inputRef={textRef}
         slotProps={{ inputLabel: { shrink: true } }}

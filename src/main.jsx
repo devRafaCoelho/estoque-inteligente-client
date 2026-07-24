@@ -12,6 +12,12 @@ import "@fontsource/nunito/800.css";
 import theme from "./theme/theme";
 import { AuthProvider } from "./context/AuthContext";
 import AppRouter from "./router/AppRouter";
+import "./schemas/yupLocale";
+import { refreshMuiInputNotches } from "./utils/refreshMuiInputNotches";
+
+if (typeof document !== "undefined" && document.fonts?.ready) {
+  document.fonts.ready.then(refreshMuiInputNotches).catch(() => {});
+}
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -3,9 +3,11 @@ import * as yup from "yup";
 const requiredNumber = (message) =>
   yup
     .number()
-    .transform((value, original) =>
-      original === "" || original == null ? undefined : value,
-    )
+    .transform((value, original) => {
+      if (original === "" || original == null) return undefined;
+      if (typeof value === "number" && Number.isNaN(value)) return undefined;
+      return value;
+    })
     .typeError(message)
     .required(message);
 
@@ -22,9 +24,8 @@ export const productSchema = yup.object({
 });
 
 export const consumeSchema = yup.object({
-  quantity: yup
-    .number()
-    .positive("Informe uma quantidade")
-    .required("Informe a quantidade"),
+  quantity: requiredNumber("Informe a quantidade").positive(
+    "Informe uma quantidade maior que zero",
+  ),
   note: yup.string().nullable(),
 });
