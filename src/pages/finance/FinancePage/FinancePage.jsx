@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
@@ -8,31 +8,37 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CircularProgress from "@mui/material/CircularProgress";
+import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { getFinanceSeries, getFinanceSummary, getFinanceTips } from "../../../services/financeService";
-import { categoryLabel } from "../../../utils/categoryLabels";
 import {
-  pageHeaderSubtitleSx,
-  pageLoadingBoxSx,
-  pageSectionTitleSx,
-} from "../../../styles/pageStyles";
-import { FINANCE_PAGE_CONFIG } from "./financePageConfig";
+  getFinanceByCategory,
+  getFinanceSeries,
+  getFinanceSummary,
+  getFinanceTips,
+} from "../../../services/financeService";
+import { categoryLabel } from "../../../utils/categoryLabels";
+import { pageHeaderSubtitleSx, pageLoadingBoxSx, pageSectionTitleSx } from "../../../styles/pageStyles";
+import {
+  FINANCE_PAGE_CONFIG,
+  getAvailableFinanceMonths,
+} from "./financePageConfig";
 import { FINANCE_PAGE_COPY } from "./financePageCopy";
 import {
   categoryBarFillSx,
   categoryBarTrackSx,
+  categoryMonthChipsSx,
   categoryRowSx,
   deltaSx,
   pageStackSpacing,
   recentItemSx,
   sectionCardSx,
-  seriesBarColumnSx,
-  seriesBarSx,
-  seriesChartSx,
+  seriesBarFillSx,
+  seriesBarTrackSx,
+  seriesRowSx,
   summaryCardContentSx,
   summaryCardSx,
   tipItemSx,
@@ -65,36 +71,83 @@ export default function FinancePage() {
   const [summary, setSummary] = useState(null);
   const [series, setSeries] = useState([]);
   const [tips, setTips] = useState([]);
+  const [byCategory, setByCategory] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
   const { locale } = FINANCE_PAGE_CONFIG;
   const year = new Date().getFullYear();
+  const monthOptions = useMemo(() => getAvailableFinanceMonths(), []);
+  const [selectedMonth, setSelectedMonth] = useState(
+    () => monthOptions[monthOptions.length - 1]?.month || new Date().getMonth() + 1,
+  );
+  const selectedMonthChipRef = useRef(null);
+
+  const loadCategoriesAndTips = useCallback(
+    async (month) => {
+      setCategoriesLoading(true);
+      try {
+        const [categoriesData, tipsData] = await Promise.all([
+          getFinanceByCategory({ year, month }),
+          getFinanceTips({ year, month }),
+        ]);
+        setByCategory(categoriesData.byCategory || []);
+        setTips(tipsData.tips || []);
+      } catch (err) {
+        error(
+          err instanceof ApiError ? err.message : FINANCE_PAGE_COPY.categoriesLoadError,
+        );
+      } finally {
+        setCategoriesLoading(false);
+      }
+    },
+    [error, year],
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [summaryData, seriesData, tipsData] = await Promise.all([
+      const currentMonth =
+        monthOptions[monthOptions.length - 1]?.month || new Date().getMonth() + 1;
+      const [summaryData, seriesData, tipsData, categoriesData] = await Promise.all([
         getFinanceSummary(),
         getFinanceSeries({ year }),
-        getFinanceTips(),
+        getFinanceTips({ year, month: currentMonth }),
+        getFinanceByCategory({ year, month: currentMonth }),
       ]);
       setSummary(summaryData);
       setSeries(seriesData.series || []);
       setTips(tipsData.tips || []);
+      setByCategory(categoriesData.byCategory || []);
+      setSelectedMonth(currentMonth);
     } catch (err) {
       error(err instanceof ApiError ? err.message : FINANCE_PAGE_COPY.loadError);
     } finally {
       setLoading(false);
     }
-  }, [error, year]);
+  }, [error, year, monthOptions]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  useEffect(() => {
+    if (loading) return;
+    selectedMonthChipRef.current?.scrollIntoView({
+      behavior: "smooth",
+      inline: "nearest",
+      block: "nearest",
+    });
+  }, [loading, selectedMonth]);
+
+  const handleSelectMonth = (month) => {
+    if (month === selectedMonth) return;
+    setSelectedMonth(month);
+    loadCategoriesAndTips(month);
+  };
+
   const maxCategory = useMemo(() => {
-    const cats = summary?.byCategory || [];
-    return Math.max(...cats.map((c) => Number(c.total) || 0), 0);
-  }, [summary]);
+    return Math.max(...byCategory.map((c) => Number(c.total) || 0), 0);
+  }, [byCategory]);
 
   const maxSeries = useMemo(
     () => Math.max(...series.map((s) => Number(s.total) || 0), 0),
@@ -162,30 +215,56 @@ export default function FinancePage() {
               description={FINANCE_PAGE_COPY.emptySeriesDescription}
             />
           ) : (
-            <Box sx={seriesChartSx}>
-              {series.map((point) => {
-                const ratio = maxSeries > 0 ? point.total / maxSeries : 0;
-                return (
-                  <Box key={`${point.year}-${point.month}`} sx={seriesBarColumnSx}>
-                    <Typography variant="caption" color="text.secondary" noWrap>
-                      {point.total > 0 ? formatMoney(point.total) : "—"}
-                    </Typography>
-                    <Box sx={seriesBarSx(ratio)} />
-                    <Typography variant="caption" color="text.secondary">
+            series.map((point) => {
+              const ratio = maxSeries > 0 ? point.total / maxSeries : 0;
+              return (
+                <Box key={`${point.year}-${point.month}`} sx={{ mb: 1 }}>
+                  <Box sx={seriesRowSx}>
+                    <Typography variant="body2" fontWeight={700}>
                       {point.label}
                     </Typography>
+                    <Typography variant="body2">
+                      {point.total > 0 ? formatMoney(point.total) : "—"}
+                    </Typography>
                   </Box>
-                );
-              })}
-            </Box>
+                  <Box sx={seriesBarTrackSx}>
+                    <Box sx={seriesBarFillSx(ratio)} />
+                  </Box>
+                </Box>
+              );
+            })
           )}
         </Box>
       </Box>
 
       <Box>
         <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.categoriesTitle}</Typography>
+        <Box
+          sx={categoryMonthChipsSx}
+          role="group"
+          aria-label={FINANCE_PAGE_COPY.categoriesMonthAria}
+        >
+          {monthOptions.map((option) => {
+            const selected = option.month === selectedMonth;
+            return (
+              <Chip
+                key={option.month}
+                ref={selected ? selectedMonthChipRef : undefined}
+                label={option.label}
+                clickable
+                color={selected ? "primary" : "default"}
+                variant={selected ? "filled" : "outlined"}
+                onClick={() => handleSelectMonth(option.month)}
+              />
+            );
+          })}
+        </Box>
         <Box sx={sectionCardSx}>
-          {(summary?.byCategory || []).length === 0 ? (
+          {categoriesLoading ? (
+            <Box sx={{ display: "grid", placeItems: "center", py: 3 }}>
+              <CircularProgress size={28} />
+            </Box>
+          ) : byCategory.length === 0 ? (
             <EmptyState
               size="sm"
               icon={CategoryOutlinedIcon}
@@ -193,7 +272,7 @@ export default function FinancePage() {
               description={FINANCE_PAGE_COPY.emptyCategoriesDescription}
             />
           ) : (
-            (summary.byCategory || []).map((row) => {
+            byCategory.map((row) => {
               const ratio = maxCategory > 0 ? row.total / maxCategory : 0;
               return (
                 <Box key={row.category} sx={{ mb: 1 }}>

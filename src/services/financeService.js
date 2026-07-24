@@ -7,6 +7,16 @@ export async function getFinanceSummary() {
 }
 
 /**
+ * @param {{ year?: number|string, month?: number|string }} [params]
+ */
+export async function getFinanceByCategory({ year, month } = {}) {
+  const query = buildQueryString({ year, month }, ["year", "month"]);
+  return api.get(
+    query ? `${FINANCE_URL}/by-category?${query}` : `${FINANCE_URL}/by-category`,
+  );
+}
+
+/**
  * @param {{ year?: number|string }} [params]
  */
 export async function getFinanceSeries({ year } = {}) {
@@ -14,6 +24,10 @@ export async function getFinanceSeries({ year } = {}) {
   return api.get(query ? `${FINANCE_URL}/series?${query}` : `${FINANCE_URL}/series`);
 }
 
-export async function getFinanceTips() {
-  return api.get(`${FINANCE_URL}/tips`);
+/**
+ * @param {{ year?: number|string, month?: number|string }} [params]
+ */
+export async function getFinanceTips({ year, month } = {}) {
+  const query = buildQueryString({ year, month }, ["year", "month"]);
+  return api.get(query ? `${FINANCE_URL}/tips?${query}` : `${FINANCE_URL}/tips`);
 }

@@ -2,14 +2,6 @@ import { listItemSurfaceSx } from "../../../styles/surfaceStyles";
 
 export const pageStackSpacing = 3;
 
-export const summaryRowDirection = "column";
-
-export const summaryRowSpacing = 1.5;
-
-export const summaryRowSx = {
-  width: "100%",
-};
-
 export const summaryCardSx = {
   width: "100%",
 };
@@ -51,33 +43,35 @@ export const categoryBarFillSx = (ratio) => ({
   bgcolor: "primary.main",
 });
 
-export const seriesChartSx = {
+/** Lista horizontal de meses (mesmo padrão visual das categorias). */
+export const seriesRowSx = {
   display: "flex",
-  alignItems: "flex-end",
-  gap: 1,
-  height: 140,
-  mt: 1.5,
-};
-
-export const seriesBarColumnSx = {
-  flex: 1,
-  minWidth: 0,
-  display: "flex",
-  flexDirection: "column",
   alignItems: "center",
-  height: "100%",
-  justifyContent: "flex-end",
-  gap: 0.5,
+  justifyContent: "space-between",
+  gap: 1,
+  py: 0.75,
 };
 
-export const seriesBarSx = (ratio) => ({
-  width: "100%",
-  maxWidth: 36,
-  height: `${Math.max(4, ratio * 100)}%`,
-  borderRadius: 1,
-  bgcolor: "primary.main",
-  opacity: 0.85,
-});
+export const seriesBarTrackSx = categoryBarTrackSx;
+
+export const seriesBarFillSx = categoryBarFillSx;
+
+export const categoryMonthChipsSx = {
+  display: "flex",
+  flexWrap: "nowrap",
+  gap: 1,
+  overflowX: "auto",
+  mb: 1.5,
+  pb: 0.5,
+  WebkitOverflowScrolling: "touch",
+  scrollbarWidth: "thin",
+  "&::-webkit-scrollbar": {
+    height: 4,
+  },
+  "& > *": {
+    flexShrink: 0,
+  },
+};
 
 export const tipItemSx = {
   p: 1.5,
