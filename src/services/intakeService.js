@@ -2,6 +2,17 @@ import { api } from "./apiClient";
 import { INTAKES_URL } from "./endpoints";
 
 /**
+ * @param {{ status?: string, limit?: number }} [params]
+ */
+export async function listIntakes(params = {}) {
+  const search = new URLSearchParams();
+  if (params.status) search.set("status", params.status);
+  if (params.limit != null) search.set("limit", String(params.limit));
+  const query = search.toString();
+  return api.get(`${INTAKES_URL}${query ? `?${query}` : ""}`);
+}
+
+/**
  * @param {{ text: string }} payload
  */
 export async function parseIntakeText(payload) {
@@ -36,4 +47,8 @@ export async function confirmIntake(id, payload) {
  */
 export async function cancelIntake(id) {
   return api.post(`${INTAKES_URL}/${id}/cancel`, {});
+}
+
+export async function clearIntakeDrafts() {
+  return api.post(`${INTAKES_URL}/clear-drafts`, {});
 }
