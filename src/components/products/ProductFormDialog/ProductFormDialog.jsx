@@ -29,6 +29,7 @@ import { quantityUnitRowSx, unitFieldSx } from "./ProductFormDialog.styled";
  * @param {(values: object) => void | Promise<void>} props.onSubmit
  * @param {object} [props.initialValues]
  * @param {boolean} [props.isEditing]
+ * @param {string} [props.submitLabel] — sobrescreve o rótulo do botão principal
  */
 export default function ProductFormDialog({
   open,
@@ -36,6 +37,7 @@ export default function ProductFormDialog({
   onSubmit,
   initialValues,
   isEditing = false,
+  submitLabel,
 }) {
   const {
     register,
@@ -87,9 +89,10 @@ export default function ProductFormDialog({
       isSubmitting={isSubmitting}
       cancelButtonLabel={PRODUCT_FORM_DIALOG_COPY.cancel}
       submitLabel={
-        isEditing
+        submitLabel ||
+        (isEditing
           ? PRODUCT_FORM_DIALOG_COPY.updateStage
-          : PRODUCT_FORM_DIALOG_COPY.addToStage
+          : PRODUCT_FORM_DIALOG_COPY.addToStage)
       }
       submitDisabled={!canSubmit}
       hasUnsavedChanges={isDirty}
@@ -163,6 +166,18 @@ export default function ProductFormDialog({
           {...register("minQuantity", {
             setValueAs: (value) =>
               value === "" || value == null ? undefined : Number(value),
+          })}
+        />
+        <TextField
+          label={PRODUCT_FORM_DIALOG_COPY.repurchaseDaysLabel}
+          type="number"
+          fullWidth
+          inputProps={PRODUCT_FORM_DIALOG_CONFIG.repurchaseDaysInputProps}
+          error={Boolean(errors.repurchaseDays)}
+          helperText={errors.repurchaseDays?.message || PRODUCT_FORM_DIALOG_COPY.repurchaseDaysHelper}
+          {...register("repurchaseDays", {
+            setValueAs: (value) =>
+              value === "" || value == null ? null : Number(value),
           })}
         />
         <TextField

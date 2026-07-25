@@ -2,7 +2,7 @@ export const NOTIFICATION_CARD_CONFIG = {
   types: {
     lowStock: "low_stock",
     outOfStock: "out_of_stock",
-    repurchase: "repurchase",
+    repurchase: "repurchase_reminder",
     consumptionNudge: "consumption_nudge",
     missingConsumption: "missing_consumption",
   },

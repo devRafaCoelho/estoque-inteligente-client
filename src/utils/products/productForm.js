@@ -4,8 +4,15 @@ export const PRODUCT_FORM_DEFAULT_VALUES = {
   quantity: 0,
   unit: "",
   minQuantity: 0,
+  repurchaseDays: null,
   notes: "",
 };
+
+function normalizeRepurchaseDays(value) {
+  if (value === "" || value == null) return null;
+  const days = Number(value);
+  return Number.isFinite(days) && days >= 1 ? Math.trunc(days) : null;
+}
 
 /**
  * @param {typeof PRODUCT_FORM_DEFAULT_VALUES} formData
@@ -17,8 +24,17 @@ export function buildCreateProductPayload(formData) {
     quantity: Number(formData.quantity),
     unit: formData.unit,
     minQuantity: Number(formData.minQuantity),
+    repurchaseDays: normalizeRepurchaseDays(formData.repurchaseDays),
     notes: formData.notes || "",
   };
+}
+
+/**
+ * Payload de PATCH — mesmos campos editáveis do formulário.
+ * @param {typeof PRODUCT_FORM_DEFAULT_VALUES} formData
+ */
+export function buildUpdateProductPayload(formData) {
+  return buildCreateProductPayload(formData);
 }
 
 /**
@@ -32,9 +48,26 @@ export function buildCreateProductsBatchPayload(stagedItems = []) {
       quantity: item.quantity,
       unit: item.unit,
       minQuantity: item.minQuantity,
+      repurchaseDays: item.repurchaseDays,
       notes: item.notes,
     }),
   );
+}
+
+/**
+ * Valores iniciais do formulário a partir do produto da API.
+ * @param {object} product
+ */
+export function productToFormValues(product) {
+  return {
+    name: product?.name || "",
+    category: product?.category || "",
+    quantity: product?.quantity ?? "",
+    unit: product?.unit || "",
+    minQuantity: product?.minQuantity ?? "",
+    repurchaseDays: product?.repurchaseDays ?? null,
+    notes: product?.notes || "",
+  };
 }
 
 /**

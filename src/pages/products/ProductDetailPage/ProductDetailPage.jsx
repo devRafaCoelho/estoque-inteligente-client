@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -11,12 +11,23 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { consumeProduct, getProductById, markProductOut } from "../../../services/productService";
+import {
+  consumeProduct,
+  getProductById,
+  markProductOut,
+  updateProduct,
+} from "../../../services/productService";
 import StockStatusChip from "../../../components/products/StockStatusChip/StockStatusChip";
 import ConsumeProductDialog from "../../../components/products/ConsumeProductDialog/ConsumeProductDialog";
+import ProductFormDialog from "../../../components/products/ProductFormDialog/ProductFormDialog";
+import { PRODUCT_FORM_DIALOG_COPY } from "../../../components/products/ProductFormDialog/productFormDialogConfig";
 import { categoryLabel } from "../../../utils/categoryLabels";
 import { formatQuantity } from "../../../utils/unitLabels";
-import { buildConsumeProductPayload } from "../../../utils/products/productForm";
+import {
+  buildConsumeProductPayload,
+  buildUpdateProductPayload,
+  productToFormValues,
+} from "../../../utils/products/productForm";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import {
@@ -44,6 +55,12 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [consumeOpen, setConsumeOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
+  const editInitialValues = useMemo(
+    () => productToFormValues(product),
+    [product],
+  );
 
   const load = async () => {
     setLoading(true);
@@ -83,6 +100,18 @@ export default function ProductDetailPage() {
     }
   };
 
+  const handleEditSubmit = async (values) => {
+    try {
+      const data = await updateProduct(id, buildUpdateProductPayload(values));
+      setProduct(data.product);
+      success(PRODUCT_DETAIL_COPY.updateSuccess);
+      setEditOpen(false);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : PRODUCT_DETAIL_COPY.updateError);
+      throw err;
+    }
+  };
+
   if (loading || !product) {
     return (
       <Box sx={pageLoadingBoxSx}>
@@ -113,12 +142,20 @@ export default function ProductDetailPage() {
           {categoryLabel(product.category)} · {PRODUCT_DETAIL_COPY.minPrefix}{" "}
           {formatQuantity(product.minQuantity, product.unit)}
         </Typography>
+        <Typography sx={pageHeaderSubtitleSx}>
+          {product.repurchaseDays
+            ? PRODUCT_DETAIL_COPY.repurchaseLabel(product.repurchaseDays)
+            : PRODUCT_DETAIL_COPY.repurchaseEmpty}
+        </Typography>
         {product.notes && (
           <Typography sx={{ ...notesSx, ...pageHeaderSubtitleSx }}>{product.notes}</Typography>
         )}
       </Box>
 
       <Stack direction={actionsRowSx.direction} spacing={actionsRowSpacing}>
+        <Button variant="outlined" onClick={() => setEditOpen(true)}>
+          {PRODUCT_DETAIL_COPY.editAction}
+        </Button>
         <Button
           variant="contained"
           disabled={Number(product.quantity) <= 0}
@@ -171,6 +208,15 @@ export default function ProductDetailPage() {
         onClose={() => setConsumeOpen(false)}
         product={product}
         onConfirm={handleConsume}
+      />
+
+      <ProductFormDialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        onSubmit={handleEditSubmit}
+        initialValues={editInitialValues}
+        isEditing
+        submitLabel={PRODUCT_FORM_DIALOG_COPY.save}
       />
     </Stack>
   );

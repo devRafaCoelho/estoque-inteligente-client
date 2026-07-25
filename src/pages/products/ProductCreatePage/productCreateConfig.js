@@ -9,6 +9,7 @@ export const PRODUCT_CREATE_CONFIG = {
     quantity: "",
     unit: "un",
     minQuantity: 1,
+    repurchaseDays: "",
     notes: "",
   },
 };

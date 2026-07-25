@@ -11,6 +11,17 @@ const requiredNumber = (message) =>
     .typeError(message)
     .required(message);
 
+const optionalPositiveInt = yup
+  .number()
+  .transform((value, original) => {
+    if (original === "" || original == null) return null;
+    if (typeof value === "number" && Number.isNaN(value)) return null;
+    return value;
+  })
+  .nullable()
+  .integer("Use um número inteiro")
+  .min(1, "Informe ao menos 1 dia");
+
 export const productSchema = yup.object({
   name: yup.string().required("Informe o nome"),
   category: yup.string().required("Informe a categoria"),
@@ -20,6 +31,7 @@ export const productSchema = yup.object({
     0,
     "Quantidade mínima inválida",
   ),
+  repurchaseDays: optionalPositiveInt,
   notes: yup.string().nullable(),
 });
 

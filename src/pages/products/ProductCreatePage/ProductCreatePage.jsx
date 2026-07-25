@@ -64,6 +64,7 @@ export default function ProductCreatePage() {
       quantity: editingItem.quantity,
       unit: editingItem.unit,
       minQuantity: editingItem.minQuantity,
+      repurchaseDays: editingItem.repurchaseDays ?? "",
       notes: editingItem.notes || "",
     };
   }, [editingItem]);
@@ -100,6 +101,10 @@ export default function ProductCreatePage() {
       quantity: Number(values.quantity),
       unit: values.unit,
       minQuantity: Number(values.minQuantity),
+      repurchaseDays:
+        values.repurchaseDays === "" || values.repurchaseDays == null
+          ? null
+          : Number(values.repurchaseDays),
       notes: values.notes || "",
     };
 
@@ -206,6 +211,9 @@ export default function ProductCreatePage() {
                   <Typography variant="body2" color="text.secondary" noWrap>
                     {categoryLabel(item.category)} · {item.quantity} {unitLabel(item.unit)} · mín.{" "}
                     {item.minQuantity}
+                    {item.repurchaseDays
+                      ? ` · recompra ${item.repurchaseDays}d`
+                      : ""}
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={0.25} sx={stageItemActionsSx}>
