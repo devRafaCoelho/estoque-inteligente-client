@@ -25,6 +25,10 @@ import { ApiError } from "../../../services/apiClient";
 import { getDashboardStats } from "../../../services/dashboardService";
 import { getFinanceSummary } from "../../../services/financeService";
 import { markNotificationRead } from "../../../services/notificationService";
+import {
+  isNotificationNavigable,
+  resolveNotificationDestination,
+} from "../../../utils/notifications/resolveNotificationDestination";
 import { pageLoadingBoxSx, pageHeaderSubtitleSx, pageSectionTitleSx } from "../../../styles/pageStyles";
 import { DASHBOARD_PAGE_COPY } from "./dashboardPageCopy";
 import { DASHBOARD_PAGE_CONFIG } from "./dashboardPageConfig";
@@ -124,6 +128,21 @@ export default function DashboardPage() {
     }
   };
 
+  const handleOpenAlert = async (alert) => {
+    const destination = resolveNotificationDestination(alert);
+    if (!destination) return;
+
+    if (alert.unread) {
+      try {
+        await markNotificationRead(alert.id);
+      } catch {
+        /* segue a navegação mesmo se falhar marcar lida */
+      }
+    }
+
+    navigate(destination.path, destination.state ? { state: destination.state } : undefined);
+  };
+
   if (loading) {
     return (
       <Box sx={pageLoadingBoxSx}>
@@ -220,8 +239,11 @@ export default function DashboardPage() {
                 locale={locale}
                 busy={busyId === alert.id}
                 onMarkRead={() => handleMarkRead(alert)}
-                onRegisterStockOut={() => navigate(paths.stockOut)}
-                onOpenProduct={() => navigate(paths.product(alert.productId))}
+                onRegisterStockOut={() => handleOpenAlert(alert)}
+                onOpenProduct={() => handleOpenAlert(alert)}
+                onClick={
+                  isNotificationNavigable(alert) ? () => handleOpenAlert(alert) : undefined
+                }
               />
             ))}
           </Stack>

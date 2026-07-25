@@ -8,9 +8,6 @@ import Typography from "@mui/material/Typography";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
 import NotificationCard from "../../../components/notifications/NotificationCard/NotificationCard";
-import {
-  isConsumptionNudge,
-} from "../../../components/notifications/NotificationCard/notificationCardConfig";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import MarkEmailReadOutlinedIcon from "@mui/icons-material/MarkEmailReadOutlined";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
@@ -20,6 +17,10 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "../../../services/notificationService";
+import {
+  isNotificationNavigable,
+  resolveNotificationDestination,
+} from "../../../utils/notifications/resolveNotificationDestination";
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
@@ -44,7 +45,7 @@ export default function NotificationsPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState(NOTIFICATIONS_PAGE_CONFIG.defaultFilter);
 
-  const { filters, listLimit, productPath, stockOutPath, locale } = NOTIFICATIONS_PAGE_CONFIG;
+  const { filters, listLimit, locale } = NOTIFICATIONS_PAGE_CONFIG;
 
   const load = useCallback(
     async ({ silent = false } = {}) => {
@@ -97,20 +98,18 @@ export default function NotificationsPage() {
   };
 
   const handleOpen = async (notification) => {
-    if (isConsumptionNudge(notification)) {
-      if (notification.unread) {
-        try {
-          await markNotificationRead(notification.id);
-        } catch {
-          /* segue para a baixa mesmo se falhar marcar lida */
-        }
+    const destination = resolveNotificationDestination(notification);
+    if (!destination) return;
+
+    if (notification.unread) {
+      try {
+        await markNotificationRead(notification.id);
+      } catch {
+        /* segue a navegação mesmo se falhar marcar lida */
       }
-      navigate(stockOutPath);
-      return;
     }
-    if (notification.productId) {
-      navigate(productPath(notification.productId));
-    }
+
+    navigate(destination.path, destination.state ? { state: destination.state } : undefined);
   };
 
   if (loading) {
@@ -188,8 +187,7 @@ export default function NotificationsPage() {
       ) : (
         <Stack spacing={listSpacing}>
           {notifications.map((notification) => {
-            const clickable =
-              Boolean(notification.productId) || isConsumptionNudge(notification);
+            const clickable = isNotificationNavigable(notification);
             return (
               <NotificationCard
                 key={notification.id}
@@ -198,7 +196,7 @@ export default function NotificationsPage() {
                 busy={busyId === notification.id}
                 onMarkRead={() => handleMarkRead(notification)}
                 onRegisterStockOut={() => handleOpen(notification)}
-                onOpenProduct={() => navigate(productPath(notification.productId))}
+                onOpenProduct={() => handleOpen(notification)}
                 onClick={clickable ? () => handleOpen(notification) : undefined}
               />
             );

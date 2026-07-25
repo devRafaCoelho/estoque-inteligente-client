@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -50,6 +50,7 @@ import {
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { success, error } = useAppSnackbar();
   const [product, setProduct] = useState(null);
@@ -79,6 +80,16 @@ export default function ProductDetailPage() {
     load();
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
+    if (loading || !product) return;
+    if (searchParams.get("baixa") !== "1") return;
+    if (Number(product.quantity) > 0) {
+      setConsumeOpen(true);
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete("baixa");
+    setSearchParams(next, { replace: true });
+  }, [loading, product, searchParams, setSearchParams]);
   const handleConsume = async (values) => {
     try {
       await consumeProduct(id, buildConsumeProductPayload(values));

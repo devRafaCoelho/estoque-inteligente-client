@@ -7,6 +7,7 @@ export const NOTIFICATION_CARD_CONFIG = {
     missingConsumption: "missing_consumption",
   },
   actions: {
+    openProduct: "open_product",
     openQuickConsume: "open_quick_consume",
   },
 };

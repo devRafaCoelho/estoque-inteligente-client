@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
@@ -23,6 +23,7 @@ import { examplesRowSx, stockOutFormStackSpacing } from "./StockOutPage.styled";
 
 export default function StockOutPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { error } = useAppSnackbar();
   const [loading, setLoading] = useState(false);
   const {
@@ -39,6 +40,18 @@ export default function StockOutPage() {
 
   const text = watch("text");
   const { ref: textRef, ...textField } = register("text");
+
+  useEffect(() => {
+    const draftText = location.state?.draftText;
+    if (!draftText || typeof draftText !== "string") return;
+
+    setValue("text", draftText, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.pathname, location.state, navigate, setValue]);
 
   const onSubmit = async (values) => {
     setLoading(true);
