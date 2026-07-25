@@ -37,6 +37,7 @@ export function resolveNotificationTone(type) {
 export function isConsumptionNudge(notification) {
   return (
     notification?.type === NOTIFICATION_CARD_CONFIG.types.consumptionNudge ||
+    notification?.type === NOTIFICATION_CARD_CONFIG.types.missingConsumption ||
     notification?.payload?.action === NOTIFICATION_CARD_CONFIG.actions.openQuickConsume
   );
 }
