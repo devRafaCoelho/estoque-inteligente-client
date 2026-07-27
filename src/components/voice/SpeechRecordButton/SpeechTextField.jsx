@@ -18,6 +18,7 @@ import {
   speechErrorMessage,
 } from "./speechRecordButtonCopy";
 import {
+  speechFieldInputSx,
   speechFieldRootSx,
   speechMicAdornmentSx,
   speechMicButtonSx,
@@ -43,6 +44,7 @@ export default function SpeechTextField({
   speechDisabled = false,
   lang = SPEECH_RECORD_BUTTON_CONFIG.lang,
   slotProps,
+  sx,
   ...textFieldProps
 }) {
   const valueRef = useRef(value);
@@ -119,6 +121,7 @@ export default function SpeechTextField({
         {...textFieldProps}
         value={value}
         onChange={handleTextChange}
+        sx={[speechFieldInputSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
         slotProps={{
           ...slotProps,
           input: {

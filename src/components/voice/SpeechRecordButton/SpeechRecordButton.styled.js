@@ -4,16 +4,26 @@ export const speechFieldRootSx = {
   gap: 0.75,
 };
 
+/** Aproxima o mic do canto inferior direito, com folga leve. */
+export const speechFieldInputSx = {
+  "& .MuiOutlinedInput-root": {
+    paddingRight: 0.75,
+    paddingBottom: 0.75,
+  },
+};
+
 export const speechMicAdornmentSx = {
   alignSelf: "flex-end",
   maxHeight: "none",
   height: "auto",
   marginRight: 0.25,
-  marginBottom: 0.5,
+  marginBottom: 0.25,
+  marginLeft: 0,
 };
 
 export const speechMicButtonSx = (listening) => ({
   color: listening ? "error.contrastText" : "text.secondary",
+  p: 0.75,
   ...(listening
     ? {
         bgcolor: "error.main",

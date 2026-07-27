@@ -5,6 +5,7 @@ import PlaylistAddOutlinedIcon from "@mui/icons-material/PlaylistAddOutlined";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 
 /**
@@ -13,6 +14,12 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
  */
 export const mainNavItems = [
   { id: "home", label: "Início", path: "/dashboard", icon: HomeOutlinedIcon },
+  {
+    id: "chat",
+    label: "Assistente",
+    path: "/chat",
+    icon: ChatOutlinedIcon,
+  },
   {
     id: "finance",
     label: "Financeiro",
@@ -59,6 +66,7 @@ export const bottomNavItems = [
 
 /** Itens do sheet "Mais" no mobile (conta e alertas ficam no menu do avatar) */
 export const moreMenuItems = [
+  { label: "Assistente", path: "/chat", icon: ChatOutlinedIcon },
   { label: "Baixa", path: "/baixa", icon: RemoveCircleOutlineIcon },
   {
     label: "Financeiro",

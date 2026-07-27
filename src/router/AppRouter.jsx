@@ -15,6 +15,7 @@ import StockOutPreviewPage from "../pages/stockOut/StockOutPreviewPage/StockOutP
 import ShoppingListPage from "../pages/shopping/ShoppingListPage/ShoppingListPage";
 import NotificationsPage from "../pages/notifications/NotificationsPage/NotificationsPage";
 import FinancePage from "../pages/finance/FinancePage/FinancePage";
+import ChatPage from "../pages/chat/ChatPage/ChatPage";
 
 export default function AppRouter() {
   return (
@@ -33,6 +34,7 @@ export default function AppRouter() {
           <Route path="/baixa/:id/preview" element={<StockOutPreviewPage />} />
           <Route path="/lista-compras" element={<ShoppingListPage />} />
           <Route path="/financeiro" element={<FinancePage />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="/notificacoes" element={<NotificationsPage />} />
           <Route path="/produtos" element={<ProductListPage />} />
           <Route path="/produtos/novo" element={<ProductCreatePage />} />
