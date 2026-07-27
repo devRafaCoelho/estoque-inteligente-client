@@ -8,6 +8,7 @@ import "@fontsource/caveat/400.css";
 import "@fontsource/caveat/700.css";
 import {
   addShoppingListItem,
+  clearShoppingListItems,
   deleteShoppingListItem,
   generateShoppingList,
   getActiveShoppingList,
@@ -43,6 +44,8 @@ export default function ShoppingListPage() {
   const [adding, setAdding] = useState(false);
   const [busyId, setBusyId] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [clearListOpen, setClearListOpen] = useState(false);
+  const [clearingList, setClearingList] = useState(false);
   const [list, setList] = useState(null);
   const [viewMode, setViewMode] = useState(SHOPPING_LIST_PAGE_CONFIG.defaultViewMode);
   const [addText, setAddText] = useState("");
@@ -151,6 +154,20 @@ export default function ShoppingListPage() {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.deleteError);
     } finally {
       setBusyId(null);
+    }
+  };
+
+  const handleClearListConfirm = async () => {
+    setClearingList(true);
+    try {
+      const data = await clearShoppingListItems();
+      applyList(data.list);
+      setClearListOpen(false);
+      success(SHOPPING_LIST_PAGE_COPY.listCleared);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.clearError);
+    } finally {
+      setClearingList(false);
     }
   };
 
@@ -274,11 +291,32 @@ export default function ShoppingListPage() {
               );
             })}
           </Box>
-          {list?.stats && (
-            <Typography variant="body2" color="text.secondary">
-              {SHOPPING_LIST_PAGE_COPY.stats(list.stats.pending, list.stats.checked)}
-            </Typography>
-          )}
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            justifyContent={{ xs: "space-between", sm: "flex-end" }}
+            flexWrap="wrap"
+            useFlexGap
+          >
+            {list?.stats && (
+              <Typography variant="body2" color="text.secondary">
+                {SHOPPING_LIST_PAGE_COPY.stats(list.stats.pending, list.stats.checked)}
+              </Typography>
+            )}
+            {items.length > 0 && (
+              <LoadingButton
+                type="button"
+                variant="text"
+                color="error"
+                size="small"
+                disabled={clearingList || Boolean(busyId)}
+                onClick={() => setClearListOpen(true)}
+              >
+                {SHOPPING_LIST_PAGE_COPY.clearList}
+              </LoadingButton>
+            )}
+          </Stack>
         </Stack>
 
         {viewMode === SHOPPING_LIST_PAGE_CONFIG.paperViewMode ? (
@@ -312,6 +350,20 @@ export default function ShoppingListPage() {
         confirmLoading={Boolean(itemToDelete && busyId === itemToDelete.id)}
         confirmLabel={SHOPPING_LIST_PAGE_COPY.deleteConfirmLabel}
         cancelLabel={SHOPPING_LIST_PAGE_COPY.deleteCancelLabel}
+      />
+
+      <ConfirmDialog
+        open={clearListOpen}
+        onClose={() => {
+          if (clearingList) return;
+          setClearListOpen(false);
+        }}
+        title={SHOPPING_LIST_PAGE_COPY.clearConfirmTitle}
+        description={SHOPPING_LIST_PAGE_COPY.clearConfirmDescription}
+        onConfirm={handleClearListConfirm}
+        confirmLoading={clearingList}
+        confirmLabel={SHOPPING_LIST_PAGE_COPY.clearConfirmLabel}
+        cancelLabel={SHOPPING_LIST_PAGE_COPY.clearCancelLabel}
       />
     </Stack>
   );

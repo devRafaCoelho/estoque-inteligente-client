@@ -34,6 +34,12 @@ export const bubbleMetaSx = (isUser) => ({
   color: isUser ? "inherit" : "text.secondary",
 });
 
+export const bubbleCtaSx = {
+  mt: 1,
+  textTransform: "none",
+  alignSelf: "flex-start",
+};
+
 export const composerRowSx = {
   display: "flex",
   gap: 1,

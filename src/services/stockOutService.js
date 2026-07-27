@@ -2,6 +2,17 @@ import { api } from "./apiClient";
 import { STOCK_OUTS_URL } from "./endpoints";
 
 /**
+ * @param {{ status?: string, limit?: number }} [params]
+ */
+export async function listStockOuts(params = {}) {
+  const search = new URLSearchParams();
+  if (params.status) search.set("status", params.status);
+  if (params.limit != null) search.set("limit", String(params.limit));
+  const query = search.toString();
+  return api.get(`${STOCK_OUTS_URL}${query ? `?${query}` : ""}`);
+}
+
+/**
  * @param {{ text: string }} payload
  */
 export async function parseStockOutText(payload) {
@@ -36,4 +47,8 @@ export async function confirmStockOut(id, payload) {
  */
 export async function cancelStockOut(id) {
   return api.post(`${STOCK_OUTS_URL}/${id}/cancel`, {});
+}
+
+export async function clearStockOutDrafts() {
+  return api.post(`${STOCK_OUTS_URL}/clear-drafts`, {});
 }

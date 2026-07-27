@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -15,8 +17,9 @@ import {
   pageLoadingBoxSx,
 } from "../../../styles/pageStyles";
 import { CHAT_PAGE_CONFIG } from "./chatPageConfig";
-import { CHAT_PAGE_COPY } from "./chatPageCopy";
+import { CHAT_PAGE_COPY, chatCtaLabel } from "./chatPageCopy";
 import {
+  bubbleCtaSx,
   bubbleMetaSx,
   bubbleRowSx,
   bubbleSx,
@@ -114,6 +117,10 @@ export default function ChatPage() {
         ) : (
           messages.map((message) => {
             const isUser = message.role === "user";
+            const path =
+              !isUser && typeof message.payload?.path === "string"
+                ? message.payload.path
+                : null;
             return (
               <Box key={message.id} sx={bubbleRowSx(isUser)}>
                 <Box sx={bubbleSx(isUser)}>
@@ -123,6 +130,18 @@ export default function ChatPage() {
                   <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
                     {message.content}
                   </Typography>
+                  {path && (
+                    <Button
+                      component={RouterLink}
+                      to={path}
+                      variant="contained"
+                      size="small"
+                      color="primary"
+                      sx={bubbleCtaSx}
+                    >
+                      {chatCtaLabel(message.payload)}
+                    </Button>
+                  )}
                 </Box>
               </Box>
             );

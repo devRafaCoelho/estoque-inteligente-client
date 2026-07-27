@@ -40,3 +40,7 @@ export async function updateShoppingListItem(id, payload) {
 export async function deleteShoppingListItem(id) {
   return api.delete(`${SHOPPING_LISTS_URL}/items/${id}`);
 }
+
+export async function clearShoppingListItems() {
+  return api.delete(`${SHOPPING_LISTS_URL}/items`);
+}
