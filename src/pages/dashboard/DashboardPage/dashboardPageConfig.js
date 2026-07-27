@@ -1,5 +1,6 @@
 export const DASHBOARD_PAGE_CONFIG = {
   paths: {
+    chat: "/chat",
     intake: "/entrada",
     stockOut: "/baixa",
     shopping: "/lista-compras",

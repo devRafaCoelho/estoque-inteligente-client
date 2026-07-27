@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import DocumentScannerOutlinedIcon from "@mui/icons-material/DocumentScannerOutlined";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Box from "@mui/material/Box";
@@ -11,6 +13,10 @@ import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import CardContent from "@mui/material/CardContent";
 import CircularProgress from "@mui/material/CircularProgress";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -42,6 +48,14 @@ import {
   statCardSx,
   statCardContentSx,
   statValueSx,
+  assistantCardContentSx,
+  assistantCardCtaLabelSx,
+  assistantCardCtaSx,
+  assistantCardDescriptionSx,
+  assistantCardIconSx,
+  assistantCardSx,
+  assistantCardTextSx,
+  assistantCardTitleRowSx,
   monthSpendCardSx,
   monthSpendContentSx,
   criticalListSpacing,
@@ -73,8 +87,10 @@ export default function DashboardPage() {
   const [recentAlerts, setRecentAlerts] = useState([]);
   const [monthSpend, setMonthSpend] = useState(null);
   const [busyId, setBusyId] = useState(null);
+  const [addProductAnchorEl, setAddProductAnchorEl] = useState(null);
 
   const { stockStatus, paths, locale } = DASHBOARD_PAGE_CONFIG;
+  const addProductMenuOpen = Boolean(addProductAnchorEl);
 
   const load = useCallback(
     async ({ silent = false } = {}) => {
@@ -120,6 +136,15 @@ export default function DashboardPage() {
     }
   };
 
+  const handleAddProductMenuClose = () => {
+    setAddProductAnchorEl(null);
+  };
+
+  const handleAddProductOption = (path) => {
+    handleAddProductMenuClose();
+    navigate(path);
+  };
+
   if (loading) {
     return (
       <Box sx={pageLoadingBoxSx}>
@@ -152,24 +177,65 @@ export default function DashboardPage() {
             <Button
               variant="contained"
               size="small"
-              startIcon={<EditNoteOutlinedIcon />}
-              onClick={() => navigate(paths.intake)}
-              sx={headerIntakeButtonSx}
-            >
-              {DASHBOARD_PAGE_COPY.ctaText}
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
               startIcon={<Inventory2OutlinedIcon />}
-              onClick={() => navigate(paths.productCreate)}
+              endIcon={<KeyboardArrowDownIcon />}
+              aria-haspopup="menu"
+              aria-expanded={addProductMenuOpen ? "true" : undefined}
+              aria-controls={addProductMenuOpen ? "dashboard-add-product-menu" : undefined}
+              aria-label={DASHBOARD_PAGE_COPY.ctaAddProductAria}
+              onClick={(event) => setAddProductAnchorEl(event.currentTarget)}
               sx={headerIntakeButtonSx}
             >
-              {DASHBOARD_PAGE_COPY.ctaManual}
+              {DASHBOARD_PAGE_COPY.ctaAddProduct}
             </Button>
+            <Menu
+              id="dashboard-add-product-menu"
+              anchorEl={addProductAnchorEl}
+              open={addProductMenuOpen}
+              onClose={handleAddProductMenuClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+            >
+              <MenuItem onClick={() => handleAddProductOption(paths.intake)}>
+                <ListItemIcon>
+                  <EditNoteOutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>{DASHBOARD_PAGE_COPY.ctaText}</ListItemText>
+              </MenuItem>
+              <MenuItem onClick={() => handleAddProductOption(paths.productCreate)}>
+                <ListItemIcon>
+                  <Inventory2OutlinedIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText>{DASHBOARD_PAGE_COPY.ctaManual}</ListItemText>
+              </MenuItem>
+            </Menu>
           </Box>
         ) : null}
       </Box>
+
+      <Card sx={assistantCardSx} variant="outlined">
+        <CardActionArea onClick={() => navigate(paths.chat)}>
+          <CardContent sx={assistantCardContentSx}>
+            <Box sx={assistantCardTextSx}>
+              <Box sx={assistantCardTitleRowSx}>
+                <ChatOutlinedIcon sx={assistantCardIconSx} />
+                <Typography variant="body2" color="text.secondary">
+                  {DASHBOARD_PAGE_COPY.assistantTitle}
+                </Typography>
+              </Box>
+              <Typography sx={assistantCardDescriptionSx}>
+                {DASHBOARD_PAGE_COPY.assistantDescription}
+              </Typography>
+            </Box>
+            <Box sx={assistantCardCtaSx}>
+              <Typography variant="body2" sx={assistantCardCtaLabelSx}>
+                {DASHBOARD_PAGE_COPY.assistantCta}
+              </Typography>
+              <ChevronRightIcon fontSize="small" />
+            </Box>
+          </CardContent>
+        </CardActionArea>
+      </Card>
 
       <Card sx={monthSpendCardSx} variant="outlined">
         <CardActionArea onClick={() => navigate(paths.finance)}>
