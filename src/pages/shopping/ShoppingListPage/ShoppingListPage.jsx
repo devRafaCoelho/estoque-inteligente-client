@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import "@fontsource/caveat/400.css";
 import "@fontsource/caveat/700.css";
@@ -18,6 +17,7 @@ import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/Sh
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
+import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import {
@@ -214,14 +214,15 @@ export default function ShoppingListPage() {
 
       <Stack spacing={addSectionSpacing}>
         <Typography variant="h6">{SHOPPING_LIST_PAGE_COPY.addSectionTitle}</Typography>
-        <TextField
+        <SpeechTextField
           label={SHOPPING_LIST_PAGE_COPY.addLabel}
           placeholder={SHOPPING_LIST_PAGE_COPY.addPlaceholder}
           value={addText}
-          onChange={(e) => setAddText(e.target.value)}
+          onChange={setAddText}
           multiline
           minRows={2}
           fullWidth
+          speechDisabled={adding || generating}
           slotProps={{ inputLabel: { shrink: true } }}
         />
         <Stack {...examplesRowSx}>
