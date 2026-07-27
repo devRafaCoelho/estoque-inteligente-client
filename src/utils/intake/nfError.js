@@ -106,6 +106,24 @@ export function resolveNfError(err) {
     };
   }
 
+  if (
+    code === "nf_ba_qr_required" ||
+    code === "nf_invalid_qr" ||
+    /bahia.*qr completo|qr da bahia|escaneie o qr completo/i.test(raw)
+  ) {
+    return {
+      kind: NF_ERROR_KIND.invalid,
+      message:
+        raw ||
+        "Para notas da Bahia, escaneie o QR completo da nota (não só a chave). Ou use a foto.",
+      fallbackPhoto: true,
+      canRetryQr: true,
+      needsState: false,
+      status,
+      code,
+    };
+  }
+
   if (status === 400 || code === "nf_invalid_payload") {
     return {
       kind: NF_ERROR_KIND.invalid,
