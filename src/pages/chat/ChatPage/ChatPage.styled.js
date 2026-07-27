@@ -19,12 +19,21 @@ export const bubbleRowSx = (isUser) => ({
 });
 
 export const bubbleSx = (isUser) => ({
-  maxWidth: "85%",
+  maxWidth: "100%",
   px: 1.5,
   py: 1.1,
   borderRadius: cardBorderRadius,
   bgcolor: isUser ? "primary.main" : "action.hover",
   color: isUser ? "primary.contrastText" : "text.primary",
+});
+
+export const messageColumnSx = (isUser, wide = false) => ({
+  maxWidth: wide ? "92%" : "85%",
+  width: "fit-content",
+  minWidth: 0,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: isUser ? "flex-end" : "flex-start",
 });
 
 export const bubbleMetaSx = (isUser) => ({
@@ -33,12 +42,6 @@ export const bubbleMetaSx = (isUser) => ({
   opacity: isUser ? 0.85 : 1,
   color: isUser ? "inherit" : "text.secondary",
 });
-
-export const bubbleCtaSx = {
-  mt: 1,
-  textTransform: "none",
-  alignSelf: "flex-start",
-};
 
 export const composerRowSx = {
   display: "flex",

@@ -9,18 +9,8 @@ export const CHAT_PAGE_COPY = {
   send: "Enviar",
   loadError: "Não foi possível carregar a conversa",
   sendError: "Não foi possível enviar a mensagem",
+  saveListSuccess: "Lista atualizada com as sugestões",
+  saveListError: "Não foi possível salvar a lista",
   you: "Você",
   assistant: "Assistente",
-  ctaStockOut: "Revisar baixa",
-  ctaShoppingList: "Abrir lista",
-  ctaFinance: "Ver financeiro",
-  ctaDefault: "Abrir",
 };
-
-export function chatCtaLabel(payload) {
-  const type = payload?.type;
-  if (type === "stock_out_draft") return CHAT_PAGE_COPY.ctaStockOut;
-  if (type === "shopping_list") return CHAT_PAGE_COPY.ctaShoppingList;
-  if (type === "finance_tip") return CHAT_PAGE_COPY.ctaFinance;
-  return CHAT_PAGE_COPY.ctaDefault;
-}
