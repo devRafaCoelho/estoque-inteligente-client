@@ -10,7 +10,15 @@ export const SPEECH_ERROR = {
   noSpeech: "no_speech",
   aborted: "aborted",
   network: "network",
+  audioCapture: "audio_capture",
   unknown: "unknown",
+};
+
+/** idle | listening | error */
+export const SPEECH_STATUS = {
+  idle: "idle",
+  listening: "listening",
+  error: "error",
 };
 
 function mapSpeechError(code) {
@@ -24,6 +32,8 @@ function mapSpeechError(code) {
       return SPEECH_ERROR.aborted;
     case "network":
       return SPEECH_ERROR.network;
+    case "audio-capture":
+      return SPEECH_ERROR.audioCapture;
     default:
       return SPEECH_ERROR.unknown;
   }
@@ -32,11 +42,14 @@ function mapSpeechError(code) {
 /**
  * Speech-to-text via Web Speech API (pt-BR).
  *
+ * Estados: idle → listening → idle (cancelamento) | error (permissão/rede/falha).
+ *
  * @param {{
  *   lang?: string,
  *   continuous?: boolean,
  *   interimResults?: boolean,
  *   onFinalTranscript?: (text: string) => void,
+ *   onCancelled?: () => void,
  * }} [options]
  */
 export function useSpeechToText({
@@ -44,19 +57,30 @@ export function useSpeechToText({
   continuous = true,
   interimResults = true,
   onFinalTranscript,
+  onCancelled,
 } = {}) {
   const supported = isSpeechRecognitionSupported();
   const [listening, setListening] = useState(false);
   const [interimTranscript, setInterimTranscript] = useState("");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(
+    supported ? null : SPEECH_ERROR.unsupported,
+  );
 
   const recognitionRef = useRef(null);
   const wantListeningRef = useRef(false);
+  const userStoppedRef = useRef(false);
+  const gotFinalRef = useRef(false);
+  const fatalErrorRef = useRef(false);
   const onFinalRef = useRef(onFinalTranscript);
+  const onCancelledRef = useRef(onCancelled);
 
   useEffect(() => {
     onFinalRef.current = onFinalTranscript;
   }, [onFinalTranscript]);
+
+  useEffect(() => {
+    onCancelledRef.current = onCancelled;
+  }, [onCancelled]);
 
   const cleanupRecognition = useCallback(() => {
     const recognition = recognitionRef.current;
@@ -73,12 +97,25 @@ export function useSpeechToText({
     recognitionRef.current = null;
   }, []);
 
-  useEffect(() => () => {
-    wantListeningRef.current = false;
-    cleanupRecognition();
-  }, [cleanupRecognition]);
+  useEffect(
+    () => () => {
+      wantListeningRef.current = false;
+      cleanupRecognition();
+    },
+    [cleanupRecognition],
+  );
+
+  const clearError = useCallback(() => {
+    if (!supported) {
+      setError(SPEECH_ERROR.unsupported);
+      return;
+    }
+    setError(null);
+  }, [supported]);
 
   const stop = useCallback(() => {
+    if (!wantListeningRef.current && !listening) return;
+    userStoppedRef.current = true;
     wantListeningRef.current = false;
     setInterimTranscript("");
     const recognition = recognitionRef.current;
@@ -90,7 +127,8 @@ export function useSpeechToText({
       }
     }
     setListening(false);
-  }, []);
+    onCancelledRef.current?.();
+  }, [listening]);
 
   const start = useCallback(() => {
     if (!supported) {
@@ -98,6 +136,9 @@ export function useSpeechToText({
       return false;
     }
 
+    userStoppedRef.current = false;
+    gotFinalRef.current = false;
+    fatalErrorRef.current = false;
     setError(null);
     setInterimTranscript("");
     wantListeningRef.current = true;
@@ -137,6 +178,7 @@ export function useSpeechToText({
       }
 
       if (finals.trim()) {
+        gotFinalRef.current = true;
         onFinalRef.current?.(finals.trim());
       }
       setInterimTranscript(interim.trim());
@@ -144,22 +186,28 @@ export function useSpeechToText({
 
     recognition.onerror = (event) => {
       const mapped = mapSpeechError(event.error);
-      if (mapped === SPEECH_ERROR.aborted && !wantListeningRef.current) {
+
+      if (mapped === SPEECH_ERROR.aborted && userStoppedRef.current) {
         return;
       }
+
       if (mapped === SPEECH_ERROR.noSpeech && wantListeningRef.current) {
-        // Chrome dispara no-speech com frequência; mantém sessão se o user ainda grava.
         return;
       }
-      setError(mapped);
-      if (mapped === SPEECH_ERROR.permission) {
-        wantListeningRef.current = false;
-        setListening(false);
+
+      if (mapped === SPEECH_ERROR.aborted && wantListeningRef.current) {
+        return;
       }
+
+      fatalErrorRef.current = true;
+      setError(mapped);
+      wantListeningRef.current = false;
+      setListening(false);
+      setInterimTranscript("");
     };
 
     recognition.onend = () => {
-      if (wantListeningRef.current && continuous) {
+      if (wantListeningRef.current && continuous && !userStoppedRef.current) {
         try {
           recognition.start();
           return;
@@ -167,9 +215,19 @@ export function useSpeechToText({
           /* fall through */
         }
       }
+
+      const endedWithoutResult =
+        !gotFinalRef.current &&
+        !userStoppedRef.current &&
+        !fatalErrorRef.current;
+
       wantListeningRef.current = false;
       setListening(false);
       setInterimTranscript("");
+
+      if (endedWithoutResult) {
+        setError(SPEECH_ERROR.noSpeech);
+      }
     };
 
     recognitionRef.current = recognition;
@@ -178,6 +236,7 @@ export function useSpeechToText({
       recognition.start();
       return true;
     } catch {
+      fatalErrorRef.current = true;
       setError(SPEECH_ERROR.unknown);
       wantListeningRef.current = false;
       setListening(false);
@@ -193,12 +252,21 @@ export function useSpeechToText({
     start();
   }, [listening, start, stop]);
 
+  const status = !supported
+    ? SPEECH_STATUS.error
+    : listening
+      ? SPEECH_STATUS.listening
+      : error
+        ? SPEECH_STATUS.error
+        : SPEECH_STATUS.idle;
+
   return {
     supported,
+    status,
     listening,
     interimTranscript,
     error,
-    clearError: () => setError(null),
+    clearError,
     start,
     stop,
     toggle,

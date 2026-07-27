@@ -1,12 +1,16 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import MicNoneOutlinedIcon from "@mui/icons-material/MicNoneOutlined";
+import MicOffOutlinedIcon from "@mui/icons-material/MicOffOutlined";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
-import { useSpeechToText } from "../../../hooks/useSpeechToText";
+import {
+  SPEECH_ERROR,
+  useSpeechToText,
+} from "../../../hooks/useSpeechToText";
 import { appendSpeechTranscript } from "../../../utils/speech/speechRecognition";
 import { SPEECH_RECORD_BUTTON_CONFIG } from "./speechRecordButtonConfig";
 import {
@@ -20,10 +24,12 @@ import {
   speechRecordErrorSx,
   speechRecordHintSx,
   speechRecordInterimSx,
+  speechStatusRowSx,
 } from "./SpeechRecordButton.styled";
 
 /**
  * TextField com microfone no canto (voz → texto editável).
+ * Estados: ouvindo, permissão/erro, cancelamento; teclado sempre disponível.
  *
  * @param {Object} props — props de TextField + value/onChange controlados
  * @param {string} props.value
@@ -40,10 +46,19 @@ export default function SpeechTextField({
   ...textFieldProps
 }) {
   const valueRef = useRef(value);
+  const [cancelledHint, setCancelledHint] = useState(false);
+  const cancelTimerRef = useRef(null);
 
   useEffect(() => {
     valueRef.current = value;
   }, [value]);
+
+  useEffect(
+    () => () => {
+      if (cancelTimerRef.current) window.clearTimeout(cancelTimerRef.current);
+    },
+    [],
+  );
 
   const handleFinalTranscript = useCallback(
     (chunk) => {
@@ -54,21 +69,56 @@ export default function SpeechTextField({
     [onChange],
   );
 
-  const { supported, listening, interimTranscript, error, toggle } =
-    useSpeechToText({
-      lang,
-      onFinalTranscript: handleFinalTranscript,
-    });
+  const handleCancelled = useCallback(() => {
+    setCancelledHint(true);
+    if (cancelTimerRef.current) window.clearTimeout(cancelTimerRef.current);
+    cancelTimerRef.current = window.setTimeout(() => {
+      setCancelledHint(false);
+      cancelTimerRef.current = null;
+    }, 2800);
+  }, []);
+
+  const {
+    supported,
+    listening,
+    interimTranscript,
+    error,
+    clearError,
+    toggle,
+  } = useSpeechToText({
+    lang,
+    onFinalTranscript: handleFinalTranscript,
+    onCancelled: handleCancelled,
+  });
+
+  const handleTextChange = (event) => {
+    if (error && error !== SPEECH_ERROR.unsupported) {
+      clearError();
+    }
+    if (cancelledHint) setCancelledHint(false);
+    onChange(event.target.value);
+  };
 
   const errorMessage = speechErrorMessage(error);
+  const voiceBlocked = !supported || error === SPEECH_ERROR.audioCapture;
+  const showMicOff =
+    voiceBlocked || error === SPEECH_ERROR.permission;
   const inputSlotProps = slotProps?.input || {};
+
+  let micIcon = <MicNoneOutlinedIcon fontSize="small" />;
+  if (listening) micIcon = <StopRoundedIcon fontSize="small" />;
+  else if (showMicOff) micIcon = <MicOffOutlinedIcon fontSize="small" />;
+
+  let micAria = SPEECH_RECORD_BUTTON_COPY.startAria;
+  if (listening) micAria = SPEECH_RECORD_BUTTON_COPY.stopAria;
+  else if (showMicOff) micAria = SPEECH_RECORD_BUTTON_COPY.unavailableAria;
 
   return (
     <Stack sx={speechFieldRootSx}>
       <TextField
         {...textFieldProps}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={handleTextChange}
         slotProps={{
           ...slotProps,
           input: {
@@ -81,20 +131,13 @@ export default function SpeechTextField({
                   size="small"
                   edge="end"
                   onClick={toggle}
-                  disabled={speechDisabled || (!supported && !listening)}
-                  aria-label={
-                    listening
-                      ? SPEECH_RECORD_BUTTON_COPY.stopAria
-                      : SPEECH_RECORD_BUTTON_COPY.startAria
-                  }
+                  disabled={speechDisabled || voiceBlocked}
+                  aria-label={micAria}
                   aria-pressed={listening}
+                  title={micAria}
                   sx={speechMicButtonSx(listening)}
                 >
-                  {listening ? (
-                    <StopRoundedIcon fontSize="small" />
-                  ) : (
-                    <MicNoneOutlinedIcon fontSize="small" />
-                  )}
+                  {micIcon}
                 </IconButton>
               </InputAdornment>
             ),
@@ -102,29 +145,31 @@ export default function SpeechTextField({
         }}
       />
 
-      {listening ? (
-        <Typography variant="caption" sx={speechRecordHintSx}>
-          {SPEECH_RECORD_BUTTON_COPY.listeningHint}
-        </Typography>
-      ) : null}
+      <Stack sx={speechStatusRowSx} aria-live="polite">
+        {listening ? (
+          <Typography variant="caption" sx={speechRecordHintSx}>
+            {SPEECH_RECORD_BUTTON_COPY.listeningHint}
+          </Typography>
+        ) : null}
 
-      {listening && interimTranscript ? (
-        <Typography variant="caption" sx={speechRecordInterimSx}>
-          {SPEECH_RECORD_BUTTON_COPY.interimPrefix} {interimTranscript}
-        </Typography>
-      ) : null}
+        {listening && interimTranscript ? (
+          <Typography variant="caption" sx={speechRecordInterimSx}>
+            {SPEECH_RECORD_BUTTON_COPY.interimPrefix} {interimTranscript}
+          </Typography>
+        ) : null}
 
-      {!supported ? (
-        <Typography variant="caption" sx={speechRecordHintSx}>
-          {SPEECH_RECORD_BUTTON_COPY.unsupported}
-        </Typography>
-      ) : null}
+        {!listening && cancelledHint && !errorMessage ? (
+          <Typography variant="caption" sx={speechRecordHintSx}>
+            {SPEECH_RECORD_BUTTON_COPY.cancelledHint}
+          </Typography>
+        ) : null}
 
-      {supported && errorMessage ? (
-        <Typography variant="caption" sx={speechRecordErrorSx} role="alert">
-          {errorMessage}
-        </Typography>
-      ) : null}
+        {errorMessage ? (
+          <Typography variant="caption" sx={speechRecordErrorSx} role="alert">
+            {errorMessage}
+          </Typography>
+        ) : null}
+      </Stack>
     </Stack>
   );
 }

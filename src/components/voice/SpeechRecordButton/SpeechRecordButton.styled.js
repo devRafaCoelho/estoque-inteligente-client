@@ -13,15 +13,26 @@ export const speechMicAdornmentSx = {
 };
 
 export const speechMicButtonSx = (listening) => ({
-  color: listening ? "error.main" : "text.secondary",
+  color: listening ? "error.contrastText" : "text.secondary",
   ...(listening
     ? {
         bgcolor: "error.main",
-        color: "error.contrastText",
         "&:hover": { bgcolor: "error.dark" },
+        animation: "speechMicPulse 1.4s ease-in-out infinite",
+        "@keyframes speechMicPulse": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(211, 47, 47, 0.45)" },
+          "50%": { boxShadow: "0 0 0 6px rgba(211, 47, 47, 0)" },
+        },
       }
     : null),
 });
+
+export const speechStatusRowSx = {
+  display: "flex",
+  flexDirection: "column",
+  gap: 0.25,
+  minHeight: 0,
+};
 
 export const speechRecordHintSx = {
   color: "text.secondary",
