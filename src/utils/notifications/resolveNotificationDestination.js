@@ -1,8 +1,9 @@
-/** Ações emitidas pelo backend em `notification.payload.action`. */
-export const NOTIFICATION_ACTIONS = {
-  openProduct: "open_product",
-  openQuickConsume: "open_quick_consume",
-};
+import {
+  NOTIFICATION_ACTIONS,
+  NOTIFICATION_CARD_CONFIG,
+} from "./notificationConstants.js";
+
+export { NOTIFICATION_ACTIONS };
 
 export const NOTIFICATION_DESTINATION = {
   product: "product",
@@ -10,7 +11,7 @@ export const NOTIFICATION_DESTINATION = {
   quickConsume: "quick_consume",
 };
 
-const CONSUMPTION_TYPES = new Set(["consumption_nudge", "missing_consumption"]);
+const { types, actions } = NOTIFICATION_CARD_CONFIG;const CONSUMPTION_TYPES = new Set([types.consumptionNudge, types.missingConsumption]);
 
 /**
  * Texto inicial para `/baixa` a partir dos itens do nudge.
@@ -35,10 +36,6 @@ export function buildStockOutDraftText(notification) {
 /**
  * Destino de navegação a partir de `payload.action` (com fallbacks).
  *
- * - open_product → detalhe do produto
- * - open_quick_consume com 1 produto → fluxo rápido (baixa no detalhe)
- * - open_quick_consume com vários / sem produto → /baixa (com rascunho de texto quando houver itens)
- *
  * @param {object} notification
  * @returns {{ kind: string, path: string, productId?: string, state?: object } | null}
  */
@@ -54,7 +51,7 @@ export function resolveNotificationDestination(notification) {
       ? payload.productIds[0]
       : null);
 
-  if (action === NOTIFICATION_ACTIONS.openQuickConsume) {
+  if (action === actions.openQuickConsume) {
     const ids = Array.isArray(payload.productIds) ? payload.productIds.filter(Boolean) : [];
     if (productId && ids.length <= 1) {
       return {
@@ -71,7 +68,7 @@ export function resolveNotificationDestination(notification) {
     };
   }
 
-  if (action === NOTIFICATION_ACTIONS.openProduct && productId) {
+  if (action === actions.openProduct && productId) {
     return {
       kind: NOTIFICATION_DESTINATION.product,
       path: `/produtos/${productId}`,

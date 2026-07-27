@@ -25,6 +25,7 @@ import {
 } from "../../../components/common/ReviewItemAccordion/ReviewItemAccordion.styled";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
+import { useExclusiveExpand } from "../../../hooks/useExclusiveExpand";
 import { ApiError } from "../../../services/apiClient";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { buildStockOutPreviewPayload } from "../../../utils/stockOut/stockOutForm";
@@ -58,7 +59,7 @@ export default function StockOutPreviewPage() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
-  const [expandedId, setExpandedId] = useState(null);
+  const { setExpandedId, isExpanded, setExpanded } = useExclusiveExpand();
   const [stockOut, setStockOut] = useState(null);
   const [items, setItems] = useState([]);
   const [products, setProducts] = useState([]);
@@ -260,10 +261,8 @@ export default function StockOutPreviewPage() {
           items.map((item) => (
             <ReviewItemAccordion
               key={item.id}
-              expanded={expandedId === item.id}
-              onExpandedChange={(isExpanded) =>
-                setExpandedId(isExpanded ? item.id : null)
-              }
+              expanded={isExpanded(item.id)}
+              onExpandedChange={(open) => setExpanded(item.id, open)}
               title={item.name || STOCK_OUT_PREVIEW_PAGE_COPY.productLabel}
               subtitle={formatQuantity(
                 item.quantity,

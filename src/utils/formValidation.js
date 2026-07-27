@@ -36,3 +36,14 @@ export function isNonNegativeNumber(value) {
   if (!isNumberFilled(value)) return false;
   return Number(value) >= 0;
 }
+
+/**
+ * Converte input de número opcional (RHF `setValueAs`).
+ * String vazia / null → `emptyValue` (default `undefined` para required; use `null` para opcional).
+ * @param {unknown} value
+ * @param {undefined|null} [emptyValue]
+ */
+export function parseOptionalNumber(value, emptyValue = undefined) {
+  if (value === "" || value == null) return emptyValue;
+  return Number(value);
+}

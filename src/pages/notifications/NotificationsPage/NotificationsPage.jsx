@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -11,16 +10,13 @@ import NotificationCard from "../../../components/notifications/NotificationCard
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import MarkEmailReadOutlinedIcon from "@mui/icons-material/MarkEmailReadOutlined";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
+import { useNotificationActions } from "../../../hooks/useNotificationActions";
 import { ApiError } from "../../../services/apiClient";
 import {
   listNotifications,
   markAllNotificationsRead,
-  markNotificationRead,
 } from "../../../services/notificationService";
-import {
-  isNotificationNavigable,
-  resolveNotificationDestination,
-} from "../../../utils/notifications/resolveNotificationDestination";
+import { isNotificationNavigable } from "../../../utils/notifications/resolveNotificationDestination";
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
@@ -36,7 +32,6 @@ import {
 } from "./NotificationsPage.styled";
 
 export default function NotificationsPage() {
-  const navigate = useNavigate();
   const { success, error } = useAppSnackbar();
   const [loading, setLoading] = useState(true);
   const [markingAll, setMarkingAll] = useState(false);
@@ -66,19 +61,20 @@ export default function NotificationsPage() {
     [error, filter, filters.unread, listLimit],
   );
 
+  const { markRead, openNotification } = useNotificationActions({
+    onAfterMarkRead: () => load({ silent: true }),
+    markReadSuccessMessage: NOTIFICATIONS_PAGE_COPY.markReadSuccess,
+    markReadErrorMessage: NOTIFICATIONS_PAGE_COPY.markReadError,
+  });
+
   useEffect(() => {
     load();
   }, [load]);
 
   const handleMarkRead = async (notification) => {
-    if (!notification.unread) return;
     setBusyId(notification.id);
     try {
-      await markNotificationRead(notification.id);
-      success(NOTIFICATIONS_PAGE_COPY.markReadSuccess);
-      await load({ silent: true });
-    } catch (err) {
-      error(err instanceof ApiError ? err.message : NOTIFICATIONS_PAGE_COPY.markReadError);
+      await markRead(notification);
     } finally {
       setBusyId(null);
     }
@@ -95,21 +91,6 @@ export default function NotificationsPage() {
     } finally {
       setMarkingAll(false);
     }
-  };
-
-  const handleOpen = async (notification) => {
-    const destination = resolveNotificationDestination(notification);
-    if (!destination) return;
-
-    if (notification.unread) {
-      try {
-        await markNotificationRead(notification.id);
-      } catch {
-        /* segue a navegação mesmo se falhar marcar lida */
-      }
-    }
-
-    navigate(destination.path, destination.state ? { state: destination.state } : undefined);
   };
 
   if (loading) {
@@ -187,7 +168,7 @@ export default function NotificationsPage() {
       ) : (
         <Stack spacing={listSpacing}>
           {notifications.map((notification) => {
-            const clickable = isNotificationNavigable(notification);
+            const navigable = isNotificationNavigable(notification);
             return (
               <NotificationCard
                 key={notification.id}
@@ -195,9 +176,7 @@ export default function NotificationsPage() {
                 locale={locale}
                 busy={busyId === notification.id}
                 onMarkRead={() => handleMarkRead(notification)}
-                onRegisterStockOut={() => handleOpen(notification)}
-                onOpenProduct={() => handleOpen(notification)}
-                onClick={clickable ? () => handleOpen(notification) : undefined}
+                onNavigate={navigable ? () => openNotification(notification) : undefined}
               />
             );
           })}

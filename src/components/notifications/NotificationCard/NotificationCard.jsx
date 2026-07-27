@@ -20,28 +20,27 @@ import {
 /**
  * Card de notificação/alerta compartilhado (dashboard e página de alertas).
  *
+ * Casca reutilizável: tom + título/corpo + ações. A navegação fica no hook
+ * `useNotificationActions` (onNavigate).
+ *
  * @param {Object} props
  * @param {object} props.notification
  * @param {string} [props.locale]
  * @param {boolean} [props.busy]
  * @param {() => void} [props.onMarkRead]
- * @param {() => void} [props.onOpenProduct]
- * @param {() => void} [props.onRegisterStockOut]
- * @param {() => void} [props.onClick]
+ * @param {() => void} [props.onNavigate] — tap no card / Ver produto / Registrar baixa
  */
 export default function NotificationCard({
   notification,
   locale = "pt-BR",
   busy = false,
   onMarkRead,
-  onOpenProduct,
-  onRegisterStockOut,
-  onClick,
+  onNavigate,
 }) {
   const unread = Boolean(notification.unread);
   const tone = resolveNotificationTone(notification.type);
   const isNudge = isConsumptionNudge(notification);
-  const clickable = Boolean(onClick);
+  const clickable = Boolean(onNavigate);
 
   return (
     <Box
@@ -49,14 +48,14 @@ export default function NotificationCard({
         ...notificationCardSx(tone, unread),
         ...(clickable ? notificationCardClickableSx : null),
       }}
-      onClick={onClick}
+      onClick={onNavigate}
       role={clickable ? "button" : undefined}
       tabIndex={clickable ? 0 : undefined}
       onKeyDown={(event) => {
         if (!clickable) return;
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          onClick?.();
+          onNavigate?.();
         }
       }}
     >
@@ -89,26 +88,26 @@ export default function NotificationCard({
           </LoadingButton>
         ) : null}
 
-        {isNudge && onRegisterStockOut ? (
+        {isNudge && onNavigate ? (
           <Button
             size="small"
             variant="text"
             onClick={(event) => {
               event.stopPropagation();
-              onRegisterStockOut();
+              onNavigate();
             }}
           >
             {NOTIFICATION_CARD_COPY.registerStockOut}
           </Button>
         ) : null}
 
-        {notification.productId && onOpenProduct ? (
+        {notification.productId && onNavigate && !isNudge ? (
           <Button
             size="small"
             variant="text"
             onClick={(event) => {
               event.stopPropagation();
-              onOpenProduct();
+              onNavigate();
             }}
           >
             {NOTIFICATION_CARD_COPY.openProduct}

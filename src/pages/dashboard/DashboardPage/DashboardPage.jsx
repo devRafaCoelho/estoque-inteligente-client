@@ -21,14 +21,12 @@ import EmptyState from "../../../components/common/EmptyState/EmptyState";
 import NotificationCard from "../../../components/notifications/NotificationCard/NotificationCard";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
+import { useNotificationActions } from "../../../hooks/useNotificationActions";
 import { ApiError } from "../../../services/apiClient";
 import { getDashboardStats } from "../../../services/dashboardService";
 import { getFinanceSummary } from "../../../services/financeService";
-import { markNotificationRead } from "../../../services/notificationService";
-import {
-  isNotificationNavigable,
-  resolveNotificationDestination,
-} from "../../../utils/notifications/resolveNotificationDestination";
+import { formatMoney } from "../../../utils/money";
+import { isNotificationNavigable } from "../../../utils/notifications/resolveNotificationDestination";
 import { pageLoadingBoxSx, pageHeaderSubtitleSx, pageSectionTitleSx } from "../../../styles/pageStyles";
 import { DASHBOARD_PAGE_COPY } from "./dashboardPageCopy";
 import { DASHBOARD_PAGE_CONFIG } from "./dashboardPageConfig";
@@ -50,13 +48,6 @@ import {
   alertsListSpacing,
 } from "./DashboardPage.styled";
 
-function formatMoney(value, { locale, currency } = DASHBOARD_PAGE_CONFIG) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-  }).format(Number(value) || 0);
-}
-
 function StatCard({ status, value }) {
   return (
     <Card sx={statCardSx}>
@@ -75,7 +66,7 @@ export default function DashboardPage() {
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { success, error } = useAppSnackbar();
+  const { error } = useAppSnackbar();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ ok: 0, low: 0, out: 0 });
   const [criticalProducts, setCriticalProducts] = useState([]);
@@ -110,37 +101,23 @@ export default function DashboardPage() {
     [error],
   );
 
+  const { markRead, openNotification } = useNotificationActions({
+    onAfterMarkRead: () => load({ silent: true }),
+    markReadSuccessMessage: DASHBOARD_PAGE_COPY.markReadSuccess,
+    markReadErrorMessage: DASHBOARD_PAGE_COPY.markReadError,
+  });
+
   useEffect(() => {
     load();
   }, [load]);
 
   const handleMarkRead = async (alert) => {
-    if (!alert.unread) return;
     setBusyId(alert.id);
     try {
-      await markNotificationRead(alert.id);
-      success(DASHBOARD_PAGE_COPY.markReadSuccess);
-      await load({ silent: true });
-    } catch (err) {
-      error(err instanceof ApiError ? err.message : DASHBOARD_PAGE_COPY.markReadError);
+      await markRead(alert);
     } finally {
       setBusyId(null);
     }
-  };
-
-  const handleOpenAlert = async (alert) => {
-    const destination = resolveNotificationDestination(alert);
-    if (!destination) return;
-
-    if (alert.unread) {
-      try {
-        await markNotificationRead(alert.id);
-      } catch {
-        /* segue a navegação mesmo se falhar marcar lida */
-      }
-    }
-
-    navigate(destination.path, destination.state ? { state: destination.state } : undefined);
   };
 
   if (loading) {
@@ -232,20 +209,19 @@ export default function DashboardPage() {
             {DASHBOARD_PAGE_COPY.alertsTitle}
           </Typography>
           <Stack spacing={alertsListSpacing}>
-            {recentAlerts.map((alert) => (
-              <NotificationCard
-                key={alert.id}
-                notification={alert}
-                locale={locale}
-                busy={busyId === alert.id}
-                onMarkRead={() => handleMarkRead(alert)}
-                onRegisterStockOut={() => handleOpenAlert(alert)}
-                onOpenProduct={() => handleOpenAlert(alert)}
-                onClick={
-                  isNotificationNavigable(alert) ? () => handleOpenAlert(alert) : undefined
-                }
-              />
-            ))}
+            {recentAlerts.map((alert) => {
+              const navigable = isNotificationNavigable(alert);
+              return (
+                <NotificationCard
+                  key={alert.id}
+                  notification={alert}
+                  locale={locale}
+                  busy={busyId === alert.id}
+                  onMarkRead={() => handleMarkRead(alert)}
+                  onNavigate={navigable ? () => openNotification(alert) : undefined}
+                />
+              );
+            })}
           </Stack>
         </Box>
       ) : null}

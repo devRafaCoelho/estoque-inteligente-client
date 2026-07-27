@@ -1,16 +1,10 @@
-export const NOTIFICATION_CARD_CONFIG = {
-  types: {
-    lowStock: "low_stock",
-    outOfStock: "out_of_stock",
-    repurchase: "repurchase_reminder",
-    consumptionNudge: "consumption_nudge",
-    missingConsumption: "missing_consumption",
-  },
-  actions: {
-    openProduct: "open_product",
-    openQuickConsume: "open_quick_consume",
-  },
-};
+import {
+  NOTIFICATION_ACTIONS,
+  NOTIFICATION_CARD_CONFIG,
+  NOTIFICATION_TYPES,
+} from "../../../utils/notifications/notificationConstants.js";
+
+export { NOTIFICATION_ACTIONS, NOTIFICATION_CARD_CONFIG, NOTIFICATION_TYPES };
 
 /**
  * @param {string|null|undefined} type
@@ -18,13 +12,13 @@ export const NOTIFICATION_CARD_CONFIG = {
  */
 export function resolveNotificationTone(type) {
   switch (type) {
-    case NOTIFICATION_CARD_CONFIG.types.outOfStock:
+    case NOTIFICATION_TYPES.outOfStock:
       return "error";
-    case NOTIFICATION_CARD_CONFIG.types.lowStock:
-    case NOTIFICATION_CARD_CONFIG.types.repurchase:
+    case NOTIFICATION_TYPES.lowStock:
+    case NOTIFICATION_TYPES.repurchase:
       return "warning";
-    case NOTIFICATION_CARD_CONFIG.types.consumptionNudge:
-    case NOTIFICATION_CARD_CONFIG.types.missingConsumption:
+    case NOTIFICATION_TYPES.consumptionNudge:
+    case NOTIFICATION_TYPES.missingConsumption:
       return "primary";
     default:
       return "default";
@@ -37,8 +31,8 @@ export function resolveNotificationTone(type) {
  */
 export function isConsumptionNudge(notification) {
   return (
-    notification?.type === NOTIFICATION_CARD_CONFIG.types.consumptionNudge ||
-    notification?.type === NOTIFICATION_CARD_CONFIG.types.missingConsumption ||
-    notification?.payload?.action === NOTIFICATION_CARD_CONFIG.actions.openQuickConsume
+    notification?.type === NOTIFICATION_TYPES.consumptionNudge ||
+    notification?.type === NOTIFICATION_TYPES.missingConsumption ||
+    notification?.payload?.action === NOTIFICATION_ACTIONS.openQuickConsume
   );
 }

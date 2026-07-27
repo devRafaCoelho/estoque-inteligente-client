@@ -21,6 +21,7 @@ import {
   getFinanceTips,
 } from "../../../services/financeService";
 import { categoryLabel } from "../../../utils/categoryLabels";
+import { formatMoney } from "../../../utils/money";
 import { pageHeaderSubtitleSx, pageLoadingBoxSx, pageSectionTitleSx } from "../../../styles/pageStyles";
 import {
   FINANCE_PAGE_CONFIG,
@@ -43,13 +44,6 @@ import {
   summaryCardSx,
   tipItemSx,
 } from "./FinancePage.styled";
-
-function formatMoney(value, { locale, currency } = FINANCE_PAGE_CONFIG) {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-  }).format(Number(value) || 0);
-}
 
 function formatDelta(percent) {
   const value = Number(percent) || 0;

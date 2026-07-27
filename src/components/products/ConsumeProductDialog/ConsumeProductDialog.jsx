@@ -7,7 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import FormDialog from "../../common/FormDialog/FormDialog";
 import { consumeSchema } from "../../../schemas/products/productSchema";
 import { formatQuantity } from "../../../utils/unitLabels";
-import { isPositiveNumber } from "../../../utils/formValidation";
+import { isPositiveNumber, parseOptionalNumber } from "../../../utils/formValidation";
 import { CONSUME_PRODUCT_DIALOG_COPY } from "./consumeProductDialogCopy";
 import { CONSUME_PRODUCT_DIALOG_CONFIG } from "./consumeProductDialogConfig";
 import { formStackSpacing } from "./ConsumeProductDialog.styled";

@@ -25,6 +25,7 @@ import {
 import ProductCategorySelectField from "../../../components/form/ProductCategorySelectField";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
+import { useExclusiveExpand } from "../../../hooks/useExclusiveExpand";
 import { ApiError } from "../../../services/apiClient";
 import { buildIntakePreviewPayload } from "../../../utils/intake/intakeForm";
 import { moneyToDisplay, parseMoneyInput } from "../../../utils/moneyInput";
@@ -56,7 +57,7 @@ export default function IntakePreviewPage() {
   const [cancelling, setCancelling] = useState(false);
   const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
   const [itemToRemove, setItemToRemove] = useState(null);
-  const [expandedId, setExpandedId] = useState(null);
+  const { setExpandedId, isExpanded, setExpanded } = useExclusiveExpand();
   const [intake, setIntake] = useState(null);
   const [items, setItems] = useState([]);
   const [storeName, setStoreName] = useState("");
@@ -283,10 +284,8 @@ export default function IntakePreviewPage() {
           items.map((item) => (
             <ReviewItemAccordion
               key={item.id}
-              expanded={expandedId === item.id}
-              onExpandedChange={(isExpanded) =>
-                setExpandedId(isExpanded ? item.id : null)
-              }
+              expanded={isExpanded(item.id)}
+              onExpandedChange={(open) => setExpanded(item.id, open)}
               title={item.name || INTAKE_PREVIEW_PAGE_COPY.nameLabel}
               subtitle={formatQuantity(
                 item.quantity,

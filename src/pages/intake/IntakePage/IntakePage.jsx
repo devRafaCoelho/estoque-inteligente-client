@@ -5,7 +5,6 @@ import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
@@ -21,6 +20,7 @@ import {
 import { buildIntakeParsePayload } from "../../../utils/intake/intakeForm";
 import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { exampleChipSx, pageHeaderSubtitleSx } from "../../../styles/pageStyles";
@@ -148,7 +148,7 @@ export default function IntakePage() {
         </Box>
       </Stack>
 
-      <TextField
+      <SpeechTextField
         label={INTAKE_PAGE_COPY.textLabel}
         placeholder={INTAKE_PAGE_COPY.textPlaceholder}
         multiline
@@ -158,10 +158,11 @@ export default function IntakePage() {
         helperText={errors.text?.message}
         value={text ?? ""}
         inputRef={textRef}
+        speechDisabled={loading}
         slotProps={{ inputLabel: { shrink: true } }}
         {...textField}
-        onChange={(e) =>
-          setValue("text", e.target.value, { shouldValidate: true, shouldDirty: true })
+        onChange={(next) =>
+          setValue("text", next, { shouldValidate: true, shouldDirty: true })
         }
       />
 

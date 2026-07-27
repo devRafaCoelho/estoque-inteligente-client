@@ -13,6 +13,7 @@ import { fullWidthFieldSx } from "../../../styles/formStyles";
 import {
   isFilled,
   isNonNegativeNumber,
+  parseOptionalNumber,
 } from "../../../utils/formValidation";
 import {
   PRODUCT_FORM_DIALOG_CONFIG,
@@ -133,8 +134,7 @@ export default function ProductFormDialog({
             error={Boolean(errors.quantity)}
             helperText={errors.quantity?.message}
             {...register("quantity", {
-              setValueAs: (value) =>
-                value === "" || value == null ? undefined : Number(value),
+              setValueAs: (value) => parseOptionalNumber(value),
             })}
           />
           <Box sx={unitFieldSx}>
@@ -164,8 +164,7 @@ export default function ProductFormDialog({
           error={Boolean(errors.minQuantity)}
           helperText={errors.minQuantity?.message}
           {...register("minQuantity", {
-            setValueAs: (value) =>
-              value === "" || value == null ? undefined : Number(value),
+            setValueAs: (value) => parseOptionalNumber(value),
           })}
         />
         <TextField
@@ -176,8 +175,7 @@ export default function ProductFormDialog({
           error={Boolean(errors.repurchaseDays)}
           helperText={errors.repurchaseDays?.message || PRODUCT_FORM_DIALOG_COPY.repurchaseDaysHelper}
           {...register("repurchaseDays", {
-            setValueAs: (value) =>
-              value === "" || value == null ? null : Number(value),
+            setValueAs: (value) => parseOptionalNumber(value, null),
           })}
         />
         <TextField
