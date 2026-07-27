@@ -15,7 +15,7 @@ import { CATEGORY_LABELS } from "../../../config/constants";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { listProducts } from "../../../services/productService";
-import { pageLoadingCompactSx } from "../../../styles/pageStyles";
+import { pageHeaderSubtitleSx, pageLoadingCompactSx } from "../../../styles/pageStyles";
 import { PRODUCT_LIST_CONFIG } from "./productListConfig";
 import { PRODUCT_LIST_COPY } from "./productListCopy";
 import {
@@ -98,7 +98,12 @@ export default function ProductListPage() {
 
   return (
     <Stack spacing={pageStackSpacing}>
-      <Typography variant="h5">{PRODUCT_LIST_COPY.title}</Typography>
+      <Box>
+        <Typography variant="h5">{PRODUCT_LIST_COPY.title}</Typography>
+        <Typography variant="body2" sx={pageHeaderSubtitleSx}>
+          {PRODUCT_LIST_COPY.subtitle}
+        </Typography>
+      </Box>
 
       <Box sx={searchRowSx}>
         <SearchTextField

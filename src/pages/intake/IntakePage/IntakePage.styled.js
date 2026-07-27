@@ -45,4 +45,4 @@ export const voiceHintSx = {
   px: 0.25,
 };
 
-export const textModeStackSpacing = 1.75;
+export const textModeStackSpacing = 2.5;

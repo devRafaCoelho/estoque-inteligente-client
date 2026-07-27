@@ -5,7 +5,6 @@ import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -22,12 +21,7 @@ import LoadingButton from "../../../components/common/LoadingButton/LoadingButto
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import {
-  pageBackHeaderGridSx,
-  pageBackIconCellSx,
-  pageBackSubtitleCellSx,
-  pageBackTitleCellSx,
-} from "../../../styles/pageStyles";
+import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import {
   formatStockOutDraftTitle,
   formatStockOutDraftUpdatedAt,
@@ -149,18 +143,9 @@ export default function StockOutPage() {
 
   return (
     <Stack spacing={stockOutFormStackSpacing} component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Box sx={pageBackHeaderGridSx}>
-        <IconButton
-          onClick={() => navigate(STOCK_OUT_PAGE_CONFIG.paths.dashboard)}
-          aria-label={STOCK_OUT_PAGE_COPY.backAria}
-          sx={pageBackIconCellSx}
-        >
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h5" sx={pageBackTitleCellSx}>
-          {STOCK_OUT_PAGE_COPY.title}
-        </Typography>
-        <Typography variant="body2" sx={pageBackSubtitleCellSx}>
+      <Box>
+        <Typography variant="h5">{STOCK_OUT_PAGE_COPY.title}</Typography>
+        <Typography variant="body2" sx={pageHeaderSubtitleSx}>
           {STOCK_OUT_PAGE_COPY.subtitle}
         </Typography>
       </Box>

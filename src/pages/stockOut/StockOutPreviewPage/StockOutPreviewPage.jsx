@@ -42,6 +42,7 @@ import {
 import { STOCK_OUT_PREVIEW_PAGE_COPY } from "./stockOutPreviewPageCopy";
 import { STOCK_OUT_PREVIEW_PAGE_CONFIG } from "./stockOutPreviewPageConfig";
 import {
+  actionsBlockSpacing,
   allowZeroLabelSx,
   lockedStackSpacing,
   stockOutPreviewStackSpacing,
@@ -358,23 +359,25 @@ export default function StockOutPreviewPage() {
         {STOCK_OUT_PREVIEW_PAGE_COPY.itemsSummary(activeCount)}
       </Typography>
 
-      <LoadingButton
-        variant="contained"
-        size="large"
-        loading={confirming}
-        disabled={!itemsReady || cancelling}
-        onClick={handleConfirm}
-      >
-        {STOCK_OUT_PREVIEW_PAGE_COPY.confirm}
-      </LoadingButton>
+      <Stack spacing={actionsBlockSpacing}>
+        <LoadingButton
+          variant="contained"
+          size="large"
+          loading={confirming}
+          disabled={!itemsReady || cancelling}
+          onClick={handleConfirm}
+        >
+          {STOCK_OUT_PREVIEW_PAGE_COPY.confirm}
+        </LoadingButton>
 
-      <Button
-        color="inherit"
-        disabled={confirming || cancelling}
-        onClick={() => setCancelConfirmOpen(true)}
-      >
-        {STOCK_OUT_PREVIEW_PAGE_COPY.cancel}
-      </Button>
+        <Button
+          color="inherit"
+          disabled={confirming || cancelling}
+          onClick={() => setCancelConfirmOpen(true)}
+        >
+          {STOCK_OUT_PREVIEW_PAGE_COPY.cancel}
+        </Button>
+      </Stack>
 
       <ConfirmDialog
         open={Boolean(itemToRemove)}

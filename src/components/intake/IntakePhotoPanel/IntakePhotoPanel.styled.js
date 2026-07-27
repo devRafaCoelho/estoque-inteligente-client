@@ -22,20 +22,40 @@ export const photoActionsSx = {
 
 export const photoPreviewWrapSx = {
   position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
   borderRadius: cardBorderRadius,
   overflow: "hidden",
   border: "1px solid",
   borderColor: "divider",
   bgcolor: "action.hover",
-  minHeight: 200,
+  px: 1.5,
+  py: 2,
+  minHeight: 220,
+  maxHeight: 420,
 };
 
 export const photoPreviewImgSx = {
   display: "block",
-  width: "100%",
+  width: "auto",
+  maxWidth: "100%",
   maxHeight: 360,
   objectFit: "contain",
-  bgcolor: "background.default",
+  borderRadius: 1,
+  bgcolor: "background.paper",
+  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+};
+
+export const photoClearButtonSx = {
+  position: "absolute",
+  top: 10,
+  right: 10,
+  bgcolor: "background.paper",
+  boxShadow: 1,
+  "&:hover": {
+    bgcolor: "background.paper",
+  },
 };
 
 export const photoOverlaySx = {
@@ -49,6 +69,22 @@ export const photoOverlaySx = {
   bgcolor: "rgba(0,0,0,0.55)",
   color: "common.white",
   px: 2,
+};
+
+export const photoSubmitRowSx = {
+  width: "100%",
+  alignItems: "stretch",
+};
+
+export const photoChangeButtonSx = {
+  whiteSpace: "nowrap",
+  flexShrink: 0,
+  px: 2,
+};
+
+export const photoSubmitButtonSx = {
+  flex: 1,
+  minWidth: 0,
 };
 
 export const photoErrorActionsSx = {

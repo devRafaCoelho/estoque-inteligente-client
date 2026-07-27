@@ -43,6 +43,7 @@ import {
 import { INTAKE_PREVIEW_PAGE_COPY } from "./intakePreviewPageCopy";
 import { INTAKE_PREVIEW_PAGE_CONFIG } from "./intakePreviewPageConfig";
 import {
+  actionsBlockSpacing,
   actionsRowProps,
   intakePreviewStackSpacing,
   lockedStackSpacing,
@@ -393,36 +394,38 @@ export default function IntakePreviewPage() {
         {INTAKE_PREVIEW_PAGE_COPY.itemsSummary(activeCount)}
       </Typography>
 
-      <Stack {...actionsRowProps}>
-        <LoadingButton
-          variant="contained"
-          size="large"
-          loading={confirming}
-          disabled={!itemsReady || saving || cancelling}
-          onClick={handleConfirm}
-          fullWidth
-        >
-          {INTAKE_PREVIEW_PAGE_COPY.confirm}
-        </LoadingButton>
-        <LoadingButton
-          variant="outlined"
-          size="large"
-          loading={saving}
-          disabled={!itemsReady || confirming || cancelling}
-          onClick={handleSaveDraft}
-          fullWidth
-        >
-          {INTAKE_PREVIEW_PAGE_COPY.saveDraft}
-        </LoadingButton>
-      </Stack>
+      <Stack spacing={actionsBlockSpacing}>
+        <Stack {...actionsRowProps}>
+          <LoadingButton
+            variant="contained"
+            size="large"
+            loading={confirming}
+            disabled={!itemsReady || saving || cancelling}
+            onClick={handleConfirm}
+            fullWidth
+          >
+            {INTAKE_PREVIEW_PAGE_COPY.confirm}
+          </LoadingButton>
+          <LoadingButton
+            variant="outlined"
+            size="large"
+            loading={saving}
+            disabled={!itemsReady || confirming || cancelling}
+            onClick={handleSaveDraft}
+            fullWidth
+          >
+            {INTAKE_PREVIEW_PAGE_COPY.saveDraft}
+          </LoadingButton>
+        </Stack>
 
-      <Button
-        color="inherit"
-        disabled={confirming || saving || cancelling}
-        onClick={() => setCancelConfirmOpen(true)}
-      >
-        {INTAKE_PREVIEW_PAGE_COPY.cancel}
-      </Button>
+        <Button
+          color="inherit"
+          disabled={confirming || saving || cancelling}
+          onClick={() => setCancelConfirmOpen(true)}
+        >
+          {INTAKE_PREVIEW_PAGE_COPY.cancel}
+        </Button>
+      </Stack>
 
       <ConfirmDialog
         open={Boolean(itemToRemove)}

@@ -1,5 +1,6 @@
 export const PRODUCT_LIST_COPY = {
   title: "Produtos",
+  subtitle: "Busque, filtre e acompanhe o que tem em casa",
   searchPlaceholder: "Buscar produto...",
   categoryLabel: "Categoria",
   categoryAll: "Todas",

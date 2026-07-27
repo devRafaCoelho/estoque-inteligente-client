@@ -9,6 +9,9 @@ export const actionsRowProps = {
   spacing: 1.25,
 };
 
+/** Bloco Confirmar / Salvar / Cancelar — mesmo gap entre todos. */
+export const actionsBlockSpacing = 1.25;
+
 // Evita quebra de HMR se algum módulo antigo ainda pedir estes nomes.
 export const itemAccordionDetailsSx = {};
 export const itemAccordionSummarySx = {};

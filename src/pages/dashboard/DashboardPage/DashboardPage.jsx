@@ -7,6 +7,8 @@ import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -33,7 +35,7 @@ import { getDashboardStats } from "../../../services/dashboardService";
 import { getFinanceSummary } from "../../../services/financeService";
 import { formatMoney } from "../../../utils/money";
 import { isNotificationNavigable } from "../../../utils/notifications/resolveNotificationDestination";
-import { pageLoadingBoxSx, pageHeaderSubtitleSx, pageSectionTitleSx } from "../../../styles/pageStyles";
+import { pageLoadingBoxSx, pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import { DASHBOARD_PAGE_COPY } from "./dashboardPageCopy";
 import { DASHBOARD_PAGE_CONFIG } from "./dashboardPageConfig";
 import {
@@ -60,6 +62,9 @@ import {
   monthSpendContentSx,
   criticalListSpacing,
   alertsListSpacing,
+  sectionTitleIconSx,
+  sectionTitleRowSx,
+  sectionTitleTextSx,
 } from "./DashboardPage.styled";
 
 function StatCard({ status, value }) {
@@ -271,9 +276,12 @@ export default function DashboardPage() {
 
       {recentAlerts.length > 0 ? (
         <Box>
-          <Typography variant="h6" sx={pageSectionTitleSx}>
-            {DASHBOARD_PAGE_COPY.alertsTitle}
-          </Typography>
+          <Box sx={sectionTitleRowSx}>
+            <NotificationsNoneOutlinedIcon sx={sectionTitleIconSx} aria-hidden />
+            <Typography variant="h6" sx={sectionTitleTextSx}>
+              {DASHBOARD_PAGE_COPY.alertsTitle}
+            </Typography>
+          </Box>
           <Stack spacing={alertsListSpacing}>
             {recentAlerts.map((alert) => {
               const navigable = isNotificationNavigable(alert);
@@ -293,9 +301,12 @@ export default function DashboardPage() {
       ) : null}
 
       <Box>
-        <Typography variant="h6" sx={pageSectionTitleSx}>
-          {DASHBOARD_PAGE_COPY.attentionTitle}
-        </Typography>
+        <Box sx={sectionTitleRowSx}>
+          <WarningAmberOutlinedIcon sx={sectionTitleIconSx} aria-hidden />
+          <Typography variant="h6" sx={sectionTitleTextSx}>
+            {DASHBOARD_PAGE_COPY.attentionTitle}
+          </Typography>
+        </Box>
         {criticalProducts.length === 0 ? (
           <EmptyState
             size="sm"

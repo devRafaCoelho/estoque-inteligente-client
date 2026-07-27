@@ -22,7 +22,9 @@ const TONE_STYLES = {
 export const notificationCardSx = (tone = "default", unread = false) => {
   const palette = TONE_STYLES[tone] || TONE_STYLES.default;
   return {
-    p: 1.5,
+    px: 1.5,
+    pt: 1.5,
+    pb: 0.5,
     borderRadius: cardBorderRadius,
     bgcolor: unread ? palette.unreadBg : "background.paper",
     border: "1px solid",
@@ -49,8 +51,11 @@ export const notificationCardTimestampSx = {
 };
 
 export const notificationCardActionsSx = {
-  mt: 1,
+  mt: 0.25,
   flexWrap: "wrap",
+  "& .MuiButton-root": {
+    py: 0.25,
+  },
 };
 
 export const notificationCardActionsSpacing = 1;

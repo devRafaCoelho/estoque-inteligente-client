@@ -5,7 +5,6 @@ import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -28,12 +27,7 @@ import SpeechTextField from "../../../components/voice/SpeechRecordButton/Speech
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { resolveOcrError, withTimeout } from "../../../utils/intake/ocrError";
-import {
-  pageBackHeaderGridSx,
-  pageBackIconCellSx,
-  pageBackSubtitleCellSx,
-  pageBackTitleCellSx,
-} from "../../../styles/pageStyles";
+import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import {
   formatIntakeDraftTitle,
   formatIntakeDraftUpdatedAt,
@@ -208,18 +202,9 @@ export default function IntakePage() {
       onSubmit={isTextMode ? handleSubmit(onSubmit) : undefined}
       noValidate={isTextMode || undefined}
     >
-      <Box sx={pageBackHeaderGridSx}>
-        <IconButton
-          onClick={() => navigate(INTAKE_PAGE_CONFIG.paths.dashboard)}
-          aria-label={INTAKE_PAGE_COPY.backAria}
-          sx={pageBackIconCellSx}
-        >
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h5" sx={pageBackTitleCellSx}>
-          {INTAKE_PAGE_COPY.title}
-        </Typography>
-        <Typography variant="body2" sx={pageBackSubtitleCellSx}>
+      <Box>
+        <Typography variant="h5">{INTAKE_PAGE_COPY.title}</Typography>
+        <Typography variant="body2" sx={pageHeaderSubtitleSx}>
           {INTAKE_PAGE_COPY.subtitle}
         </Typography>
       </Box>

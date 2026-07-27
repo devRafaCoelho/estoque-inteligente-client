@@ -139,3 +139,20 @@ export const monthSpendContentSx = {
 export const criticalListSpacing = 1.5;
 
 export const alertsListSpacing = 1.25;
+
+export const sectionTitleRowSx = {
+  display: "flex",
+  alignItems: "center",
+  gap: 0.75,
+  mb: 1.5,
+};
+
+export const sectionTitleIconSx = {
+  color: "text.secondary",
+  fontSize: 22,
+};
+
+export const sectionTitleTextSx = {
+  mb: 0,
+  fontWeight: 700,
+};

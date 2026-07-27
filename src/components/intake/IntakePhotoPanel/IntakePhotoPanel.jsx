@@ -18,11 +18,15 @@ import {
 } from "./intakePhotoConfig";
 import {
   photoActionsSx,
+  photoChangeButtonSx,
+  photoClearButtonSx,
   photoDropSx,
   photoErrorActionsSx,
   photoOverlaySx,
   photoPreviewImgSx,
   photoPreviewWrapSx,
+  photoSubmitButtonSx,
+  photoSubmitRowSx,
 } from "./IntakePhotoPanel.styled";
 
 function isAllowedFile(file) {
@@ -144,7 +148,7 @@ export default function IntakePhotoPanel({
               size="small"
               aria-label={INTAKE_PHOTO_COPY.clearAria}
               onClick={clearFile}
-              sx={{ position: "absolute", top: 8, right: 8, bgcolor: "background.paper" }}
+              sx={photoClearButtonSx}
             >
               <CloseRoundedIcon fontSize="small" />
             </IconButton>
@@ -244,13 +248,14 @@ export default function IntakePhotoPanel({
       )}
 
       {file && !hasError && (
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1.5} sx={photoSubmitRowSx}>
           {!loading && (
             <LoadingButton
               type="button"
-              variant="text"
+              variant="outlined"
               disabled={busy}
               onClick={() => galleryRef.current?.click()}
+              sx={photoChangeButtonSx}
             >
               {INTAKE_PHOTO_COPY.change}
             </LoadingButton>
@@ -258,10 +263,10 @@ export default function IntakePhotoPanel({
           <LoadingButton
             type="button"
             variant="contained"
-            fullWidth
             loading={loading}
             disabled={!file || disabled}
             onClick={() => onSubmit?.(file)}
+            sx={photoSubmitButtonSx}
           >
             {loading ? INTAKE_PHOTO_COPY.reading : INTAKE_PHOTO_COPY.submit}
           </LoadingButton>

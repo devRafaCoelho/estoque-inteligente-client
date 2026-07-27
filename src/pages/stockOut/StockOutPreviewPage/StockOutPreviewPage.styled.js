@@ -4,6 +4,9 @@ export const stockOutPreviewStackSpacing = 2.5;
 
 export const lockedStackSpacing = 2;
 
+/** Bloco Confirmar / Cancelar — mesmo gap entre os botões. */
+export const actionsBlockSpacing = 1.25;
+
 export const allowZeroLabelSx = {
   display: "inline-flex",
   alignItems: "center",
