@@ -9,12 +9,6 @@ export const listToolbarRowProps = {
   justifyContent: "space-between",
 };
 
-export const viewModeChipsSx = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 1,
-};
-
 export const addSectionSpacing = 1.5;
 
 export const actionButtonSx = {

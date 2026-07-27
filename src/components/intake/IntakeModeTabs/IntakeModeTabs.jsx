@@ -1,13 +1,11 @@
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import SegmentedControl from "../../common/SegmentedControl/SegmentedControl";
 import {
   INTAKE_MODE_TABS_CONFIG,
   INTAKE_MODE_TABS_COPY,
 } from "./intakeModeTabsConfig";
-import { intakeModeTabsGroupSx, intakeModeTabSx } from "./IntakeModeTabs.styled";
 
 /**
- * Escolha Texto | Voz | Foto na entrada.
+ * Escolha Texto | Voz | Foto na entrada (wrapper do SegmentedControl).
  * @param {{ value: string, onChange: (mode: string) => void, disabled?: boolean }} props
  */
 export default function IntakeModeTabs({
@@ -16,28 +14,16 @@ export default function IntakeModeTabs({
   disabled = false,
 }) {
   return (
-    <ToggleButtonGroup
-      exclusive
-      fullWidth
-      size="small"
-      color="primary"
+    <SegmentedControl
       value={value}
+      onChange={onChange}
       disabled={disabled}
-      onChange={(_event, next) => {
-        if (next != null) onChange?.(next);
-      }}
-      aria-label={INTAKE_MODE_TABS_COPY.groupAria}
-      sx={intakeModeTabsGroupSx}
-    >
-      <ToggleButton value="text" sx={intakeModeTabSx}>
-        {INTAKE_MODE_TABS_COPY.text}
-      </ToggleButton>
-      <ToggleButton value="voice" sx={intakeModeTabSx}>
-        {INTAKE_MODE_TABS_COPY.voice}
-      </ToggleButton>
-      <ToggleButton value="photo" sx={intakeModeTabSx}>
-        {INTAKE_MODE_TABS_COPY.photo}
-      </ToggleButton>
-    </ToggleButtonGroup>
+      ariaLabel={INTAKE_MODE_TABS_COPY.groupAria}
+      options={[
+        { value: "text", label: INTAKE_MODE_TABS_COPY.text },
+        { value: "voice", label: INTAKE_MODE_TABS_COPY.voice },
+        { value: "photo", label: INTAKE_MODE_TABS_COPY.photo },
+      ]}
+    />
   );
 }

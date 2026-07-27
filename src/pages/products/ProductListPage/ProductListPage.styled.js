@@ -19,10 +19,4 @@ export const categoryFieldSx = {
   flexShrink: 0,
 };
 
-export const statusChipsSx = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 1,
-};
-
 export const productListSpacing = 1.5;

@@ -7,10 +7,4 @@ export const toolbarRowProps = {
   justifyContent: "space-between",
 };
 
-export const filterChipsSx = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 1,
-};
-
 export const listSpacing = 1.25;

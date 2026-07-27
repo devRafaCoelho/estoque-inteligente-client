@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
@@ -8,10 +8,10 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CircularProgress from "@mui/material/CircularProgress";
-import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
+import SegmentedControl from "../../../components/common/SegmentedControl/SegmentedControl";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import {
@@ -31,7 +31,7 @@ import { FINANCE_PAGE_COPY } from "./financePageCopy";
 import {
   categoryBarFillSx,
   categoryBarTrackSx,
-  categoryMonthChipsSx,
+  categoryMonthControlSx,
   categoryRowSx,
   deltaSx,
   pageStackSpacing,
@@ -74,7 +74,6 @@ export default function FinancePage() {
   const [selectedMonth, setSelectedMonth] = useState(
     () => monthOptions[monthOptions.length - 1]?.month || new Date().getMonth() + 1,
   );
-  const selectedMonthChipRef = useRef(null);
 
   const loadCategoriesAndTips = useCallback(
     async (month) => {
@@ -123,15 +122,6 @@ export default function FinancePage() {
   useEffect(() => {
     load();
   }, [load]);
-
-  useEffect(() => {
-    if (loading) return;
-    selectedMonthChipRef.current?.scrollIntoView({
-      behavior: "smooth",
-      inline: "nearest",
-      block: "nearest",
-    });
-  }, [loading, selectedMonth]);
 
   const handleSelectMonth = (month) => {
     if (month === selectedMonth) return;
@@ -233,25 +223,17 @@ export default function FinancePage() {
 
       <Box>
         <Typography sx={pageSectionTitleSx}>{FINANCE_PAGE_COPY.categoriesTitle}</Typography>
-        <Box
-          sx={categoryMonthChipsSx}
-          role="group"
-          aria-label={FINANCE_PAGE_COPY.categoriesMonthAria}
-        >
-          {monthOptions.map((option) => {
-            const selected = option.month === selectedMonth;
-            return (
-              <Chip
-                key={option.month}
-                ref={selected ? selectedMonthChipRef : undefined}
-                label={option.label}
-                clickable
-                color={selected ? "primary" : "default"}
-                variant={selected ? "filled" : "outlined"}
-                onClick={() => handleSelectMonth(option.month)}
-              />
-            );
-          })}
+        <Box sx={categoryMonthControlSx}>
+          <SegmentedControl
+            scrollable
+            value={selectedMonth}
+            onChange={handleSelectMonth}
+            ariaLabel={FINANCE_PAGE_COPY.categoriesMonthAria}
+            options={monthOptions.map((option) => ({
+              value: option.month,
+              label: option.label,
+            }))}
+          />
         </Box>
         <Box sx={sectionCardSx}>
           {categoriesLoading ? (

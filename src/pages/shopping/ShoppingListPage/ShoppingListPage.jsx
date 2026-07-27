@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -19,6 +18,7 @@ import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/Sh
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
+import SegmentedControl from "../../../components/common/SegmentedControl/SegmentedControl";
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -33,7 +33,6 @@ import {
   addSectionSpacing,
   listToolbarRowProps,
   shoppingListStackSpacing,
-  viewModeChipsSx,
 } from "./ShoppingListPage.styled";
 
 export default function ShoppingListPage() {
@@ -272,29 +271,22 @@ export default function ShoppingListPage() {
 
       <Stack spacing={1}>
         <Stack {...listToolbarRowProps}>
-          <Box sx={viewModeChipsSx} role="group" aria-label={SHOPPING_LIST_PAGE_COPY.viewModeAria}>
-            {[
-              {
-                value: SHOPPING_LIST_PAGE_CONFIG.paperViewMode,
-                label: SHOPPING_LIST_PAGE_COPY.viewPaper,
-              },
-              {
-                value: SHOPPING_LIST_PAGE_CONFIG.listViewMode,
-                label: SHOPPING_LIST_PAGE_COPY.viewList,
-              },
-            ].map((option) => {
-              const selected = viewMode === option.value;
-              return (
-                <Chip
-                  key={option.value}
-                  label={option.label}
-                  clickable
-                  color={selected ? "primary" : "default"}
-                  variant={selected ? "filled" : "outlined"}
-                  onClick={() => handleViewMode(option.value)}
-                />
-              );
-            })}
+          <Box sx={{ minWidth: { sm: 220 }, maxWidth: { sm: 320 }, width: { xs: "100%", sm: "auto" } }}>
+            <SegmentedControl
+              value={viewMode}
+              onChange={handleViewMode}
+              ariaLabel={SHOPPING_LIST_PAGE_COPY.viewModeAria}
+              options={[
+                {
+                  value: SHOPPING_LIST_PAGE_CONFIG.paperViewMode,
+                  label: SHOPPING_LIST_PAGE_COPY.viewPaper,
+                },
+                {
+                  value: SHOPPING_LIST_PAGE_CONFIG.listViewMode,
+                  label: SHOPPING_LIST_PAGE_COPY.viewList,
+                },
+              ]}
+            />
           </Box>
           <Stack
             direction="row"

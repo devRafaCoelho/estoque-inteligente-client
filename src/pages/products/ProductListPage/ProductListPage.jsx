@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
+import SegmentedControl from "../../../components/common/SegmentedControl/SegmentedControl";
 import SearchTextField from "../../../components/form/SearchTextField/SearchTextField";
 import ProductCard from "../../../components/products/ProductCard/ProductCard";
 import { CATEGORY_LABELS } from "../../../config/constants";
@@ -24,7 +24,6 @@ import {
   productListSpacing,
   searchFieldSx,
   searchRowSx,
-  statusChipsSx,
 } from "./ProductListPage.styled";
 
 const CATEGORY_ALL_VALUE = "all";
@@ -124,21 +123,15 @@ export default function ProductListPage() {
         </TextField>
       </Box>
 
-      <Box sx={statusChipsSx} role="group" aria-label={PRODUCT_LIST_COPY.title}>
-        {PRODUCT_LIST_CONFIG.statusFilters.map((filter) => {
-          const selected = status === filter.value;
-          return (
-            <Chip
-              key={filter.value || "all"}
-              label={PRODUCT_LIST_COPY[filter.labelKey]}
-              clickable
-              color={selected ? "primary" : "default"}
-              variant={selected ? "filled" : "outlined"}
-              onClick={() => setStatus(filter.value)}
-            />
-          );
-        })}
-      </Box>
+      <SegmentedControl
+        value={status}
+        onChange={setStatus}
+        ariaLabel={PRODUCT_LIST_COPY.title}
+        options={PRODUCT_LIST_CONFIG.statusFilters.map((filter) => ({
+          value: filter.value,
+          label: PRODUCT_LIST_COPY[filter.labelKey],
+        }))}
+      />
 
       {loading ? (
         <Box sx={pageLoadingCompactSx}>

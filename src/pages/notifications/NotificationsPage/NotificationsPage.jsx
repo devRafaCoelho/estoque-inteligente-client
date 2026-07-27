@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
+import SegmentedControl from "../../../components/common/SegmentedControl/SegmentedControl";
 import NotificationCard from "../../../components/notifications/NotificationCard/NotificationCard";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import MarkEmailReadOutlinedIcon from "@mui/icons-material/MarkEmailReadOutlined";
@@ -25,7 +25,6 @@ import {
 import { NOTIFICATIONS_PAGE_CONFIG } from "./notificationsPageConfig";
 import { NOTIFICATIONS_PAGE_COPY } from "./notificationsPageCopy";
 import {
-  filterChipsSx,
   listSpacing,
   pageStackSpacing,
   toolbarRowProps,
@@ -127,20 +126,13 @@ export default function NotificationsPage() {
       </Box>
 
       <Stack {...toolbarRowProps}>
-        <Box sx={filterChipsSx} role="group" aria-label={NOTIFICATIONS_PAGE_COPY.title}>
-          {filterOptions.map((option) => {
-            const selected = filter === option.value;
-            return (
-              <Chip
-                key={option.value}
-                label={option.label}
-                clickable
-                color={selected ? "primary" : "default"}
-                variant={selected ? "filled" : "outlined"}
-                onClick={() => setFilter(option.value)}
-              />
-            );
-          })}
+        <Box sx={{ minWidth: { sm: 240 }, maxWidth: { sm: 360 }, width: { xs: "100%", sm: "auto" } }}>
+          <SegmentedControl
+            value={filter}
+            onChange={setFilter}
+            ariaLabel={NOTIFICATIONS_PAGE_COPY.title}
+            options={filterOptions}
+          />
         </Box>
 
         <Box sx={pageToolbarActionsSx}>

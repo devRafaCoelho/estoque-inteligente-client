@@ -56,21 +56,8 @@ export const seriesBarTrackSx = categoryBarTrackSx;
 
 export const seriesBarFillSx = categoryBarFillSx;
 
-export const categoryMonthChipsSx = {
-  display: "flex",
-  flexWrap: "nowrap",
-  gap: 1,
-  overflowX: "auto",
+export const categoryMonthControlSx = {
   mb: 1.5,
-  pb: 0.5,
-  WebkitOverflowScrolling: "touch",
-  scrollbarWidth: "thin",
-  "&::-webkit-scrollbar": {
-    height: 4,
-  },
-  "& > *": {
-    flexShrink: 0,
-  },
 };
 
 export const tipItemSx = {
