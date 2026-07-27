@@ -15,6 +15,12 @@ export const INTAKE_PHOTO_COPY = {
   qr: "QR da nota",
   qrDisabledHint: "Leitura de QR da nota em breve",
   openQr: "Abrir leitura de QR",
+  sefazFallbackTitle: "Consulta à SEFAZ indisponível",
+  sefazFallbackHint:
+    "Não bloqueamos você: tire uma foto do cupom ou escolha da galeria para continuar pela leitura (OCR).",
+  sefazFallbackCamera: "Tirar foto do cupom",
+  sefazFallbackGallery: "Escolher da galeria",
+  sefazFallbackRetryQr: "Tentar QR de novo",
   change: "Trocar foto",
   submit: "Ler cupom",
   retry: "Tentar de novo",

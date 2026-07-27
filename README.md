@@ -53,7 +53,7 @@ Abre em **http://localhost:5173**. Em dev, o Vite faz proxy de `/api` para a API
 | **Recompra / nudges** | Preferências e handlers de notificação (deep link produto / baixa) |
 | **Voz** | `SpeechTextField` + `useSpeechToText` em entrada, baixa, lista e chat; fallback para teclado |
 | **Foto / OCR** | `/entrada` Texto \| Foto \| Manual; câmera, galeria ou QR da nota |
-| **QR NF-e** | Na aba Foto → QR abre a câmera; após ler a nota, vai para o preview dos itens |
+| **QR NF-e** | Na aba Foto → QR abre a câmera; se a SEFAZ falhar, fallback para foto/OCR |
 | **Chat** | UI conversacional, cards de proposta com CTA (Revisar baixa / Salvar lista / Ver financeiro) |
 | **Composer** | Campo compacto com mic + seta de envio nos fluxos de texto |
 

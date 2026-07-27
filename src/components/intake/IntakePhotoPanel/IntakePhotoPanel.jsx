@@ -12,6 +12,7 @@ import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
 import QrCodeScannerOutlinedIcon from "@mui/icons-material/QrCodeScannerOutlined";
 import LoadingButton from "../../common/LoadingButton/LoadingButton";
 import IntakeNfPanel from "../IntakeNfPanel/IntakeNfPanel";
+import IntakeNfStateGate from "../IntakeNfStateGate/IntakeNfStateGate";
 import {
   INTAKE_PHOTO_CONFIG,
   INTAKE_PHOTO_COPY,
@@ -37,28 +38,20 @@ function isAllowedFile(file) {
 }
 
 /**
- * Captura/galeria de cupom + QR da nota + “Lendo cupom…”.
- *
- * @param {{
- *   onSubmit: (file: File) => void | Promise<void>,
- *   onNfValidated?: (payload: object) => void,
- *   startInQr?: boolean,
- *   loading?: boolean,
- *   disabled?: boolean,
- *   errorMessage?: string | null,
- *   canRetry?: boolean,
- *   onClearError?: () => void,
- *   onUseText?: () => void,
- *   onInvalid?: (message: string) => void,
- * }} props
+ * Captura/galeria de cupom + QR da nota + fallback SEFAZ → foto (F2-5.3).
+ * F2-5.4: com default_state, QR abre direto; sem preferência, pede UF uma vez.
  */
 export default function IntakePhotoPanel({
   onSubmit,
   onNfValidated,
   startInQr = false,
+  defaultState = "",
+  onSaveDefaultState,
   loading = false,
   disabled = false,
   errorMessage = null,
+  sefazFallback = false,
+  needsState = false,
   canRetry = true,
   onClearError,
   onUseText,
@@ -70,11 +63,42 @@ export default function IntakePhotoPanel({
   const galleryRef = useRef(null);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
-  const [qrMode, setQrMode] = useState(Boolean(startInQr));
+  const [qrMode, setQrMode] = useState(false);
+  const [stateGate, setStateGate] = useState(false);
+
+  const hasDefaultState = /^[A-Z]{2}$/i.test(String(defaultState || "").trim());
+
+  const openQrFlow = () => {
+    onClearError?.();
+    if (hasDefaultState) {
+      setStateGate(false);
+      setQrMode(true);
+      return;
+    }
+    setQrMode(false);
+    setStateGate(true);
+  };
 
   useEffect(() => {
-    setQrMode(Boolean(startInQr));
-  }, [startInQr]);
+    if (sefazFallback) {
+      setQrMode(false);
+      setStateGate(false);
+      return;
+    }
+    if (needsState) {
+      setQrMode(false);
+      setStateGate(true);
+      return;
+    }
+    if (!startInQr) return;
+    if (hasDefaultState) {
+      setStateGate(false);
+      setQrMode(true);
+    } else {
+      setQrMode(false);
+      setStateGate(true);
+    }
+  }, [startInQr, sefazFallback, needsState, hasDefaultState]);
 
   useEffect(() => {
     if (!file) {
@@ -98,6 +122,7 @@ export default function IntakePhotoPanel({
     }
     onClearError?.();
     setQrMode(false);
+    setStateGate(false);
     setFile(next);
   };
 
@@ -110,9 +135,35 @@ export default function IntakePhotoPanel({
   };
 
   const busy = Boolean(loading || disabled);
-  const hasError = Boolean(errorMessage);
+  const hasError = Boolean(errorMessage) && !sefazFallback && !needsState;
 
-  if (qrMode) {
+  if (stateGate && !sefazFallback) {
+    return (
+      <IntakeNfStateGate
+        initialState={defaultState}
+        loading={busy}
+        disabled={busy}
+        onConfirm={async (code) => {
+          await onSaveDefaultState?.(code);
+          onClearError?.();
+          setStateGate(false);
+          setQrMode(true);
+        }}
+        onCancel={() => {
+          onClearError?.();
+          setStateGate(false);
+          setQrMode(false);
+        }}
+        onUsePhoto={() => {
+          onClearError?.();
+          setStateGate(false);
+          setQrMode(false);
+        }}
+      />
+    );
+  }
+
+  if (qrMode && !sefazFallback) {
     return (
       <IntakeNfPanel
         disabled={busy}
@@ -139,6 +190,52 @@ export default function IntakePhotoPanel({
           {INTAKE_PHOTO_COPY.hint}
         </Typography>
       </Box>
+
+      {sefazFallback ? (
+        <Alert
+          severity="warning"
+          onClose={busy ? undefined : () => onClearError?.()}
+          role="alert"
+        >
+          <AlertTitle>{INTAKE_PHOTO_COPY.sefazFallbackTitle}</AlertTitle>
+          {errorMessage || INTAKE_PHOTO_COPY.sefazFallbackHint}
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            {INTAKE_PHOTO_COPY.sefazFallbackHint}
+          </Typography>
+          <Stack direction="row" spacing={1} sx={photoErrorActionsSx} flexWrap="wrap">
+            <LoadingButton
+              type="button"
+              size="small"
+              variant="contained"
+              disabled={busy}
+              startIcon={<PhotoCameraOutlinedIcon />}
+              onClick={() => cameraRef.current?.click()}
+            >
+              {INTAKE_PHOTO_COPY.sefazFallbackCamera}
+            </LoadingButton>
+            <LoadingButton
+              type="button"
+              size="small"
+              variant="outlined"
+              disabled={busy}
+              startIcon={<CollectionsOutlinedIcon />}
+              onClick={() => galleryRef.current?.click()}
+            >
+              {INTAKE_PHOTO_COPY.sefazFallbackGallery}
+            </LoadingButton>
+            <LoadingButton
+              type="button"
+              size="small"
+              variant="text"
+              disabled={busy}
+              startIcon={<QrCodeScannerOutlinedIcon />}
+              onClick={openQrFlow}
+            >
+              {INTAKE_PHOTO_COPY.sefazFallbackRetryQr}
+            </LoadingButton>
+          </Stack>
+        </Alert>
+      ) : null}
 
       <input
         id={cameraInputId}
@@ -189,7 +286,7 @@ export default function IntakePhotoPanel({
             </Box>
           )}
         </Box>
-      ) : (
+      ) : !sefazFallback ? (
         <Box sx={photoDropSx}>
           <Stack spacing={1} direction={{ xs: "column", lg: "row" }} sx={photoActionsSx}>
             <LoadingButton
@@ -215,16 +312,13 @@ export default function IntakePhotoPanel({
               variant="outlined"
               startIcon={<QrCodeScannerOutlinedIcon />}
               disabled={busy}
-              onClick={() => {
-                onClearError?.();
-                setQrMode(true);
-              }}
+              onClick={openQrFlow}
             >
               {INTAKE_PHOTO_COPY.qr}
             </LoadingButton>
           </Stack>
         </Box>
-      )}
+      ) : null}
 
       {hasError && (
         <Alert
@@ -273,9 +367,9 @@ export default function IntakePhotoPanel({
         </Alert>
       )}
 
-      {file && !hasError && (
+      {file && (!hasError || sefazFallback) && (
         <Stack direction="row" spacing={1.5} sx={photoSubmitRowSx}>
-          {!loading && (
+          {!loading && !sefazFallback && (
             <LoadingButton
               type="button"
               variant="outlined"
@@ -290,11 +384,11 @@ export default function IntakePhotoPanel({
             type="button"
             variant="contained"
             loading={loading}
-            disabled={!file || disabled}
+            disabled={busy || !file}
             onClick={() => onSubmit?.(file)}
             sx={photoSubmitButtonSx}
           >
-            {loading ? INTAKE_PHOTO_COPY.reading : INTAKE_PHOTO_COPY.submit}
+            {INTAKE_PHOTO_COPY.submit}
           </LoadingButton>
         </Stack>
       )}

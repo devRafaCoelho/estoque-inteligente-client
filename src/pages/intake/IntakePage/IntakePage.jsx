@@ -26,8 +26,11 @@ import { INTAKE_PHOTO_CONFIG } from "../../../components/intake/IntakePhotoPanel
 import ManualProductStage from "../../../components/products/ManualProductStage/ManualProductStage";
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
+import { useAuth } from "../../../hooks/useAuth";
 import { ApiError } from "../../../services/apiClient";
+import { updateMe } from "../../../services/userService";
 import { resolveOcrError, withTimeout } from "../../../utils/intake/ocrError";
+import { resolveNfError } from "../../../utils/intake/nfError";
 import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import {
   formatIntakeDraftTitle,
@@ -66,6 +69,7 @@ function shouldStartInQr(searchParams) {
 export default function IntakePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { user, updateSessionUser } = useAuth();
   const { success, error } = useAppSnackbar();
   const [mode, setMode] = useState(() => resolveInitialMode(searchParams));
   const [loading, setLoading] = useState(false);
@@ -172,6 +176,13 @@ export default function IntakePage() {
     setMode(INTAKE_PAGE_CONFIG.modes.text);
   };
 
+  const handleSaveDefaultState = async (code) => {
+    const data = await updateMe({ defaultState: code });
+    const nextUser = data?.user || { ...user, defaultState: code };
+    updateSessionUser(nextUser);
+    return nextUser;
+  };
+
   const handleNfValidated = async (payload) => {
     setPhotoError(null);
     setNfLoading(true);
@@ -179,22 +190,28 @@ export default function IntakePage() {
       const data = await parseIntakeNfQr({
         qrContent: payload.qrContent || undefined,
         accessKey: payload.accessKey,
-        stateCode: payload.stateCode || undefined,
+        // Preferência default_state preenche quando o QR não traz UF clara (F2-5.4).
+        stateCode: payload.stateCode || user?.defaultState || undefined,
       });
       const intake = data?.intake;
       if (!intake?.id || !Array.isArray(intake.items) || intake.items.length === 0) {
         setPhotoError({
           message: INTAKE_PAGE_COPY.nfEmptyError,
           canRetry: true,
+          fallbackPhoto: true,
+          needsState: false,
         });
         throw new Error("empty");
       }
       navigate(INTAKE_PAGE_CONFIG.paths.preview(intake.id));
     } catch (err) {
       if (err?.message === "empty") throw err;
+      const resolved = resolveNfError(err);
       setPhotoError({
-        message: err instanceof ApiError ? err.message : INTAKE_PAGE_COPY.nfParseError,
-        canRetry: true,
+        message: resolved.message,
+        canRetry: resolved.canRetryQr,
+        fallbackPhoto: resolved.fallbackPhoto,
+        needsState: Boolean(resolved.needsState),
       });
       throw err;
     } finally {
@@ -284,7 +301,11 @@ export default function IntakePage() {
           loading={photoLoading || nfLoading}
           disabled={busy}
           startInQr={startPhotoInQr}
+          defaultState={user?.defaultState || ""}
+          onSaveDefaultState={handleSaveDefaultState}
           errorMessage={photoError?.message || null}
+          sefazFallback={Boolean(photoError?.fallbackPhoto)}
+          needsState={Boolean(photoError?.needsState)}
           canRetry={photoError?.canRetry !== false}
           onClearError={() => setPhotoError(null)}
           onUseText={handleUseTextFromPhoto}
