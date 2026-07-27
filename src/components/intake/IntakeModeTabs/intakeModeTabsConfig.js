@@ -1,11 +1,11 @@
 export const INTAKE_MODE_TABS_CONFIG = {
-  modes: ["text", "voice", "photo"],
+  modes: ["text", "photo", "manual"],
   defaultMode: "text",
 };
 
 export const INTAKE_MODE_TABS_COPY = {
   groupAria: "Como registrar a compra",
   text: "Texto",
-  voice: "Voz",
   photo: "Foto",
+  manual: "Manual",
 };

@@ -6,12 +6,13 @@ export const INTAKE_PAGE_CONFIG = {
   defaultMode: "text",
   modes: {
     text: "text",
-    voice: "voice",
     photo: "photo",
+    manual: "manual",
   },
   paths: {
     dashboard: "/dashboard",
     stockOut: "/baixa",
+    products: "/produtos",
     preview: (id) => `/entrada/${id}/preview`,
   },
 };

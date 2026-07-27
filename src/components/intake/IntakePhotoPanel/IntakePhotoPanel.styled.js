@@ -14,6 +14,10 @@ export const photoDropSx = {
 export const photoActionsSx = {
   flexWrap: "wrap",
   justifyContent: "center",
+  width: "100%",
+  "& > *": {
+    flex: { xs: "1 1 auto", sm: "0 0 auto" },
+  },
 };
 
 export const photoPreviewWrapSx = {

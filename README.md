@@ -33,7 +33,7 @@ Abre em **http://localhost:5173**. Em dev, o Vite faz proxy de `/api` para a API
 | `/login` | Login e-mail/senha + Google/Apple (se configurados) |
 | `/cadastro` | Cadastro local + atalho social |
 | `/dashboard` | Resumo ok/low/out, card do assistente e atalhos |
-| `/entrada` | Entrada por texto, voz ou foto do cupom + rascunhos |
+| `/entrada` | Entrada: Texto \| Foto \| Manual (+ rascunhos IA) |
 | `/entrada/:id/preview` | Conferir itens, preço opcional e confirmar no estoque |
 | `/baixa` | Baixa por texto/voz (consumo) + rascunhos |
 | `/baixa/:id/preview` | Conferir e confirmar baixa |

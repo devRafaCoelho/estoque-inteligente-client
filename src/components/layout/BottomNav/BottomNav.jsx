@@ -12,7 +12,6 @@ import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import IntakeOptionsSheet from "../../intake/IntakeOptionsSheet/IntakeOptionsSheet";
 import { bottomNavItems, moreMenuItems } from "../../../config/navigation";
 import { BOTTOM_NAV_COPY } from "./bottomNavCopy";
 import {
@@ -35,19 +34,14 @@ export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
-  const [intakeOpen, setIntakeOpen] = useState(false);
 
   const activeValue = useMemo(() => {
-    if (intakeOpen) return "intake";
     const match = bottomNavItems.find(
       (item) => item.path && isPathActive(location.pathname, item.path),
     );
     if (match) return match.id;
 
-    if (
-      location.pathname.startsWith("/entrada") ||
-      location.pathname === "/produtos/novo"
-    ) {
+    if (location.pathname.startsWith("/entrada")) {
       return "intake";
     }
 
@@ -55,17 +49,13 @@ export default function BottomNav() {
       isPathActive(location.pathname, item.path),
     );
     return inMore ? "more" : false;
-  }, [intakeOpen, location.pathname]);
+  }, [location.pathname]);
 
   const handleChange = (_event, nextValue) => {
     const item = bottomNavItems.find((entry) => entry.id === nextValue);
     if (!item) return;
     if (item.action === "more") {
       setMoreOpen(true);
-      return;
-    }
-    if (item.action === "intake-menu") {
-      setIntakeOpen(true);
       return;
     }
     if (item.path) navigate(item.path);
@@ -111,8 +101,6 @@ export default function BottomNav() {
         </BottomNavigation>
       </Paper>
 
-      <IntakeOptionsSheet open={intakeOpen} onClose={() => setIntakeOpen(false)} />
-
       <Drawer
         anchor="bottom"
         open={moreOpen}
@@ -134,20 +122,15 @@ export default function BottomNav() {
         <List sx={moreSheetListSx}>
           {moreMenuItems.map((item) => {
             const Icon = item.icon;
-            const active = isPathActive(location.pathname, item.path);
             return (
               <ListItemButton
                 key={item.path}
-                selected={active}
                 onClick={() => handleMoreNavigate(item.path)}
               >
-                <ListItemIcon sx={{ minWidth: 40, color: active ? "primary.main" : "inherit" }}>
+                <ListItemIcon sx={{ minWidth: 40 }}>
                   <Icon />
                 </ListItemIcon>
-                <ListItemText
-                  primary={item.label}
-                  primaryTypographyProps={{ fontWeight: active ? 700 : 500 }}
-                />
+                <ListItemText primary={item.label} />
               </ListItemButton>
             );
           })}

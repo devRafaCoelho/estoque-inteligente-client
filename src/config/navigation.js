@@ -43,17 +43,16 @@ export const mainNavItems = [
   },
 ];
 
-/** Bottom nav mobile — `intake` abre sheet; `more` abre menu adicional */
+/** Bottom nav mobile — Entrada abre `/entrada`; `more` abre menu adicional */
 export const bottomNavItems = [
   { id: "home", label: "Início", path: "/dashboard", icon: HomeOutlinedIcon },
   { id: "products", label: "Produtos", path: "/produtos", icon: Inventory2OutlinedIcon },
   {
     id: "intake",
     label: "Entrada",
-    path: null,
+    path: "/entrada",
     icon: AddCircleOutlineIcon,
     prominent: true,
-    action: "intake-menu",
   },
   {
     id: "list",

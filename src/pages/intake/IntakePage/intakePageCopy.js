@@ -1,10 +1,10 @@
 export const INTAKE_PAGE_COPY = {
   backAria: "Voltar",
   title: "Entrada no estoque",
-  subtitle: "Texto, voz ou foto do cupom — depois você revisa os itens",
+  subtitle: "Escolha texto, foto ou cadastro manual",
   textLabel: "O que você comprou?",
   textPlaceholder: "Ex.: 2kg arroz, 1 leite, 500g feijão",
-  voiceHint: "Toque no microfone e diga o que comprou. Você pode editar o texto antes de enviar.",
+  textHint: "Digite ou use o microfone. Depois revise os itens.",
   submit: "Revisar itens",
   submitAria: "Revisar itens",
   parseError: "Não foi possível interpretar o texto",

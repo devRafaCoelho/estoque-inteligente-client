@@ -12,6 +12,8 @@ export const INTAKE_PHOTO_COPY = {
   hint: "Tire uma foto ou escolha da galeria. Depois revise os itens.",
   camera: "Câmera",
   gallery: "Galeria",
+  qr: "QR",
+  qrDisabledHint: "Leitura de QR da nota em breve",
   change: "Trocar foto",
   submit: "Ler cupom",
   retry: "Tentar de novo",

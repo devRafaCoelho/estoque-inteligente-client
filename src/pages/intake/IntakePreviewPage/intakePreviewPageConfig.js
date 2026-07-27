@@ -7,6 +7,7 @@ export const INTAKE_PREVIEW_PAGE_CONFIG = {
     entrada: "/entrada",
     entradaPhoto: "/entrada?mode=photo",
     entradaText: "/entrada?mode=text",
+    entradaManual: "/entrada?mode=manual",
     produtos: "/produtos",
   },
 };

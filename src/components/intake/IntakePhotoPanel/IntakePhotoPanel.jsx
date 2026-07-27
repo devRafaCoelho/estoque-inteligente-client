@@ -9,7 +9,9 @@ import Typography from "@mui/material/Typography";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
+import QrCodeScannerOutlinedIcon from "@mui/icons-material/QrCodeScannerOutlined";
 import LoadingButton from "../../common/LoadingButton/LoadingButton";
+import Tooltip from "@mui/material/Tooltip";
 import {
   INTAKE_PHOTO_CONFIG,
   INTAKE_PHOTO_COPY,
@@ -178,6 +180,18 @@ export default function IntakePhotoPanel({
             >
               {INTAKE_PHOTO_COPY.gallery}
             </LoadingButton>
+            <Tooltip title={INTAKE_PHOTO_COPY.qrDisabledHint}>
+              <span>
+                <LoadingButton
+                  type="button"
+                  variant="outlined"
+                  startIcon={<QrCodeScannerOutlinedIcon />}
+                  disabled
+                >
+                  {INTAKE_PHOTO_COPY.qr}
+                </LoadingButton>
+              </span>
+            </Tooltip>
           </Stack>
         </Box>
       )}

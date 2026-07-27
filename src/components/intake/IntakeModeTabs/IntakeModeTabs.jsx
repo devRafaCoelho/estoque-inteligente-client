@@ -5,7 +5,7 @@ import {
 } from "./intakeModeTabsConfig";
 
 /**
- * Escolha Texto | Voz | Foto na entrada (wrapper do SegmentedControl).
+ * Escolha Texto | Foto | Manual na entrada.
  * @param {{ value: string, onChange: (mode: string) => void, disabled?: boolean }} props
  */
 export default function IntakeModeTabs({
@@ -21,8 +21,8 @@ export default function IntakeModeTabs({
       ariaLabel={INTAKE_MODE_TABS_COPY.groupAria}
       options={[
         { value: "text", label: INTAKE_MODE_TABS_COPY.text },
-        { value: "voice", label: INTAKE_MODE_TABS_COPY.voice },
         { value: "photo", label: INTAKE_MODE_TABS_COPY.photo },
+        { value: "manual", label: INTAKE_MODE_TABS_COPY.manual },
       ]}
     />
   );

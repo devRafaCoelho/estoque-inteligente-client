@@ -4,11 +4,11 @@ export const speechFieldRootSx = {
   gap: 0.75,
 };
 
-/** Mantém só o espaçamento à direita para mic/seta; altura vem do input padrão. */
+/** Mantém espaçamento à direita para mic/seta não colarem na borda. */
 export const speechFieldInputSx = {
   "& .MuiOutlinedInput-root": {
     alignItems: "center",
-    paddingRight: 0.5,
+    paddingRight: 1.25,
   },
 };
 
@@ -16,11 +16,11 @@ export const speechMicAdornmentSx = {
   alignSelf: "center",
   maxHeight: "none",
   height: "auto",
-  marginRight: 0.25,
+  marginRight: 0.5,
   marginLeft: 0,
   display: "flex",
   alignItems: "center",
-  gap: 0.25,
+  gap: 0.5,
 };
 
 export const speechMicButtonSx = (listening) => ({

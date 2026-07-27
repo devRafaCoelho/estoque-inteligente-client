@@ -23,6 +23,7 @@ import LoadingButton from "../../../components/common/LoadingButton/LoadingButto
 import IntakeModeTabs from "../../../components/intake/IntakeModeTabs/IntakeModeTabs";
 import IntakePhotoPanel from "../../../components/intake/IntakePhotoPanel/IntakePhotoPanel";
 import { INTAKE_PHOTO_CONFIG } from "../../../components/intake/IntakePhotoPanel/intakePhotoConfig";
+import ManualProductStage from "../../../components/products/ManualProductStage/ManualProductStage";
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
@@ -47,7 +48,10 @@ import {
 
 function resolveInitialMode(searchParams) {
   const raw = String(searchParams.get("mode") || "").toLowerCase();
-  if (raw === "voice" || raw === "photo" || raw === "text") return raw;
+  if (raw === "photo") return INTAKE_PAGE_CONFIG.modes.photo;
+  if (raw === "manual") return INTAKE_PAGE_CONFIG.modes.manual;
+  // voice legado → texto (mic no mesmo campo)
+  if (raw === "text" || raw === "voice") return INTAKE_PAGE_CONFIG.modes.text;
   return INTAKE_PAGE_CONFIG.defaultMode;
 }
 
@@ -81,6 +85,9 @@ export default function IntakePage() {
   const text = watch("text");
   const { ref: textRef, ...textField } = register("text");
   const busy = loading || photoLoading;
+  const isTextMode = mode === INTAKE_PAGE_CONFIG.modes.text;
+  const isPhotoMode = mode === INTAKE_PAGE_CONFIG.modes.photo;
+  const isManualMode = mode === INTAKE_PAGE_CONFIG.modes.manual;
 
   const loadDrafts = useCallback(async () => {
     setDraftsLoading(true);
@@ -188,15 +195,12 @@ export default function IntakePage() {
     }
   };
 
-  const isTextOrVoice =
-    mode === INTAKE_PAGE_CONFIG.modes.text || mode === INTAKE_PAGE_CONFIG.modes.voice;
-
   return (
     <Stack
       spacing={intakeFormStackSpacing}
-      component={isTextOrVoice ? "form" : "div"}
-      onSubmit={isTextOrVoice ? handleSubmit(onSubmit) : undefined}
-      noValidate={isTextOrVoice || undefined}
+      component={isTextMode ? "form" : "div"}
+      onSubmit={isTextMode ? handleSubmit(onSubmit) : undefined}
+      noValidate={isTextMode || undefined}
     >
       <Stack direction="row" alignItems="center" spacing={1}>
         <IconButton
@@ -215,13 +219,11 @@ export default function IntakePage() {
 
       <IntakeModeTabs value={mode} onChange={handleModeChange} disabled={busy} />
 
-      {isTextOrVoice && (
+      {isTextMode && (
         <Stack spacing={1}>
-          {mode === INTAKE_PAGE_CONFIG.modes.voice && (
-            <Typography variant="body2" color="text.secondary" sx={voiceHintSx}>
-              {INTAKE_PAGE_COPY.voiceHint}
-            </Typography>
-          )}
+          <Typography variant="body2" color="text.secondary" sx={voiceHintSx}>
+            {INTAKE_PAGE_COPY.textHint}
+          </Typography>
           <SpeechTextField
             label={INTAKE_PAGE_COPY.textLabel}
             placeholder={INTAKE_PAGE_COPY.textPlaceholder}
@@ -230,7 +232,7 @@ export default function IntakePage() {
             helperText={errors.text?.message}
             value={text ?? ""}
             inputRef={textRef}
-            speechDisabled={busy || mode === INTAKE_PAGE_CONFIG.modes.text}
+            speechDisabled={busy}
             showSubmit
             submitType="submit"
             submitLoading={loading}
@@ -245,7 +247,7 @@ export default function IntakePage() {
         </Stack>
       )}
 
-      {mode === INTAKE_PAGE_CONFIG.modes.photo && (
+      {isPhotoMode && (
         <IntakePhotoPanel
           loading={photoLoading}
           disabled={busy}
@@ -258,7 +260,14 @@ export default function IntakePage() {
         />
       )}
 
-      {!draftsLoading && drafts.length > 0 && (
+      {isManualMode && (
+        <ManualProductStage
+          disabled={busy}
+          onSaved={() => navigate(INTAKE_PAGE_CONFIG.paths.products)}
+        />
+      )}
+
+      {!isManualMode && !draftsLoading && drafts.length > 0 && (
         <Stack spacing={draftsSectionSpacing}>
           <Box sx={draftsHeaderRowSx}>
             <Typography variant="h6" sx={draftsHeaderTitleSx}>
@@ -319,12 +328,14 @@ export default function IntakePage() {
         </Stack>
       )}
 
-      <Typography variant="body2" color="text.secondary" textAlign="center">
-        {INTAKE_PAGE_COPY.stockOutPrompt}{" "}
-        <Link component={RouterLink} to={INTAKE_PAGE_CONFIG.paths.stockOut} fontWeight={700}>
-          {INTAKE_PAGE_COPY.stockOutLink}
-        </Link>
-      </Typography>
+      {!isManualMode && (
+        <Typography variant="body2" color="text.secondary" textAlign="center">
+          {INTAKE_PAGE_COPY.stockOutPrompt}{" "}
+          <Link component={RouterLink} to={INTAKE_PAGE_CONFIG.paths.stockOut} fontWeight={700}>
+            {INTAKE_PAGE_COPY.stockOutLink}
+          </Link>
+        </Typography>
+      )}
 
       <ConfirmDialog
         open={Boolean(draftToDiscard)}
