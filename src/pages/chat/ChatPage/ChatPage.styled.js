@@ -42,13 +42,3 @@ export const bubbleMetaSx = (isUser) => ({
   opacity: isUser ? 0.85 : 1,
   color: isUser ? "inherit" : "text.secondary",
 });
-
-export const composerRowSx = {
-  display: "flex",
-  gap: 1,
-  alignItems: "flex-end",
-};
-
-export const composerFieldSx = {
-  flex: 1,
-};

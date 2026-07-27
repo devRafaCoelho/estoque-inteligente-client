@@ -17,12 +17,6 @@ export const viewModeChipsSx = {
 
 export const addSectionSpacing = 1.5;
 
-export const examplesRowSx = {
-  direction: "row",
-  flexWrap: "wrap",
-  gap: 1,
-};
-
 export const actionButtonSx = {
   width: { xs: "100%", sm: "auto" },
   alignSelf: { sm: "flex-start" },

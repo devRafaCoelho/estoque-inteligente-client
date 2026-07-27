@@ -4,21 +4,23 @@ export const speechFieldRootSx = {
   gap: 0.75,
 };
 
-/** Aproxima o mic do canto inferior direito, com folga leve. */
+/** Mantém só o espaçamento à direita para mic/seta; altura vem do input padrão. */
 export const speechFieldInputSx = {
   "& .MuiOutlinedInput-root": {
-    paddingRight: 0.75,
-    paddingBottom: 0.75,
+    alignItems: "center",
+    paddingRight: 0.5,
   },
 };
 
 export const speechMicAdornmentSx = {
-  alignSelf: "flex-end",
+  alignSelf: "center",
   maxHeight: "none",
   height: "auto",
   marginRight: 0.25,
-  marginBottom: 0.25,
   marginLeft: 0,
+  display: "flex",
+  alignItems: "center",
+  gap: 0.25,
 };
 
 export const speechMicButtonSx = (listening) => ({
@@ -36,6 +38,21 @@ export const speechMicButtonSx = (listening) => ({
       }
     : null),
 });
+
+export const speechSubmitButtonSx = {
+  bgcolor: "primary.main",
+  color: "primary.contrastText",
+  width: 32,
+  height: 32,
+  p: 0.5,
+  "&:hover": {
+    bgcolor: "primary.dark",
+  },
+  "&.Mui-disabled": {
+    bgcolor: "action.disabledBackground",
+    color: "action.disabled",
+  },
+};
 
 export const speechStatusRowSx = {
   display: "flex",

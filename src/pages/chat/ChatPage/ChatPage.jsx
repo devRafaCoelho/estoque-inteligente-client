@@ -3,13 +3,12 @@ import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import ChatProposalCard from "../../../components/chat/ChatProposalCard/ChatProposalCard";
 import { isProposalPayload } from "../../../components/chat/ChatProposalCard/chatProposalCardCopy";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
-import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { getChatSession, postChatMessage } from "../../../services/chatService";
@@ -24,8 +23,6 @@ import {
   bubbleMetaSx,
   bubbleRowSx,
   bubbleSx,
-  composerFieldSx,
-  composerRowSx,
   messageColumnSx,
   messagesBoxSx,
   pageStackSpacing,
@@ -181,30 +178,25 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </Box>
 
-      <Box sx={composerRowSx}>
-        <TextField
-          label={CHAT_PAGE_COPY.inputLabel}
-          placeholder={CHAT_PAGE_COPY.inputPlaceholder}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={handleKeyDown}
-          multiline
-          maxRows={4}
-          fullWidth
-          disabled={sending}
-          slotProps={{ inputLabel: { shrink: true } }}
-          inputProps={{ maxLength: CHAT_PAGE_CONFIG.maxMessageLength }}
-          sx={composerFieldSx}
-        />
-        <LoadingButton
-          variant="contained"
-          loading={sending}
-          disabled={!draft.trim()}
-          onClick={handleSend}
-        >
-          {CHAT_PAGE_COPY.send}
-        </LoadingButton>
-      </Box>
+      <SpeechTextField
+        label={CHAT_PAGE_COPY.inputLabel}
+        placeholder={CHAT_PAGE_COPY.inputPlaceholder}
+        value={draft}
+        onChange={setDraft}
+        onKeyDown={handleKeyDown}
+        fullWidth
+        speechDisabled={sending}
+        showSubmit
+        submitType="button"
+        onSubmitClick={handleSend}
+        submitLoading={sending}
+        submitDisabled={!draft.trim()}
+        submitAriaLabel={CHAT_PAGE_COPY.send}
+        slotProps={{
+          inputLabel: { shrink: true },
+          htmlInput: { maxLength: CHAT_PAGE_CONFIG.maxMessageLength },
+        }}
+      />
     </Stack>
   );
 }

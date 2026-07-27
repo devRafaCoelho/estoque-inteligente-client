@@ -4,12 +4,6 @@ import { listItemSurfaceSx } from "../../../styles/surfaceStyles";
 
 export const stockOutFormStackSpacing = 2.5;
 
-export const examplesRowSx = {
-  direction: "row",
-  flexWrap: "wrap",
-  gap: 1,
-};
-
 export const draftsSectionSpacing = 1.25;
 
 export const draftsHeaderRowSx = {

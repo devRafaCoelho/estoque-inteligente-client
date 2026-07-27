@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
@@ -37,7 +36,6 @@ import {
   draftsHeaderRowSx,
   draftsHeaderTitleSx,
   draftsSectionSpacing,
-  examplesRowSx,
   stockOutFormStackSpacing,
 } from "./StockOutPage.styled";
 
@@ -164,47 +162,23 @@ export default function StockOutPage() {
       <SpeechTextField
         label={STOCK_OUT_PAGE_COPY.textLabel}
         placeholder={STOCK_OUT_PAGE_COPY.textPlaceholder}
-        multiline
-        minRows={4}
         fullWidth
         error={Boolean(errors.text)}
         helperText={errors.text?.message}
         value={text ?? ""}
         inputRef={textRef}
         speechDisabled={loading}
+        showSubmit
+        submitType="submit"
+        submitLoading={loading}
+        submitDisabled={String(text || "").trim().length < 3}
+        submitAriaLabel={STOCK_OUT_PAGE_COPY.submitAria}
         slotProps={{ inputLabel: { shrink: true } }}
         {...textField}
         onChange={(next) =>
           setValue("text", next, { shouldValidate: true, shouldDirty: true })
         }
       />
-
-      <Stack {...examplesRowSx}>
-        {STOCK_OUT_PAGE_CONFIG.examples.map((example) => (
-          <Chip
-            key={example}
-            label={example}
-            variant="outlined"
-            onClick={() =>
-              setValue("text", example, {
-                shouldValidate: true,
-                shouldDirty: true,
-                shouldTouch: true,
-              })
-            }
-          />
-        ))}
-      </Stack>
-
-      <LoadingButton
-        type="submit"
-        variant="contained"
-        size="large"
-        loading={loading}
-        disabled={String(text || "").trim().length < 3}
-      >
-        {STOCK_OUT_PAGE_COPY.submit}
-      </LoadingButton>
 
       {!draftsLoading && drafts.length > 0 && (
         <Stack spacing={draftsSectionSpacing}>

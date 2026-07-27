@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
@@ -23,7 +22,7 @@ import LoadingButton from "../../../components/common/LoadingButton/LoadingButto
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { exampleChipSx, pageHeaderSubtitleSx } from "../../../styles/pageStyles";
+import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import {
   formatIntakeDraftTitle,
   formatIntakeDraftUpdatedAt,
@@ -37,7 +36,6 @@ import {
   draftsHeaderRowSx,
   draftsHeaderTitleSx,
   draftsSectionSpacing,
-  examplesRowSx,
   intakeFormStackSpacing,
 } from "./IntakePage.styled";
 
@@ -151,48 +149,23 @@ export default function IntakePage() {
       <SpeechTextField
         label={INTAKE_PAGE_COPY.textLabel}
         placeholder={INTAKE_PAGE_COPY.textPlaceholder}
-        multiline
-        minRows={4}
         fullWidth
         error={Boolean(errors.text)}
         helperText={errors.text?.message}
         value={text ?? ""}
         inputRef={textRef}
         speechDisabled={loading}
+        showSubmit
+        submitType="submit"
+        submitLoading={loading}
+        submitDisabled={String(text || "").trim().length < 3}
+        submitAriaLabel={INTAKE_PAGE_COPY.submitAria}
         slotProps={{ inputLabel: { shrink: true } }}
         {...textField}
         onChange={(next) =>
           setValue("text", next, { shouldValidate: true, shouldDirty: true })
         }
       />
-
-      <Stack {...examplesRowSx}>
-        {INTAKE_PAGE_CONFIG.examples.map((example) => (
-          <Chip
-            key={example}
-            label={example}
-            variant="outlined"
-            onClick={() =>
-              setValue("text", example, {
-                shouldValidate: true,
-                shouldDirty: true,
-                shouldTouch: true,
-              })
-            }
-            sx={exampleChipSx}
-          />
-        ))}
-      </Stack>
-
-      <LoadingButton
-        type="submit"
-        variant="contained"
-        size="large"
-        loading={loading}
-        disabled={String(text || "").trim().length < 3}
-      >
-        {INTAKE_PAGE_COPY.submit}
-      </LoadingButton>
 
       {!draftsLoading && drafts.length > 0 && (
         <Stack spacing={draftsSectionSpacing}>

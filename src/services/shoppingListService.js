@@ -8,6 +8,16 @@ export async function getActiveShoppingList() {
 /**
  * @param {string} [mode]
  */
+export async function previewShoppingListSuggestions(mode = "rules") {
+  const search = new URLSearchParams();
+  if (mode) search.set("mode", mode);
+  const query = search.toString();
+  return api.get(`${SHOPPING_LISTS_URL}/suggestions-preview${query ? `?${query}` : ""}`);
+}
+
+/**
+ * @param {string} [mode]
+ */
 export async function generateShoppingList(mode = "rules") {
   return api.post(`${SHOPPING_LISTS_URL}/generate`, { mode });
 }

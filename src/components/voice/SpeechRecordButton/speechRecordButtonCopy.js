@@ -20,6 +20,7 @@ export const SPEECH_RECORD_BUTTON_COPY = {
   startAria: "Começar gravação de voz",
   stopAria: "Cancelar gravação de voz",
   unavailableAria: "Microfone indisponível — use o teclado",
+  submitAria: "Enviar",
 };
 
 export function speechErrorMessage(code) {

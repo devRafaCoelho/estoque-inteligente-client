@@ -12,6 +12,7 @@ import {
   deleteShoppingListItem,
   generateShoppingList,
   getActiveShoppingList,
+  previewShoppingListSuggestions,
   setShoppingListViewMode,
 } from "../../../services/shoppingListService";
 import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/ShoppingChecklist";
@@ -22,7 +23,6 @@ import SpeechTextField from "../../../components/voice/SpeechRecordButton/Speech
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import {
-  exampleChipSx,
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
 } from "../../../styles/pageStyles";
@@ -31,7 +31,6 @@ import { SHOPPING_LIST_PAGE_CONFIG } from "./shoppingListPageConfig";
 import {
   actionButtonSx,
   addSectionSpacing,
-  examplesRowSx,
   listToolbarRowProps,
   shoppingListStackSpacing,
   viewModeChipsSx,
@@ -49,6 +48,7 @@ export default function ShoppingListPage() {
   const [list, setList] = useState(null);
   const [viewMode, setViewMode] = useState(SHOPPING_LIST_PAGE_CONFIG.defaultViewMode);
   const [addText, setAddText] = useState("");
+  const [newSuggestionCount, setNewSuggestionCount] = useState(0);
 
   const applyList = useCallback((next) => {
     setList(next);
@@ -57,6 +57,17 @@ export default function ShoppingListPage() {
         ? SHOPPING_LIST_PAGE_CONFIG.listViewMode
         : SHOPPING_LIST_PAGE_CONFIG.defaultViewMode,
     );
+  }, []);
+
+  const refreshSuggestions = useCallback(async () => {
+    try {
+      const data = await previewShoppingListSuggestions(
+        SHOPPING_LIST_PAGE_CONFIG.generateMode,
+      );
+      setNewSuggestionCount(data.preview?.newCount ?? data.preview?.newSuggestions?.length ?? 0);
+    } catch {
+      // Mantém o último valor conhecido; o botão de gerar ainda funciona.
+    }
   }, []);
 
   const patchListItems = useCallback((mapItems) => {
@@ -81,13 +92,14 @@ export default function ShoppingListPage() {
       try {
         const data = await getActiveShoppingList();
         applyList(data.list);
+        await refreshSuggestions();
       } catch (err) {
         error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.loadError);
       } finally {
         if (!silent) setLoading(false);
       }
     },
-    [applyList, error],
+    [applyList, error, refreshSuggestions],
   );
 
   useEffect(() => {
@@ -99,6 +111,7 @@ export default function ShoppingListPage() {
     try {
       const data = await generateShoppingList(SHOPPING_LIST_PAGE_CONFIG.generateMode);
       applyList(data.list);
+      await refreshSuggestions();
       success(
         data.list.stats.pending
           ? SHOPPING_LIST_PAGE_COPY.generatePending(data.list.stats.pending)
@@ -149,6 +162,7 @@ export default function ShoppingListPage() {
       await deleteShoppingListItem(removedId);
       setItemToDelete(null);
       patchListItems((items) => items.filter((row) => row.id !== removedId));
+      await refreshSuggestions();
       success(SHOPPING_LIST_PAGE_COPY.itemRemoved);
     } catch (err) {
       error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.deleteError);
@@ -162,6 +176,7 @@ export default function ShoppingListPage() {
     try {
       const data = await clearShoppingListItems();
       applyList(data.list);
+      await refreshSuggestions();
       setClearListOpen(false);
       success(SHOPPING_LIST_PAGE_COPY.listCleared);
     } catch (err) {
@@ -185,6 +200,7 @@ export default function ShoppingListPage() {
       } else {
         await load({ silent: true });
       }
+      await refreshSuggestions();
       const created = data.createdCount ?? data.items?.length ?? 1;
       const updated = data.updatedCount ?? 0;
       if (updated > 0 && created === 0) {
@@ -212,6 +228,11 @@ export default function ShoppingListPage() {
   }
 
   const items = list?.items || [];
+  const hasListItems = items.length > 0;
+  const canGenerate = newSuggestionCount > 0;
+  const generateLabel = hasListItems
+    ? SHOPPING_LIST_PAGE_COPY.generateUpdate
+    : SHOPPING_LIST_PAGE_COPY.generate;
 
   return (
     <Stack spacing={shoppingListStackSpacing}>
@@ -223,46 +244,30 @@ export default function ShoppingListPage() {
       <LoadingButton
         variant="contained"
         loading={generating}
+        disabled={!canGenerate}
         onClick={handleGenerate}
+        title={!canGenerate ? SHOPPING_LIST_PAGE_COPY.generateDisabledHint : undefined}
         sx={actionButtonSx}
       >
-        {SHOPPING_LIST_PAGE_COPY.generate}
+        {generateLabel}
       </LoadingButton>
 
       <Stack spacing={addSectionSpacing}>
-        <Typography variant="h6">{SHOPPING_LIST_PAGE_COPY.addSectionTitle}</Typography>
         <SpeechTextField
           label={SHOPPING_LIST_PAGE_COPY.addLabel}
           placeholder={SHOPPING_LIST_PAGE_COPY.addPlaceholder}
           value={addText}
           onChange={setAddText}
-          multiline
-          minRows={2}
           fullWidth
           speechDisabled={adding || generating}
+          showSubmit
+          submitType="button"
+          onSubmitClick={handleAdd}
+          submitLoading={adding}
+          submitDisabled={!addText.trim() || generating}
+          submitAriaLabel={SHOPPING_LIST_PAGE_COPY.addSubmit}
           slotProps={{ inputLabel: { shrink: true } }}
         />
-        <Stack {...examplesRowSx}>
-          {SHOPPING_LIST_PAGE_CONFIG.examples.map((example) => (
-            <Chip
-              key={example}
-              label={example}
-              variant="outlined"
-              onClick={() => setAddText(example)}
-              sx={exampleChipSx}
-            />
-          ))}
-        </Stack>
-        <LoadingButton
-          variant="outlined"
-          size="large"
-          loading={adding}
-          disabled={!addText.trim()}
-          onClick={handleAdd}
-          sx={actionButtonSx}
-        >
-          {SHOPPING_LIST_PAGE_COPY.addSubmit}
-        </LoadingButton>
       </Stack>
 
       <Stack spacing={1}>

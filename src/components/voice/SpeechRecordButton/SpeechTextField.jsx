@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import ArrowUpwardRoundedIcon from "@mui/icons-material/ArrowUpwardRounded";
 import MicNoneOutlinedIcon from "@mui/icons-material/MicNoneOutlined";
 import MicOffOutlinedIcon from "@mui/icons-material/MicOffOutlined";
 import StopRoundedIcon from "@mui/icons-material/StopRounded";
@@ -26,6 +28,7 @@ import {
   speechRecordHintSx,
   speechRecordInterimSx,
   speechStatusRowSx,
+  speechSubmitButtonSx,
 } from "./SpeechRecordButton.styled";
 
 /**
@@ -37,12 +40,24 @@ import {
  * @param {(next: string) => void} props.onChange — string do texto (não o evento)
  * @param {boolean} [props.speechDisabled]
  * @param {string} [props.lang]
+ * @param {boolean} [props.showSubmit] — seta circular ao lado do mic
+ * @param {"button"|"submit"} [props.submitType]
+ * @param {() => void} [props.onSubmitClick]
+ * @param {boolean} [props.submitDisabled]
+ * @param {boolean} [props.submitLoading]
+ * @param {string} [props.submitAriaLabel]
  */
 export default function SpeechTextField({
   value,
   onChange,
   speechDisabled = false,
   lang = SPEECH_RECORD_BUTTON_CONFIG.lang,
+  showSubmit = false,
+  submitType = "button",
+  onSubmitClick,
+  submitDisabled = false,
+  submitLoading = false,
+  submitAriaLabel = SPEECH_RECORD_BUTTON_COPY.submitAria,
   slotProps,
   sx,
   ...textFieldProps
@@ -142,6 +157,24 @@ export default function SpeechTextField({
                 >
                   {micIcon}
                 </IconButton>
+                {showSubmit ? (
+                  <IconButton
+                    type={submitType}
+                    size="small"
+                    edge="end"
+                    onClick={submitType === "button" ? onSubmitClick : undefined}
+                    disabled={submitDisabled || submitLoading || speechDisabled}
+                    aria-label={submitAriaLabel}
+                    title={submitAriaLabel}
+                    sx={speechSubmitButtonSx}
+                  >
+                    {submitLoading ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : (
+                      <ArrowUpwardRoundedIcon fontSize="small" />
+                    )}
+                  </IconButton>
+                ) : null}
               </InputAdornment>
             ),
           },
