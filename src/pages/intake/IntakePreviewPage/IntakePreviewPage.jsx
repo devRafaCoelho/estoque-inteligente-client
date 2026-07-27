@@ -167,14 +167,23 @@ export default function IntakePreviewPage() {
     });
 
   const handleSaveDraft = async () => {
+    if (!itemsReady || activeCount === 0) {
+      error(INTAKE_PREVIEW_PAGE_COPY.selectItemError);
+      return;
+    }
     setSaving(true);
     try {
-      const data = await updateIntake(id, getPayload());
-      setIntake(data.intake);
-      setItems(data.intake.items || []);
+      await updateIntake(id, getPayload());
       success(INTAKE_PREVIEW_PAGE_COPY.draftSaved);
+      navigate(INTAKE_PREVIEW_PAGE_CONFIG.paths.entrada);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : INTAKE_PREVIEW_PAGE_COPY.saveDraftError);
+      const details = err instanceof ApiError && Array.isArray(err.body?.details)
+        ? err.body.details.filter(Boolean).slice(0, 3).join(" · ")
+        : "";
+      error(
+        details ||
+          (err instanceof ApiError ? err.message : INTAKE_PREVIEW_PAGE_COPY.saveDraftError),
+      );
     } finally {
       setSaving(false);
     }
@@ -397,6 +406,7 @@ export default function IntakePreviewPage() {
       <Stack spacing={actionsBlockSpacing}>
         <Stack {...actionsRowProps}>
           <LoadingButton
+            type="button"
             variant="contained"
             size="large"
             loading={confirming}
@@ -407,6 +417,7 @@ export default function IntakePreviewPage() {
             {INTAKE_PREVIEW_PAGE_COPY.confirm}
           </LoadingButton>
           <LoadingButton
+            type="button"
             variant="outlined"
             size="large"
             loading={saving}

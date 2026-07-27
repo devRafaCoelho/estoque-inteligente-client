@@ -13,6 +13,18 @@ export const draftsHeaderRowSx = {
   gap: 1,
 };
 
+export const draftsHeaderTitleRowSx = {
+  display: "flex",
+  alignItems: "center",
+  gap: 0.75,
+  minWidth: 0,
+};
+
+export const draftsHeaderIconSx = {
+  color: "text.secondary",
+  fontSize: 22,
+};
+
 export const draftsHeaderTitleSx = {
   mb: 0,
   fontWeight: 700,

@@ -40,6 +40,12 @@ export const statCardSx = {
   flex: 1,
   minWidth: 0,
   width: "100%",
+  cursor: "pointer",
+  transition: "border-color 0.15s ease, box-shadow 0.15s ease",
+  "&:hover": {
+    borderColor: "primary.light",
+    boxShadow: 1,
+  },
 };
 
 export const statCardContentSx = {

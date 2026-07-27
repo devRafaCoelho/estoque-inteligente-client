@@ -7,20 +7,28 @@ export const speechFieldRootSx = {
 /** Mantém espaçamento à direita para mic/seta não colarem na borda. */
 export const speechFieldInputSx = {
   "& .MuiOutlinedInput-root": {
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingRight: 1.25,
+    paddingTop: 1.25,
+    paddingBottom: 1.25,
+  },
+  "& .MuiOutlinedInput-input": {
+    overflowWrap: "anywhere",
+    wordBreak: "break-word",
+    whiteSpace: "pre-wrap",
   },
 };
 
 export const speechMicAdornmentSx = {
-  alignSelf: "center",
+  alignSelf: "flex-end",
   maxHeight: "none",
   height: "auto",
-  marginRight: 0.5,
+  marginRight: 0.25,
   marginLeft: 0,
+  marginBottom: 0.25,
   display: "flex",
   alignItems: "center",
-  gap: 0.5,
+  gap: 1,
 };
 
 export const speechMicButtonSx = (listening) => ({

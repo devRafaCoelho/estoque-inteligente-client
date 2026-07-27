@@ -1,9 +1,9 @@
 export const INTAKE_PREVIEW_PAGE_COPY = {
   backAria: "Voltar",
   loadError: "Erro ao carregar preview",
-  draftSaved: "Rascunho atualizado",
+  draftSaved: "Rascunho salvo",
   saveDraftError: "Erro ao salvar rascunho",
-  selectItemError: "Selecione ao menos um item para confirmar",
+  selectItemError: "Revise os itens (nome, quantidade, unidade e categoria) antes de salvar",
   confirmSuccessWithPurchase: (count) =>
     `Estoque atualizado (${count} itens) e compra registrada`,
   confirmSuccess: (count) => `Estoque atualizado (${count} itens)`,

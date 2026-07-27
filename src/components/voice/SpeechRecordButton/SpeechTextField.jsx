@@ -46,6 +46,9 @@ import {
  * @param {boolean} [props.submitDisabled]
  * @param {boolean} [props.submitLoading]
  * @param {string} [props.submitAriaLabel]
+ * @param {boolean} [props.multiline=true]
+ * @param {number} [props.minRows=1]
+ * @param {number} [props.maxRows=6]
  */
 export default function SpeechTextField({
   value,
@@ -58,6 +61,9 @@ export default function SpeechTextField({
   submitDisabled = false,
   submitLoading = false,
   submitAriaLabel = SPEECH_RECORD_BUTTON_COPY.submitAria,
+  multiline = true,
+  minRows = 1,
+  maxRows = 6,
   slotProps,
   sx,
   ...textFieldProps
@@ -136,6 +142,9 @@ export default function SpeechTextField({
         {...textFieldProps}
         value={value}
         onChange={handleTextChange}
+        multiline={multiline}
+        minRows={minRows}
+        maxRows={maxRows}
         sx={[speechFieldInputSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
         slotProps={{
           ...slotProps,
@@ -147,7 +156,6 @@ export default function SpeechTextField({
                 <IconButton
                   type="button"
                   size="small"
-                  edge="end"
                   onClick={toggle}
                   disabled={speechDisabled || voiceBlocked}
                   aria-label={micAria}
@@ -161,7 +169,6 @@ export default function SpeechTextField({
                   <IconButton
                     type={submitType}
                     size="small"
-                    edge="end"
                     onClick={submitType === "button" ? onSubmitClick : undefined}
                     disabled={submitDisabled || submitLoading || speechDisabled}
                     aria-label={submitAriaLabel}

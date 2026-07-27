@@ -6,6 +6,7 @@ import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DraftsOutlinedIcon from "@mui/icons-material/DraftsOutlined";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { textParseSchema } from "../../../schemas/intake/textParseSchema";
@@ -42,7 +43,9 @@ import {
   draftItemBodySx,
   draftItemMetaSx,
   draftItemSx,
+  draftsHeaderIconSx,
   draftsHeaderRowSx,
+  draftsHeaderTitleRowSx,
   draftsHeaderTitleSx,
   draftsSectionSpacing,
   intakeFormStackSpacing,
@@ -277,6 +280,8 @@ export default function IntakePage() {
             label={INTAKE_PAGE_COPY.textLabel}
             placeholder={INTAKE_PAGE_COPY.textPlaceholder}
             fullWidth
+            minRows={2}
+            maxRows={8}
             error={Boolean(errors.text)}
             helperText={errors.text?.message}
             value={text ?? ""}
@@ -322,12 +327,15 @@ export default function IntakePage() {
         />
       )}
 
-      {!isManualMode && !draftsLoading && drafts.length > 0 && (
+      {!draftsLoading && drafts.length > 0 && (
         <Stack spacing={draftsSectionSpacing}>
           <Box sx={draftsHeaderRowSx}>
-            <Typography variant="h6" sx={draftsHeaderTitleSx}>
-              {INTAKE_PAGE_COPY.draftsTitle}
-            </Typography>
+            <Box sx={draftsHeaderTitleRowSx}>
+              <DraftsOutlinedIcon sx={draftsHeaderIconSx} aria-hidden />
+              <Typography variant="h6" sx={draftsHeaderTitleSx}>
+                {INTAKE_PAGE_COPY.draftsTitle}
+              </Typography>
+            </Box>
             <LoadingButton
               type="button"
               variant="text"

@@ -67,15 +67,17 @@ import {
   sectionTitleTextSx,
 } from "./DashboardPage.styled";
 
-function StatCard({ status, value }) {
+function StatCard({ status, value, onClick, ariaLabel }) {
   return (
-    <Card sx={statCardSx}>
-      <CardContent sx={statCardContentSx}>
-        <StockStatusChip status={status} />
-        <Typography variant="h4" fontWeight={800} color="text.primary" sx={statValueSx}>
-          {value}
-        </Typography>
-      </CardContent>
+    <Card sx={statCardSx} variant="outlined">
+      <CardActionArea onClick={onClick} aria-label={ariaLabel} sx={{ height: "100%" }}>
+        <CardContent sx={statCardContentSx}>
+          <StockStatusChip status={status} />
+          <Typography variant="h4" fontWeight={800} color="text.primary" sx={statValueSx}>
+            {value}
+          </Typography>
+        </CardContent>
+      </CardActionArea>
     </Card>
   );
 }
@@ -269,9 +271,24 @@ export default function DashboardPage() {
       </Card>
 
       <Stack direction={statsRowDirection} spacing={statsRowSpacing} sx={statsRowSx}>
-        <StatCard status={stockStatus.ok} value={stats.ok} />
-        <StatCard status={stockStatus.low} value={stats.low} />
-        <StatCard status={stockStatus.out} value={stats.out} />
+        <StatCard
+          status={stockStatus.ok}
+          value={stats.ok}
+          ariaLabel={DASHBOARD_PAGE_COPY.statOkAria}
+          onClick={() => navigate(`${paths.products}?status=${stockStatus.ok}`)}
+        />
+        <StatCard
+          status={stockStatus.low}
+          value={stats.low}
+          ariaLabel={DASHBOARD_PAGE_COPY.statLowAria}
+          onClick={() => navigate(`${paths.products}?status=${stockStatus.low}`)}
+        />
+        <StatCard
+          status={stockStatus.out}
+          value={stats.out}
+          ariaLabel={DASHBOARD_PAGE_COPY.statOutAria}
+          onClick={() => navigate(`${paths.products}?status=${stockStatus.out}`)}
+        />
       </Stack>
 
       {recentAlerts.length > 0 ? (

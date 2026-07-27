@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import SearchOffOutlinedIcon from "@mui/icons-material/SearchOffOutlined";
 import Box from "@mui/material/Box";
@@ -27,19 +28,32 @@ import {
 } from "./ProductListPage.styled";
 
 const CATEGORY_ALL_VALUE = "all";
+const STATUS_VALUES = new Set(
+  PRODUCT_LIST_CONFIG.statusFilters.map((filter) => filter.value).filter(Boolean),
+);
 
 const CATEGORY_OPTIONS = Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
   value,
   label,
 }));
 
+function resolveStatusParam(raw) {
+  const value = String(raw || "").toLowerCase();
+  return STATUS_VALUES.has(value) ? value : "";
+}
+
 export default function ProductListPage() {
   const { error } = useAppSnackbar();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState(() => resolveStatusParam(searchParams.get("status")));
   const [category, setCategory] = useState(CATEGORY_ALL_VALUE);
+
+  useEffect(() => {
+    setStatus(resolveStatusParam(searchParams.get("status")));
+  }, [searchParams]);
 
   useEffect(() => {
     let ativo = true;
@@ -66,6 +80,15 @@ export default function ProductListPage() {
       ativo = false;
     };
   }, [status, category, error]);
+
+  const handleStatusChange = (next) => {
+    const resolved = resolveStatusParam(next);
+    setStatus(resolved);
+    const params = new URLSearchParams(searchParams);
+    if (resolved) params.set("status", resolved);
+    else params.delete("status");
+    setSearchParams(params, { replace: true });
+  };
 
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -130,7 +153,7 @@ export default function ProductListPage() {
 
       <SegmentedControl
         value={status}
-        onChange={setStatus}
+        onChange={handleStatusChange}
         ariaLabel={PRODUCT_LIST_COPY.title}
         options={PRODUCT_LIST_CONFIG.statusFilters.map((filter) => ({
           value: filter.value,

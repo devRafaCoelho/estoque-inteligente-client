@@ -11,22 +11,33 @@ export function buildIntakePreviewPayload({
 }) {
   return {
     storeName: String(storeName || "").trim() || null,
-    items: items.map((item, index) => ({
-      id: item.id,
-      productId: item.productId || null,
-      name: item.name,
-      quantity: Number(item.quantity),
-      unit: item.unit,
-      category: item.category || defaultCategory,
-      unitPrice:
-        item.unitPrice === "" || item.unitPrice == null
-          ? null
-          : Number(item.unitPrice),
-      excluded: Boolean(item.excluded),
-      confidence: item.confidence ?? null,
-      matchedExisting: Boolean(item.matchedExisting),
-      sortOrder: index,
-    })),
+    items: items.map((item, index) => {
+      const quantity = Number(item.quantity);
+      const rawPrice = item.unitPrice;
+      let unitPrice = null;
+      if (rawPrice !== "" && rawPrice != null) {
+        const parsed = Number(rawPrice);
+        unitPrice = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+      }
+
+      return {
+        id: item.id || null,
+        productId: item.productId || null,
+        name: String(item.name || "").trim(),
+        quantity: Number.isFinite(quantity) ? quantity : 0,
+        unit: item.unit || "un",
+        category: item.category || defaultCategory,
+        unitPrice,
+        excluded: Boolean(item.excluded),
+        confidence: (() => {
+          if (item.confidence == null || item.confidence === "") return null;
+          const n = Number(item.confidence);
+          return Number.isFinite(n) ? n : null;
+        })(),
+        matchedExisting: Boolean(item.matchedExisting),
+        sortOrder: index,
+      };
+    }),
   };
 }
 
