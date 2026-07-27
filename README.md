@@ -52,7 +52,8 @@ Abre em **http://localhost:5173**. Em dev, o Vite faz proxy de `/api` para a API
 |------|----------|
 | **Recompra / nudges** | Preferências e handlers de notificação (deep link produto / baixa) |
 | **Voz** | `SpeechTextField` + `useSpeechToText` em entrada, baixa, lista e chat; fallback para teclado |
-| **Foto / OCR** | `/entrada` Texto \| Voz \| Foto; “Lendo cupom…”; erros com retry / usar texto |
+| **Foto / OCR** | `/entrada` Texto \| Foto \| Manual; câmera, galeria ou QR da nota |
+| **QR NF-e** | Na aba Foto → QR abre a câmera; após ler a nota, vai para o preview dos itens |
 | **Chat** | UI conversacional, cards de proposta com CTA (Revisar baixa / Salvar lista / Ver financeiro) |
 | **Composer** | Campo compacto com mic + seta de envio nos fluxos de texto |
 
@@ -77,4 +78,4 @@ Voz depende do suporte do navegador à Web Speech API (melhor em Chrome/Edge). S
 
 ## Fora desta entrega
 
-QR de NF-e, push/e-mail, compartilhar lista, conta familiar, STT no servidor (Whisper/Gemini). Roadmap em `DOCUMENTACAO.md`.
+Push/e-mail, compartilhar lista, conta familiar, STT no servidor (Whisper/Gemini), mais UFs no collector NF-e. Roadmap em `DOCUMENTACAO.md`.

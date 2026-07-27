@@ -17,6 +17,7 @@
     "@mui/icons-material": "^6.5.0",
     "@mui/material": "^6.5.0",
     "@react-oauth/google": "^0.13.5",
+    "@zxing/browser": "^0.1.5",
     "notistack": "^3.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

@@ -9,11 +9,12 @@ export const INTAKE_PHOTO_CONFIG = {
 
 export const INTAKE_PHOTO_COPY = {
   title: "Foto do cupom",
-  hint: "Tire uma foto ou escolha da galeria. Depois revise os itens.",
+  hint: "Tire uma foto, escolha da galeria ou leia o QR da nota.",
   camera: "Câmera",
   gallery: "Galeria",
-  qr: "QR",
+  qr: "QR da nota",
   qrDisabledHint: "Leitura de QR da nota em breve",
+  openQr: "Abrir leitura de QR",
   change: "Trocar foto",
   submit: "Ler cupom",
   retry: "Tentar de novo",

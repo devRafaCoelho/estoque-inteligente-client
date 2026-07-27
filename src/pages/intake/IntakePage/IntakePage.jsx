@@ -14,6 +14,7 @@ import {
   clearIntakeDrafts,
   listIntakes,
   parseIntakeImage,
+  parseIntakeNfQr,
   parseIntakeText,
 } from "../../../services/intakeService";
 import { buildIntakeParsePayload } from "../../../utils/intake/intakeForm";
@@ -48,11 +49,18 @@ import {
 
 function resolveInitialMode(searchParams) {
   const raw = String(searchParams.get("mode") || "").toLowerCase();
-  if (raw === "photo") return INTAKE_PAGE_CONFIG.modes.photo;
+  if (raw === "photo" || raw === "qr" || raw === "nfe" || raw === "nf") {
+    return INTAKE_PAGE_CONFIG.modes.photo;
+  }
   if (raw === "manual") return INTAKE_PAGE_CONFIG.modes.manual;
   // voice legado → texto (mic no mesmo campo)
   if (raw === "text" || raw === "voice") return INTAKE_PAGE_CONFIG.modes.text;
   return INTAKE_PAGE_CONFIG.defaultMode;
+}
+
+function shouldStartInQr(searchParams) {
+  const raw = String(searchParams.get("mode") || "").toLowerCase();
+  return raw === "qr" || raw === "nfe" || raw === "nf";
 }
 
 export default function IntakePage() {
@@ -63,6 +71,7 @@ export default function IntakePage() {
   const [loading, setLoading] = useState(false);
   const [photoLoading, setPhotoLoading] = useState(false);
   const [photoError, setPhotoError] = useState(null);
+  const [nfLoading, setNfLoading] = useState(false);
   const [draftsLoading, setDraftsLoading] = useState(true);
   const [drafts, setDrafts] = useState([]);
   const [draftToDiscard, setDraftToDiscard] = useState(null);
@@ -84,10 +93,11 @@ export default function IntakePage() {
 
   const text = watch("text");
   const { ref: textRef, ...textField } = register("text");
-  const busy = loading || photoLoading;
+  const busy = loading || photoLoading || nfLoading;
   const isTextMode = mode === INTAKE_PAGE_CONFIG.modes.text;
   const isPhotoMode = mode === INTAKE_PAGE_CONFIG.modes.photo;
   const isManualMode = mode === INTAKE_PAGE_CONFIG.modes.manual;
+  const startPhotoInQr = shouldStartInQr(searchParams);
 
   const loadDrafts = useCallback(async () => {
     setDraftsLoading(true);
@@ -160,6 +170,36 @@ export default function IntakePage() {
   const handleUseTextFromPhoto = () => {
     setPhotoError(null);
     setMode(INTAKE_PAGE_CONFIG.modes.text);
+  };
+
+  const handleNfValidated = async (payload) => {
+    setPhotoError(null);
+    setNfLoading(true);
+    try {
+      const data = await parseIntakeNfQr({
+        qrContent: payload.qrContent || undefined,
+        accessKey: payload.accessKey,
+        stateCode: payload.stateCode || undefined,
+      });
+      const intake = data?.intake;
+      if (!intake?.id || !Array.isArray(intake.items) || intake.items.length === 0) {
+        setPhotoError({
+          message: INTAKE_PAGE_COPY.nfEmptyError,
+          canRetry: true,
+        });
+        throw new Error("empty");
+      }
+      navigate(INTAKE_PAGE_CONFIG.paths.preview(intake.id));
+    } catch (err) {
+      if (err?.message === "empty") throw err;
+      setPhotoError({
+        message: err instanceof ApiError ? err.message : INTAKE_PAGE_COPY.nfParseError,
+        canRetry: true,
+      });
+      throw err;
+    } finally {
+      setNfLoading(false);
+    }
   };
 
   const handleContinueDraft = (draft) => {
@@ -241,12 +281,14 @@ export default function IntakePage() {
 
       {isPhotoMode && (
         <IntakePhotoPanel
-          loading={photoLoading}
+          loading={photoLoading || nfLoading}
           disabled={busy}
+          startInQr={startPhotoInQr}
           errorMessage={photoError?.message || null}
           canRetry={photoError?.canRetry !== false}
           onClearError={() => setPhotoError(null)}
           onUseText={handleUseTextFromPhoto}
+          onNfValidated={handleNfValidated}
           onInvalid={(message) => error(message)}
           onSubmit={handlePhotoSubmit}
         />

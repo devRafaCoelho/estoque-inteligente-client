@@ -31,6 +31,14 @@ export async function parseIntakeImage(file, filename = "cupom.jpg") {
 }
 
 /**
+ * QR / chave NF-e → draft `nf_qr`.
+ * @param {{ qrContent?: string, accessKey?: string, stateCode?: string }} payload
+ */
+export async function parseIntakeNfQr(payload) {
+  return api.post(`${INTAKES_URL}/parse-nf-qr`, payload);
+}
+
+/**
  * @param {string} id
  */
 export async function getIntakeById(id) {

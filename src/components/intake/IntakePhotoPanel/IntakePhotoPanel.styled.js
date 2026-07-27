@@ -12,11 +12,12 @@ export const photoDropSx = {
 };
 
 export const photoActionsSx = {
-  flexWrap: "wrap",
-  justifyContent: "center",
   width: "100%",
+  justifyContent: "center",
+  alignItems: "stretch",
   "& > *": {
-    flex: { xs: "1 1 auto", sm: "0 0 auto" },
+    width: { xs: "100%", lg: "auto" },
+    flex: { lg: "1 1 auto" },
   },
 };
 

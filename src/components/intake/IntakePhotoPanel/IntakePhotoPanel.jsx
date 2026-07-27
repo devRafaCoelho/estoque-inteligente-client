@@ -11,7 +11,7 @@ import CollectionsOutlinedIcon from "@mui/icons-material/CollectionsOutlined";
 import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
 import QrCodeScannerOutlinedIcon from "@mui/icons-material/QrCodeScannerOutlined";
 import LoadingButton from "../../common/LoadingButton/LoadingButton";
-import Tooltip from "@mui/material/Tooltip";
+import IntakeNfPanel from "../IntakeNfPanel/IntakeNfPanel";
 import {
   INTAKE_PHOTO_CONFIG,
   INTAKE_PHOTO_COPY,
@@ -37,10 +37,12 @@ function isAllowedFile(file) {
 }
 
 /**
- * Captura/galeria de cupom + “Lendo cupom…” + erro com retry (mantém a prévia).
+ * Captura/galeria de cupom + QR da nota + “Lendo cupom…”.
  *
  * @param {{
  *   onSubmit: (file: File) => void | Promise<void>,
+ *   onNfValidated?: (payload: object) => void,
+ *   startInQr?: boolean,
  *   loading?: boolean,
  *   disabled?: boolean,
  *   errorMessage?: string | null,
@@ -52,6 +54,8 @@ function isAllowedFile(file) {
  */
 export default function IntakePhotoPanel({
   onSubmit,
+  onNfValidated,
+  startInQr = false,
   loading = false,
   disabled = false,
   errorMessage = null,
@@ -66,6 +70,11 @@ export default function IntakePhotoPanel({
   const galleryRef = useRef(null);
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
+  const [qrMode, setQrMode] = useState(Boolean(startInQr));
+
+  useEffect(() => {
+    setQrMode(Boolean(startInQr));
+  }, [startInQr]);
 
   useEffect(() => {
     if (!file) {
@@ -88,6 +97,7 @@ export default function IntakePhotoPanel({
       return;
     }
     onClearError?.();
+    setQrMode(false);
     setFile(next);
   };
 
@@ -101,6 +111,25 @@ export default function IntakePhotoPanel({
 
   const busy = Boolean(loading || disabled);
   const hasError = Boolean(errorMessage);
+
+  if (qrMode) {
+    return (
+      <IntakeNfPanel
+        disabled={busy}
+        loading={loading}
+        errorMessage={errorMessage}
+        onValidated={onNfValidated}
+        onCancel={() => {
+          onClearError?.();
+          setQrMode(false);
+        }}
+        onUsePhoto={() => {
+          onClearError?.();
+          setQrMode(false);
+        }}
+      />
+    );
+  }
 
   return (
     <Stack spacing={2}>
@@ -162,10 +191,7 @@ export default function IntakePhotoPanel({
         </Box>
       ) : (
         <Box sx={photoDropSx}>
-          <Typography variant="body2" color="text.secondary" textAlign="center">
-            {INTAKE_PHOTO_COPY.hint}
-          </Typography>
-          <Stack direction="row" spacing={1} sx={photoActionsSx}>
+          <Stack spacing={1} direction={{ xs: "column", lg: "row" }} sx={photoActionsSx}>
             <LoadingButton
               type="button"
               variant="outlined"
@@ -184,18 +210,18 @@ export default function IntakePhotoPanel({
             >
               {INTAKE_PHOTO_COPY.gallery}
             </LoadingButton>
-            <Tooltip title={INTAKE_PHOTO_COPY.qrDisabledHint}>
-              <span>
-                <LoadingButton
-                  type="button"
-                  variant="outlined"
-                  startIcon={<QrCodeScannerOutlinedIcon />}
-                  disabled
-                >
-                  {INTAKE_PHOTO_COPY.qr}
-                </LoadingButton>
-              </span>
-            </Tooltip>
+            <LoadingButton
+              type="button"
+              variant="outlined"
+              startIcon={<QrCodeScannerOutlinedIcon />}
+              disabled={busy}
+              onClick={() => {
+                onClearError?.();
+                setQrMode(true);
+              }}
+            >
+              {INTAKE_PHOTO_COPY.qr}
+            </LoadingButton>
           </Stack>
         </Box>
       )}
