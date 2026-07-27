@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
@@ -20,6 +20,7 @@ import { isNotificationNavigable } from "../../../utils/notifications/resolveNot
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
+  pageLoadingCompactSx,
   pageToolbarActionsSx,
 } from "../../../styles/pageStyles";
 import { NOTIFICATIONS_PAGE_CONFIG } from "./notificationsPageConfig";
@@ -32,7 +33,11 @@ import {
 
 export default function NotificationsPage() {
   const { success, error } = useAppSnackbar();
+  const errorRef = useRef(error);
+  errorRef.current = error;
+
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
   const [busyId, setBusyId] = useState(null);
   const [notifications, setNotifications] = useState([]);
@@ -40,28 +45,41 @@ export default function NotificationsPage() {
   const [filter, setFilter] = useState(NOTIFICATIONS_PAGE_CONFIG.defaultFilter);
 
   const { filters, listLimit, locale } = NOTIFICATIONS_PAGE_CONFIG;
+  const hasLoadedOnce = useRef(false);
 
-  const load = useCallback(
-    async ({ silent = false } = {}) => {
-      if (!silent) setLoading(true);
-      try {
-        const data = await listNotifications({
-          unreadOnly: filter === filters.unread ? true : undefined,
-          limit: listLimit,
-        });
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount ?? 0);
-      } catch (err) {
-        error(err instanceof ApiError ? err.message : NOTIFICATIONS_PAGE_COPY.loadError);
-      } finally {
-        if (!silent) setLoading(false);
-      }
-    },
-    [error, filter, filters.unread, listLimit],
-  );
+  const load = useCallback(async ({ silent = false } = {}) => {
+    if (silent || hasLoadedOnce.current) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    try {
+      // Sempre busca a lista completa; o filtro Todos/Não lidos é só no client.
+      const data = await listNotifications({ limit: listLimit });
+      setNotifications(data.notifications || []);
+      setUnreadCount(data.unreadCount ?? 0);
+      hasLoadedOnce.current = true;
+    } catch (err) {
+      errorRef.current(
+        err instanceof ApiError ? err.message : NOTIFICATIONS_PAGE_COPY.loadError,
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [listLimit]);
+
+  const applyLocalMarkRead = useCallback((notificationId) => {
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.id === notificationId ? { ...item, unread: false } : item,
+      ),
+    );
+    setUnreadCount((count) => Math.max(0, count - 1));
+  }, []);
 
   const { markRead, openNotification } = useNotificationActions({
-    onAfterMarkRead: () => load({ silent: true }),
+    onAfterMarkRead: undefined,
     markReadSuccessMessage: NOTIFICATIONS_PAGE_COPY.markReadSuccess,
     markReadErrorMessage: NOTIFICATIONS_PAGE_COPY.markReadError,
   });
@@ -73,10 +91,17 @@ export default function NotificationsPage() {
   const handleMarkRead = async (notification) => {
     setBusyId(notification.id);
     try {
-      await markRead(notification);
+      const ok = await markRead(notification);
+      if (ok) applyLocalMarkRead(notification.id);
     } finally {
       setBusyId(null);
     }
+  };
+
+  const handleOpenNotification = async (notification) => {
+    const wasUnread = Boolean(notification?.unread);
+    const ok = await openNotification(notification);
+    if (ok && wasUnread) applyLocalMarkRead(notification.id);
   };
 
   const handleMarkAllRead = async () => {
@@ -84,7 +109,8 @@ export default function NotificationsPage() {
     try {
       await markAllNotificationsRead();
       success(NOTIFICATIONS_PAGE_COPY.markAllReadSuccess);
-      await load({ silent: true });
+      setNotifications((prev) => prev.map((item) => ({ ...item, unread: false })));
+      setUnreadCount(0);
     } catch (err) {
       error(err instanceof ApiError ? err.message : NOTIFICATIONS_PAGE_COPY.markAllReadError);
     } finally {
@@ -92,13 +118,12 @@ export default function NotificationsPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={pageLoadingBoxSx}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const visibleNotifications = useMemo(() => {
+    if (filter === filters.unread) {
+      return notifications.filter((item) => item.unread);
+    }
+    return notifications;
+  }, [filter, filters.unread, notifications]);
 
   const emptyContent =
     filter === filters.unread
@@ -117,6 +142,14 @@ export default function NotificationsPage() {
     { value: filters.all, label: NOTIFICATIONS_PAGE_COPY.filterAll },
     { value: filters.unread, label: NOTIFICATIONS_PAGE_COPY.filterUnread },
   ];
+
+  if (loading && !hasLoadedOnce.current) {
+    return (
+      <Box sx={pageLoadingBoxSx}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Stack spacing={pageStackSpacing}>
@@ -140,6 +173,7 @@ export default function NotificationsPage() {
             {NOTIFICATIONS_PAGE_COPY.unreadCount(unreadCount)}
           </Typography>
           <LoadingButton
+            type="button"
             variant="outlined"
             size="small"
             loading={markingAll}
@@ -151,7 +185,11 @@ export default function NotificationsPage() {
         </Box>
       </Stack>
 
-      {notifications.length === 0 ? (
+      {refreshing ? (
+        <Box sx={pageLoadingCompactSx}>
+          <CircularProgress size={28} />
+        </Box>
+      ) : visibleNotifications.length === 0 ? (
         <EmptyState
           icon={emptyContent.icon}
           title={emptyContent.title}
@@ -159,7 +197,7 @@ export default function NotificationsPage() {
         />
       ) : (
         <Stack spacing={listSpacing}>
-          {notifications.map((notification) => {
+          {visibleNotifications.map((notification) => {
             const navigable = isNotificationNavigable(notification);
             return (
               <NotificationCard
@@ -168,7 +206,7 @@ export default function NotificationsPage() {
                 locale={locale}
                 busy={busyId === notification.id}
                 onMarkRead={() => handleMarkRead(notification)}
-                onNavigate={navigable ? () => openNotification(notification) : undefined}
+                onNavigate={navigable ? () => handleOpenNotification(notification) : undefined}
               />
             );
           })}

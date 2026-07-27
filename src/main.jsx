@@ -26,7 +26,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <SnackbarProvider
         maxSnack={3}
         autoHideDuration={3500}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        style={{ top: 72 }}
       >
         <BrowserRouter
           future={{

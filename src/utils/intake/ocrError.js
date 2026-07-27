@@ -37,7 +37,7 @@ export function resolveOcrError(err) {
   if (!(err instanceof ApiError)) {
     return {
       kind: OCR_ERROR_KIND.generic,
-      message: "Não foi possível ler o cupom. Tente outra foto ou use texto.",
+      message: "Não foi possível ler a nota. Tente outra foto ou use texto.",
       canRetry: true,
     };
   }
@@ -58,8 +58,21 @@ export function resolveOcrError(err) {
   if (status === 503) {
     return {
       kind: OCR_ERROR_KIND.unavailable,
-      message: raw || "Leitura por foto indisponível no momento. Use texto.",
+      message:
+        raw ||
+        "Leitura por foto indisponível no momento. Confira a IA no servidor ou use texto.",
       canRetry: false,
+      status,
+    };
+  }
+
+  if (status === 504 || /demorou demais no servidor/i.test(lower)) {
+    return {
+      kind: OCR_ERROR_KIND.timeout,
+      message:
+        raw ||
+        "A leitura demorou demais no servidor. Tente de novo com outra foto ou use texto.",
+      canRetry: true,
       status,
     };
   }
@@ -75,7 +88,7 @@ export function resolveOcrError(err) {
 
   if (
     /não encontrei itens|nenhum item|sem itens/i.test(lower) ||
-    /não entendi o cupom/i.test(lower)
+    /não entendi (o cupom|a nota)/i.test(lower)
   ) {
     return {
       kind: OCR_ERROR_KIND.empty,
@@ -88,7 +101,7 @@ export function resolveOcrError(err) {
   if (/ilegív|nítida|outra (imagem|foto)|não consegui (ler|estruturar)/i.test(lower)) {
     return {
       kind: OCR_ERROR_KIND.illegible,
-      message: raw || "Cupom ilegível. Tire outra foto (mais perto e com boa luz) ou use texto.",
+      message: raw || "Nota ilegível. Tire outra foto (mais perto e com boa luz) ou use texto.",
       canRetry: true,
       status,
     };
@@ -105,7 +118,7 @@ export function resolveOcrError(err) {
 
   return {
     kind: OCR_ERROR_KIND.generic,
-    message: raw || "Não foi possível ler o cupom. Tente de novo ou use texto.",
+    message: raw || "Não foi possível ler a nota. Tente de novo ou use texto.",
     canRetry: true,
     status,
   };

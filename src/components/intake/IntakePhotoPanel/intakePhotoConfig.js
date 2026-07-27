@@ -5,10 +5,14 @@ export const INTAKE_PHOTO_CONFIG = {
   cameraCapture: "environment",
   /** Tempo máximo aguardando OCR/visão no client (F2-4.5). */
   parseTimeoutMs: 90_000,
+  /** Compactação antes do upload (API hospedada / Render). */
+  compressMaxEdge: 1600,
+  compressQuality: 0.82,
+  compressMaxBytes: 1.5 * 1024 * 1024,
 };
 
 export const INTAKE_PHOTO_COPY = {
-  title: "Foto do cupom",
+  title: "Foto da nota",
   hint: "Tire uma foto, escolha da galeria ou leia o QR da nota.",
   camera: "Câmera",
   gallery: "Galeria",
@@ -17,19 +21,19 @@ export const INTAKE_PHOTO_COPY = {
   openQr: "Abrir leitura de QR",
   sefazFallbackTitle: "Consulta à SEFAZ indisponível",
   sefazFallbackHint:
-    "Não bloqueamos você: tire uma foto do cupom ou escolha da galeria para continuar pela leitura (OCR).",
-  sefazFallbackCamera: "Tirar foto do cupom",
+    "Não bloqueamos você: tire uma foto da nota ou escolha da galeria para continuar pela leitura (OCR).",
+  sefazFallbackCamera: "Tirar foto da nota",
   sefazFallbackGallery: "Escolher da galeria",
   sefazFallbackRetryQr: "Tentar QR de novo",
   change: "Trocar foto",
-  submit: "Ler cupom",
+  submit: "Ler nota",
   retry: "Tentar de novo",
   useText: "Usar texto",
-  reading: "Lendo cupom…",
+  reading: "Lendo nota…",
   clearAria: "Remover foto",
-  previewAlt: "Prévia do cupom",
+  previewAlt: "Prévia da nota",
   errorTitle: "Não deu para ler",
   invalidType: "Use imagem JPG, PNG ou WebP",
   tooLarge: "Imagem muito grande (máximo 8 MB)",
-  parseError: "Não foi possível ler o cupom",
+  parseError: "Não foi possível ler a nota",
 };

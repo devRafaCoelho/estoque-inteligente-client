@@ -31,6 +31,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { ApiError } from "../../../services/apiClient";
 import { updateMe } from "../../../services/userService";
 import { resolveOcrError, withTimeout } from "../../../utils/intake/ocrError";
+import { compressReceiptImage } from "../../../utils/intake/compressReceiptImage";
 import { resolveNfError } from "../../../utils/intake/nfError";
 import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import {
@@ -145,8 +146,13 @@ export default function IntakePage() {
     setPhotoError(null);
     setPhotoLoading(true);
     try {
+      const compressed = await compressReceiptImage(file, {
+        maxEdge: INTAKE_PHOTO_CONFIG.compressMaxEdge,
+        quality: INTAKE_PHOTO_CONFIG.compressQuality,
+        maxBytes: INTAKE_PHOTO_CONFIG.compressMaxBytes,
+      });
       const data = await withTimeout(
-        parseIntakeImage(file),
+        parseIntakeImage(compressed),
         INTAKE_PHOTO_CONFIG.parseTimeoutMs,
       );
       const intake = data?.intake;

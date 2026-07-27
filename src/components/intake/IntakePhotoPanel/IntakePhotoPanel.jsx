@@ -23,6 +23,7 @@ import {
   photoClearButtonSx,
   photoDropSx,
   photoErrorActionsSx,
+  photoErrorAlertSx,
   photoOverlaySx,
   photoPreviewImgSx,
   photoPreviewWrapSx,
@@ -38,7 +39,7 @@ function isAllowedFile(file) {
 }
 
 /**
- * Captura/galeria de cupom + QR da nota + fallback SEFAZ → foto (F2-5.3).
+ * Captura/galeria de nota + QR + fallback SEFAZ → foto (F2-5.3).
  * F2-5.4: com default_state, QR abre direto; sem preferência, pede UF uma vez.
  */
 export default function IntakePhotoPanel({
@@ -196,13 +197,19 @@ export default function IntakePhotoPanel({
           severity="warning"
           onClose={busy ? undefined : () => onClearError?.()}
           role="alert"
+          sx={photoErrorAlertSx}
         >
           <AlertTitle>{INTAKE_PHOTO_COPY.sefazFallbackTitle}</AlertTitle>
           {errorMessage || INTAKE_PHOTO_COPY.sefazFallbackHint}
           <Typography variant="body2" sx={{ mt: 1 }}>
             {INTAKE_PHOTO_COPY.sefazFallbackHint}
           </Typography>
-          <Stack direction="row" spacing={1} sx={photoErrorActionsSx} flexWrap="wrap">
+          <Stack
+            direction={{ xs: "column", lg: "row" }}
+            spacing={1}
+            sx={photoErrorActionsSx}
+            flexWrap={{ lg: "wrap" }}
+          >
             <LoadingButton
               type="button"
               size="small"
@@ -325,10 +332,16 @@ export default function IntakePhotoPanel({
           severity="warning"
           onClose={busy ? undefined : () => onClearError?.()}
           role="alert"
+          sx={photoErrorAlertSx}
         >
           <AlertTitle>{INTAKE_PHOTO_COPY.errorTitle}</AlertTitle>
           {errorMessage}
-          <Stack direction="row" spacing={1} sx={photoErrorActionsSx} flexWrap="wrap">
+          <Stack
+            direction={{ xs: "column", lg: "row" }}
+            spacing={1}
+            sx={photoErrorActionsSx}
+            flexWrap={{ lg: "wrap" }}
+          >
             {canRetry && file && (
               <LoadingButton
                 type="button"

@@ -5,6 +5,6 @@ export const INTAKE_NF_STATE_GATE_COPY = {
   helper: "Salvo em Minha conta como preferência.",
   continue: "Continuar para o QR",
   cancel: "Voltar",
-  usePhoto: "Usar foto do cupom",
+  usePhoto: "Usar foto da nota",
   saveError: "Não foi possível salvar o estado. Tente de novo.",
 };

@@ -90,5 +90,17 @@ export const photoSubmitButtonSx = {
 
 export const photoErrorActionsSx = {
   mt: 1.25,
-  gap: 1,
+  width: "100%",
+  alignItems: "stretch",
+  "& > *": {
+    width: { xs: "100%", lg: "auto" },
+  },
+};
+
+/** Garante que a área de ações do Alert ocupe 100% no mobile/tablet. */
+export const photoErrorAlertSx = {
+  "& .MuiAlert-message": {
+    width: "100%",
+    minWidth: 0,
+  },
 };

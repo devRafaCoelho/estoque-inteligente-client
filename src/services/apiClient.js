@@ -108,7 +108,7 @@ export const api = {
   get: (path, options) => apiRequest(path, { ...options, method: "GET" }),
   post: (path, body, options) =>
     apiRequest(path, { ...options, method: "POST", body }),
-  /** Multipart (ex.: foto do cupom). Não define Content-Type — o browser envia o boundary. */
+  /** Multipart (ex.: foto da nota). Não define Content-Type — o browser envia o boundary. */
   postFormData: (path, formData, options) =>
     apiRequest(path, { ...options, method: "POST", body: formData }),
   patch: (path, body, options) =>

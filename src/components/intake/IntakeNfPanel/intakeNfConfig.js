@@ -8,8 +8,8 @@ export const INTAKE_NF_COPY = {
   scanAgain: "Escanear de novo",
   stopScan: "Cancelar",
   backToPhoto: "Voltar",
-  usePhoto: "Usar foto do cupom",
-  cameraDenied: "Não foi possível abrir a câmera. Use a foto do cupom.",
+  usePhoto: "Usar foto da nota",
+  cameraDenied: "Não foi possível abrir a câmera. Use a foto da nota.",
   scanError: "Não li um QR de nota válido. Tente de novo.",
   parseError: "Não foi possível ler a nota",
   errors: {

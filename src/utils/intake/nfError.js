@@ -27,7 +27,7 @@ export function resolveNfError(err) {
   if (err instanceof TypeError || /failed to fetch|network/i.test(String(err?.message || ""))) {
     return {
       kind: NF_ERROR_KIND.network,
-      message: "Sem conexão agora. Verifique a rede ou use a foto do cupom.",
+      message: "Sem conexão agora. Verifique a rede ou use a foto da nota.",
       fallbackPhoto: true,
       canRetryQr: true,
       needsState: false,
@@ -37,7 +37,7 @@ export function resolveNfError(err) {
   if (!(err instanceof ApiError)) {
     return {
       kind: NF_ERROR_KIND.generic,
-      message: "Não foi possível ler a nota. Use a foto do cupom para continuar.",
+      message: "Não foi possível ler a nota. Use a foto da nota para continuar.",
       fallbackPhoto: true,
       canRetryQr: true,
       needsState: false,
@@ -61,7 +61,7 @@ export function resolveNfError(err) {
       kind: NF_ERROR_KIND.sefazUnavailable,
       message:
         raw ||
-        "Não foi possível consultar a SEFAZ. Tire uma foto do cupom para continuar.",
+        "Não foi possível consultar a SEFAZ. Tire uma foto da nota para continuar.",
       fallbackPhoto: true,
       canRetryQr: true,
       needsState: false,
@@ -85,7 +85,7 @@ export function resolveNfError(err) {
   if (code === "nf_uf_unsupported" || /ainda não lemos notas|sem adapter/i.test(raw)) {
     return {
       kind: NF_ERROR_KIND.ufUnsupported,
-      message: raw || "Esta UF ainda não é suportada no QR. Use a foto do cupom.",
+      message: raw || "Esta UF ainda não é suportada no QR. Use a foto da nota.",
       fallbackPhoto: true,
       canRetryQr: false,
       needsState: false,
@@ -97,7 +97,7 @@ export function resolveNfError(err) {
   if (code === "nf_empty_items" || /não encontrei itens|não retornou itens/i.test(raw)) {
     return {
       kind: NF_ERROR_KIND.empty,
-      message: raw || "A nota não retornou itens. Use a foto do cupom.",
+      message: raw || "A nota não retornou itens. Use a foto da nota.",
       fallbackPhoto: true,
       canRetryQr: true,
       needsState: false,
@@ -109,7 +109,7 @@ export function resolveNfError(err) {
   if (status === 400 || code === "nf_invalid_payload") {
     return {
       kind: NF_ERROR_KIND.invalid,
-      message: raw || "QR inválido. Escaneie de novo ou use a foto do cupom.",
+      message: raw || "QR inválido. Escaneie de novo ou use a foto da nota.",
       fallbackPhoto: true,
       canRetryQr: true,
       needsState: false,
@@ -120,7 +120,7 @@ export function resolveNfError(err) {
 
   return {
     kind: NF_ERROR_KIND.generic,
-    message: raw || "Não foi possível ler a nota. Use a foto do cupom para continuar.",
+    message: raw || "Não foi possível ler a nota. Use a foto da nota para continuar.",
     fallbackPhoto: true,
     canRetryQr: true,
     needsState: false,
