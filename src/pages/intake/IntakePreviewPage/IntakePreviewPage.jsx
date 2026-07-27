@@ -178,7 +178,7 @@ export default function IntakePreviewPage() {
   };
 
   const handleConfirm = async () => {
-    if (activeCount === 0) {
+    if (!itemsReady || activeCount === 0) {
       error(INTAKE_PREVIEW_PAGE_COPY.selectItemError);
       return;
     }
@@ -279,7 +279,26 @@ export default function IntakePreviewPage() {
 
       <Box>
         {items.length === 0 ? (
-          <Typography color="text.secondary">{INTAKE_PREVIEW_PAGE_COPY.emptyItems}</Typography>
+          <Stack spacing={1.5}>
+            <Typography color="text.secondary">{INTAKE_PREVIEW_PAGE_COPY.emptyItems}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {INTAKE_PREVIEW_PAGE_COPY.emptyItemsPhotoHint}
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Button
+                variant="contained"
+                onClick={() => navigate(INTAKE_PREVIEW_PAGE_CONFIG.paths.entradaPhoto)}
+              >
+                {INTAKE_PREVIEW_PAGE_COPY.emptyRetryPhoto}
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => navigate(INTAKE_PREVIEW_PAGE_CONFIG.paths.entradaText)}
+              >
+                {INTAKE_PREVIEW_PAGE_COPY.emptyRetryText}
+              </Button>
+            </Stack>
+          </Stack>
         ) : (
           items.map((item) => (
             <ReviewItemAccordion

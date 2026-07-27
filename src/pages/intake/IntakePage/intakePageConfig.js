@@ -3,6 +3,12 @@ export const INTAKE_PAGE_CONFIG = {
   formMode: "onTouched",
   draftsStatus: "draft",
   draftsLimit: 20,
+  defaultMode: "text",
+  modes: {
+    text: "text",
+    voice: "voice",
+    photo: "photo",
+  },
   paths: {
     dashboard: "/dashboard",
     stockOut: "/baixa",

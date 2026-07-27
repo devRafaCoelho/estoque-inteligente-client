@@ -1,6 +1,7 @@
 import DocumentScannerOutlinedIcon from "@mui/icons-material/DocumentScannerOutlined";
 import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
 import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
+import PhotoCameraOutlinedIcon from "@mui/icons-material/PhotoCameraOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
 import Drawer from "@mui/material/Drawer";
@@ -21,8 +22,8 @@ import {
 } from "./IntakeOptionsSheet.styled";
 
 /**
- * Sheet de escolha do fluxo de entrada (scanner / texto / manual).
- * Scanner fica preparado para a fase 2, sem ação real ainda.
+ * Sheet de escolha do fluxo de entrada (foto / texto / manual).
+ * QR/NF-e fica preparado para a Sprint 5.
  */
 export default function IntakeOptionsSheet({ open, onClose }) {
   const navigate = useNavigate();
@@ -35,11 +36,11 @@ export default function IntakeOptionsSheet({ open, onClose }) {
 
   const options = [
     {
-      id: "scanner",
-      label: INTAKE_OPTIONS_COPY.scannerLabel,
-      description: INTAKE_OPTIONS_COPY.scannerDescription,
-      icon: DocumentScannerOutlinedIcon,
-      disabled: true,
+      id: "photo",
+      label: INTAKE_OPTIONS_COPY.photoLabel,
+      description: INTAKE_OPTIONS_COPY.photoDescription,
+      icon: PhotoCameraOutlinedIcon,
+      path: INTAKE_OPTIONS_CONFIG.paths.photo,
     },
     {
       id: "text",
@@ -47,6 +48,13 @@ export default function IntakeOptionsSheet({ open, onClose }) {
       description: INTAKE_OPTIONS_COPY.textDescription,
       icon: EditNoteOutlinedIcon,
       path: INTAKE_OPTIONS_CONFIG.paths.text,
+    },
+    {
+      id: "scanner",
+      label: INTAKE_OPTIONS_COPY.scannerLabel,
+      description: INTAKE_OPTIONS_COPY.scannerDescription,
+      icon: DocumentScannerOutlinedIcon,
+      disabled: true,
     },
     {
       id: "manual",

@@ -41,19 +41,20 @@ async function parseResponseBody(response) {
  * @param {string} path
  * @param {{
  *   method?: string,
- *   body?: object,
+ *   body?: object | FormData,
  *   headers?: Record<string, string>,
  * }} [options]
  */
 export async function apiRequest(path, options = {}) {
   const { method = "GET", body, headers = {} } = options;
+  const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
 
   const requestHeaders = {
     Accept: "application/json",
     ...headers,
   };
 
-  if (body !== undefined) {
+  if (body !== undefined && !isFormData) {
     requestHeaders["Content-Type"] = "application/json";
   }
 
@@ -65,7 +66,12 @@ export async function apiRequest(path, options = {}) {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: requestHeaders,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
+    body:
+      body === undefined
+        ? undefined
+        : isFormData
+          ? body
+          : JSON.stringify(body),
   });
 
   const responseBody = await parseResponseBody(response);
@@ -102,6 +108,9 @@ export const api = {
   get: (path, options) => apiRequest(path, { ...options, method: "GET" }),
   post: (path, body, options) =>
     apiRequest(path, { ...options, method: "POST", body }),
+  /** Multipart (ex.: foto do cupom). Não define Content-Type — o browser envia o boundary. */
+  postFormData: (path, formData, options) =>
+    apiRequest(path, { ...options, method: "POST", body: formData }),
   patch: (path, body, options) =>
     apiRequest(path, { ...options, method: "PATCH", body }),
   put: (path, body, options) =>

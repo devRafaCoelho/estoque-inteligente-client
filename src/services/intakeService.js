@@ -20,6 +20,17 @@ export async function parseIntakeText(payload) {
 }
 
 /**
+ * Foto do cupom → draft (multipart campo `image`).
+ * @param {File|Blob} file
+ * @param {string} [filename]
+ */
+export async function parseIntakeImage(file, filename = "cupom.jpg") {
+  const formData = new FormData();
+  formData.append("image", file, file?.name || filename);
+  return api.postFormData(`${INTAKES_URL}/parse-image`, formData);
+}
+
+/**
  * @param {string} id
  */
 export async function getIntakeById(id) {

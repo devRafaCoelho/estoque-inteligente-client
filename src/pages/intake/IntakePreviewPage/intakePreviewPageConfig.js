@@ -5,6 +5,8 @@ export const INTAKE_PREVIEW_PAGE_CONFIG = {
   confirmedStatus: "confirmed",
   paths: {
     entrada: "/entrada",
+    entradaPhoto: "/entrada?mode=photo",
+    entradaText: "/entrada?mode=text",
     produtos: "/produtos",
   },
 };

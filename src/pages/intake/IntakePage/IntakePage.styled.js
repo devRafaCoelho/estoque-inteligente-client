@@ -40,3 +40,7 @@ export const draftItemBodySx = {
 export const draftItemMetaSx = {
   mt: 0.25,
 };
+
+export const voiceHintSx = {
+  px: 0.25,
+};

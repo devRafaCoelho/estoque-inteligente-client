@@ -1,17 +1,23 @@
 export const INTAKE_PAGE_COPY = {
   backAria: "Voltar",
   title: "Entrada no estoque",
-  subtitle: "Descreva a compra em texto ou por voz",
+  subtitle: "Texto, voz ou foto do cupom — depois você revisa os itens",
   textLabel: "O que você comprou?",
   textPlaceholder: "Ex.: 2kg arroz, 1 leite, 500g feijão",
+  voiceHint: "Toque no microfone e diga o que comprou. Você pode editar o texto antes de enviar.",
   submit: "Revisar itens",
   submitAria: "Revisar itens",
   parseError: "Não foi possível interpretar o texto",
+  photoParseError: "Não foi possível ler o cupom",
+  photoEmptyError:
+    "A leitura não retornou itens para revisar. Tente outra foto ou use texto.",
+  readingReceipt: "Lendo cupom…",
   stockOutPrompt: "Quer dar baixa?",
   stockOutLink: "Baixa por texto ou voz",
   draftsTitle: "Rascunhos salvos",
   draftsLoadError: "Erro ao carregar rascunhos",
   draftUntitled: "Entrada sem título",
+  draftPhotoTitle: "Cupom (foto)",
   draftItems: (count) => `${count} item(ns)`,
   draftContinueAria: "Continuar rascunho",
   draftDiscardAria: "Descartar rascunho",
@@ -34,6 +40,11 @@ export const INTAKE_PAGE_COPY = {
 export function formatIntakeDraftTitle(draft) {
   const store = String(draft?.storeName || "").trim();
   if (store) return store;
+  if (draft?.source === "receipt_photo") {
+    const raw = String(draft?.rawInput || "").trim();
+    if (raw && !/\.(jpe?g|png|webp)$/i.test(raw)) return raw;
+    return INTAKE_PAGE_COPY.draftPhotoTitle;
+  }
   const raw = String(draft?.rawInput || "").trim().replace(/\s+/g, " ");
   if (!raw) return INTAKE_PAGE_COPY.draftUntitled;
   return raw.length > 72 ? `${raw.slice(0, 72)}…` : raw;

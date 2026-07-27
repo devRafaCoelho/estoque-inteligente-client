@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Link from "@mui/material/Link";
@@ -14,14 +14,19 @@ import {
   cancelIntake,
   clearIntakeDrafts,
   listIntakes,
+  parseIntakeImage,
   parseIntakeText,
 } from "../../../services/intakeService";
 import { buildIntakeParsePayload } from "../../../utils/intake/intakeForm";
 import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
+import IntakeModeTabs from "../../../components/intake/IntakeModeTabs/IntakeModeTabs";
+import IntakePhotoPanel from "../../../components/intake/IntakePhotoPanel/IntakePhotoPanel";
+import { INTAKE_PHOTO_CONFIG } from "../../../components/intake/IntakePhotoPanel/intakePhotoConfig";
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
+import { resolveOcrError, withTimeout } from "../../../utils/intake/ocrError";
 import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import {
   formatIntakeDraftTitle,
@@ -37,12 +42,23 @@ import {
   draftsHeaderTitleSx,
   draftsSectionSpacing,
   intakeFormStackSpacing,
+  voiceHintSx,
 } from "./IntakePage.styled";
+
+function resolveInitialMode(searchParams) {
+  const raw = String(searchParams.get("mode") || "").toLowerCase();
+  if (raw === "voice" || raw === "photo" || raw === "text") return raw;
+  return INTAKE_PAGE_CONFIG.defaultMode;
+}
 
 export default function IntakePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { success, error } = useAppSnackbar();
+  const [mode, setMode] = useState(() => resolveInitialMode(searchParams));
   const [loading, setLoading] = useState(false);
+  const [photoLoading, setPhotoLoading] = useState(false);
+  const [photoError, setPhotoError] = useState(null);
   const [draftsLoading, setDraftsLoading] = useState(true);
   const [drafts, setDrafts] = useState([]);
   const [draftToDiscard, setDraftToDiscard] = useState(null);
@@ -64,6 +80,7 @@ export default function IntakePage() {
 
   const text = watch("text");
   const { ref: textRef, ...textField } = register("text");
+  const busy = loading || photoLoading;
 
   const loadDrafts = useCallback(async () => {
     setDraftsLoading(true);
@@ -84,6 +101,10 @@ export default function IntakePage() {
     loadDrafts();
   }, [loadDrafts]);
 
+  useEffect(() => {
+    setMode(resolveInitialMode(searchParams));
+  }, [searchParams]);
+
   const onSubmit = async (values) => {
     setLoading(true);
     try {
@@ -94,6 +115,44 @@ export default function IntakePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePhotoSubmit = async (file) => {
+    setPhotoError(null);
+    setPhotoLoading(true);
+    try {
+      const data = await withTimeout(
+        parseIntakeImage(file),
+        INTAKE_PHOTO_CONFIG.parseTimeoutMs,
+      );
+      const intake = data?.intake;
+      if (!intake?.id || !Array.isArray(intake.items) || intake.items.length === 0) {
+        setPhotoError({
+          message: INTAKE_PAGE_COPY.photoEmptyError,
+          canRetry: true,
+        });
+        return;
+      }
+      navigate(INTAKE_PAGE_CONFIG.paths.preview(intake.id));
+    } catch (err) {
+      const resolved = resolveOcrError(err);
+      setPhotoError({
+        message: resolved.message,
+        canRetry: resolved.canRetry,
+      });
+    } finally {
+      setPhotoLoading(false);
+    }
+  };
+
+  const handleModeChange = (next) => {
+    setPhotoError(null);
+    setMode(next);
+  };
+
+  const handleUseTextFromPhoto = () => {
+    setPhotoError(null);
+    setMode(INTAKE_PAGE_CONFIG.modes.text);
   };
 
   const handleContinueDraft = (draft) => {
@@ -129,8 +188,16 @@ export default function IntakePage() {
     }
   };
 
+  const isTextOrVoice =
+    mode === INTAKE_PAGE_CONFIG.modes.text || mode === INTAKE_PAGE_CONFIG.modes.voice;
+
   return (
-    <Stack spacing={intakeFormStackSpacing} component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <Stack
+      spacing={intakeFormStackSpacing}
+      component={isTextOrVoice ? "form" : "div"}
+      onSubmit={isTextOrVoice ? handleSubmit(onSubmit) : undefined}
+      noValidate={isTextOrVoice || undefined}
+    >
       <Stack direction="row" alignItems="center" spacing={1}>
         <IconButton
           onClick={() => navigate(INTAKE_PAGE_CONFIG.paths.dashboard)}
@@ -146,26 +213,50 @@ export default function IntakePage() {
         </Box>
       </Stack>
 
-      <SpeechTextField
-        label={INTAKE_PAGE_COPY.textLabel}
-        placeholder={INTAKE_PAGE_COPY.textPlaceholder}
-        fullWidth
-        error={Boolean(errors.text)}
-        helperText={errors.text?.message}
-        value={text ?? ""}
-        inputRef={textRef}
-        speechDisabled={loading}
-        showSubmit
-        submitType="submit"
-        submitLoading={loading}
-        submitDisabled={String(text || "").trim().length < 3}
-        submitAriaLabel={INTAKE_PAGE_COPY.submitAria}
-        slotProps={{ inputLabel: { shrink: true } }}
-        {...textField}
-        onChange={(next) =>
-          setValue("text", next, { shouldValidate: true, shouldDirty: true })
-        }
-      />
+      <IntakeModeTabs value={mode} onChange={handleModeChange} disabled={busy} />
+
+      {isTextOrVoice && (
+        <Stack spacing={1}>
+          {mode === INTAKE_PAGE_CONFIG.modes.voice && (
+            <Typography variant="body2" color="text.secondary" sx={voiceHintSx}>
+              {INTAKE_PAGE_COPY.voiceHint}
+            </Typography>
+          )}
+          <SpeechTextField
+            label={INTAKE_PAGE_COPY.textLabel}
+            placeholder={INTAKE_PAGE_COPY.textPlaceholder}
+            fullWidth
+            error={Boolean(errors.text)}
+            helperText={errors.text?.message}
+            value={text ?? ""}
+            inputRef={textRef}
+            speechDisabled={busy || mode === INTAKE_PAGE_CONFIG.modes.text}
+            showSubmit
+            submitType="submit"
+            submitLoading={loading}
+            submitDisabled={String(text || "").trim().length < 3 || busy}
+            submitAriaLabel={INTAKE_PAGE_COPY.submitAria}
+            slotProps={{ inputLabel: { shrink: true } }}
+            {...textField}
+            onChange={(next) =>
+              setValue("text", next, { shouldValidate: true, shouldDirty: true })
+            }
+          />
+        </Stack>
+      )}
+
+      {mode === INTAKE_PAGE_CONFIG.modes.photo && (
+        <IntakePhotoPanel
+          loading={photoLoading}
+          disabled={busy}
+          errorMessage={photoError?.message || null}
+          canRetry={photoError?.canRetry !== false}
+          onClearError={() => setPhotoError(null)}
+          onUseText={handleUseTextFromPhoto}
+          onInvalid={(message) => error(message)}
+          onSubmit={handlePhotoSubmit}
+        />
+      )}
 
       {!draftsLoading && drafts.length > 0 && (
         <Stack spacing={draftsSectionSpacing}>
@@ -178,7 +269,7 @@ export default function IntakePage() {
               variant="text"
               color="error"
               size="small"
-              disabled={clearingDrafts}
+              disabled={clearingDrafts || busy}
               onClick={() => setClearDraftsOpen(true)}
             >
               {INTAKE_PAGE_COPY.clearDrafts}

@@ -33,7 +33,7 @@ Abre em **http://localhost:5173**. Em dev, o Vite faz proxy de `/api` para a API
 | `/login` | Login e-mail/senha + Google/Apple (se configurados) |
 | `/cadastro` | Cadastro local + atalho social |
 | `/dashboard` | Resumo ok/low/out, card do assistente e atalhos |
-| `/entrada` | Entrada por texto/voz (compra) + rascunhos |
+| `/entrada` | Entrada por texto, voz ou foto do cupom + rascunhos |
 | `/entrada/:id/preview` | Conferir itens, preço opcional e confirmar no estoque |
 | `/baixa` | Baixa por texto/voz (consumo) + rascunhos |
 | `/baixa/:id/preview` | Conferir e confirmar baixa |
@@ -52,6 +52,7 @@ Abre em **http://localhost:5173**. Em dev, o Vite faz proxy de `/api` para a API
 |------|----------|
 | **Recompra / nudges** | Preferências e handlers de notificação (deep link produto / baixa) |
 | **Voz** | `SpeechTextField` + `useSpeechToText` em entrada, baixa, lista e chat; fallback para teclado |
+| **Foto / OCR** | `/entrada` Texto \| Voz \| Foto; “Lendo cupom…”; erros com retry / usar texto |
 | **Chat** | UI conversacional, cards de proposta com CTA (Revisar baixa / Salvar lista / Ver financeiro) |
 | **Composer** | Campo compacto com mic + seta de envio nos fluxos de texto |
 
@@ -76,4 +77,4 @@ Voz depende do suporte do navegador à Web Speech API (melhor em Chrome/Edge). S
 
 ## Fora desta entrega
 
-Foto/OCR, QR de NF-e, push/e-mail, compartilhar lista, conta familiar, STT no servidor (Whisper/Gemini). Roadmap em `DOCUMENTACAO.md`.
+QR de NF-e, push/e-mail, compartilhar lista, conta familiar, STT no servidor (Whisper/Gemini). Roadmap em `DOCUMENTACAO.md`.
