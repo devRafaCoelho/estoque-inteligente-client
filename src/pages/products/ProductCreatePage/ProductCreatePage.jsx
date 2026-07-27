@@ -6,10 +6,15 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ManualProductStage from "../../../components/products/ManualProductStage/ManualProductStage";
 import { formStackSpacing } from "../../../styles/formStyles";
-import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
+import {
+  pageBackHeaderGridSx,
+  pageBackIconCellSx,
+  pageBackSubtitleCellSx,
+  pageBackTitleCellSx,
+} from "../../../styles/pageStyles";
 import { PRODUCT_CREATE_CONFIG } from "./productCreateConfig";
 import { PRODUCT_CREATE_COPY } from "./productCreateCopy";
-import { pageHeaderLeftSx, pageHeaderRowSx } from "./ProductCreatePage.styled";
+import { pageHeaderRowSx } from "./ProductCreatePage.styled";
 
 export default function ProductCreatePage() {
   const navigate = useNavigate();
@@ -17,17 +22,18 @@ export default function ProductCreatePage() {
   return (
     <Stack spacing={formStackSpacing}>
       <Box sx={pageHeaderRowSx}>
-        <Box sx={pageHeaderLeftSx}>
+        <Box sx={pageBackHeaderGridSx}>
           <IconButton
             onClick={() => navigate(PRODUCT_CREATE_CONFIG.paths.list)}
             aria-label={PRODUCT_CREATE_COPY.backAria}
+            sx={pageBackIconCellSx}
           >
             <ArrowBackIcon />
           </IconButton>
-          <Box minWidth={0}>
-            <Typography variant="h5">{PRODUCT_CREATE_COPY.title}</Typography>
-            <Typography sx={pageHeaderSubtitleSx}>{PRODUCT_CREATE_COPY.subtitle}</Typography>
-          </Box>
+          <Typography variant="h5" sx={pageBackTitleCellSx}>
+            {PRODUCT_CREATE_COPY.title}
+          </Typography>
+          <Typography sx={pageBackSubtitleCellSx}>{PRODUCT_CREATE_COPY.subtitle}</Typography>
         </Box>
       </Box>
 

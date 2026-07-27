@@ -22,7 +22,12 @@ import LoadingButton from "../../../components/common/LoadingButton/LoadingButto
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
+import {
+  pageBackHeaderGridSx,
+  pageBackIconCellSx,
+  pageBackSubtitleCellSx,
+  pageBackTitleCellSx,
+} from "../../../styles/pageStyles";
 import {
   formatStockOutDraftTitle,
   formatStockOutDraftUpdatedAt,
@@ -144,20 +149,21 @@ export default function StockOutPage() {
 
   return (
     <Stack spacing={stockOutFormStackSpacing} component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-      <Stack direction="row" alignItems="center" spacing={1}>
+      <Box sx={pageBackHeaderGridSx}>
         <IconButton
           onClick={() => navigate(STOCK_OUT_PAGE_CONFIG.paths.dashboard)}
           aria-label={STOCK_OUT_PAGE_COPY.backAria}
+          sx={pageBackIconCellSx}
         >
           <ArrowBackIcon />
         </IconButton>
-        <Box>
-          <Typography variant="h5">{STOCK_OUT_PAGE_COPY.title}</Typography>
-          <Typography variant="body2" sx={pageHeaderSubtitleSx}>
-            {STOCK_OUT_PAGE_COPY.subtitle}
-          </Typography>
-        </Box>
-      </Stack>
+        <Typography variant="h5" sx={pageBackTitleCellSx}>
+          {STOCK_OUT_PAGE_COPY.title}
+        </Typography>
+        <Typography variant="body2" sx={pageBackSubtitleCellSx}>
+          {STOCK_OUT_PAGE_COPY.subtitle}
+        </Typography>
+      </Box>
 
       <SpeechTextField
         label={STOCK_OUT_PAGE_COPY.textLabel}

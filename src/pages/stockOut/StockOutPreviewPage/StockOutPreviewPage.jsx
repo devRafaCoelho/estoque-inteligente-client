@@ -31,8 +31,10 @@ import { formatQuantity } from "../../../utils/unitLabels";
 import { buildStockOutPreviewPayload } from "../../../utils/stockOut/stockOutForm";
 import { isFilled, isPositiveNumber } from "../../../utils/formValidation";
 import {
-  pageBackHeaderSx,
-  pageHeaderSubtitleSx,
+  pageBackHeaderGridSx,
+  pageBackIconCellSx,
+  pageBackSubtitleCellSx,
+  pageBackTitleCellSx,
   pageLoadingBoxSx,
   rawInputBoxSx,
   rawInputOffsetSx,
@@ -228,20 +230,21 @@ export default function StockOutPreviewPage() {
 
   return (
     <Stack spacing={stockOutPreviewStackSpacing}>
-      <Stack direction="row" alignItems="center" spacing={1}>
+      <Box sx={pageBackHeaderGridSx}>
         <IconButton
           onClick={() => navigate(STOCK_OUT_PREVIEW_PAGE_CONFIG.paths.baixa)}
           aria-label={STOCK_OUT_PREVIEW_PAGE_COPY.backAria}
+          sx={pageBackIconCellSx}
         >
           <ArrowBackIcon />
         </IconButton>
-        <Box sx={pageBackHeaderSx}>
-          <Typography variant="h5">{STOCK_OUT_PREVIEW_PAGE_COPY.title}</Typography>
-          <Typography variant="body2" sx={pageHeaderSubtitleSx} noWrap>
-            {STOCK_OUT_PREVIEW_PAGE_COPY.subtitle}
-          </Typography>
-        </Box>
-      </Stack>
+        <Typography variant="h5" sx={pageBackTitleCellSx}>
+          {STOCK_OUT_PREVIEW_PAGE_COPY.title}
+        </Typography>
+        <Typography variant="body2" sx={pageBackSubtitleCellSx} noWrap>
+          {STOCK_OUT_PREVIEW_PAGE_COPY.subtitle}
+        </Typography>
+      </Box>
 
       {stockOut.rawInput && (
         <Box sx={rawInputOffsetSx}>

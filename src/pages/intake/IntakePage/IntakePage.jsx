@@ -28,7 +28,12 @@ import SpeechTextField from "../../../components/voice/SpeechRecordButton/Speech
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { resolveOcrError, withTimeout } from "../../../utils/intake/ocrError";
-import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
+import {
+  pageBackHeaderGridSx,
+  pageBackIconCellSx,
+  pageBackSubtitleCellSx,
+  pageBackTitleCellSx,
+} from "../../../styles/pageStyles";
 import {
   formatIntakeDraftTitle,
   formatIntakeDraftUpdatedAt,
@@ -43,6 +48,7 @@ import {
   draftsHeaderTitleSx,
   draftsSectionSpacing,
   intakeFormStackSpacing,
+  textModeStackSpacing,
   voiceHintSx,
 } from "./IntakePage.styled";
 
@@ -202,25 +208,26 @@ export default function IntakePage() {
       onSubmit={isTextMode ? handleSubmit(onSubmit) : undefined}
       noValidate={isTextMode || undefined}
     >
-      <Stack direction="row" alignItems="center" spacing={1}>
+      <Box sx={pageBackHeaderGridSx}>
         <IconButton
           onClick={() => navigate(INTAKE_PAGE_CONFIG.paths.dashboard)}
           aria-label={INTAKE_PAGE_COPY.backAria}
+          sx={pageBackIconCellSx}
         >
           <ArrowBackIcon />
         </IconButton>
-        <Box>
-          <Typography variant="h5">{INTAKE_PAGE_COPY.title}</Typography>
-          <Typography variant="body2" sx={pageHeaderSubtitleSx}>
-            {INTAKE_PAGE_COPY.subtitle}
-          </Typography>
-        </Box>
-      </Stack>
+        <Typography variant="h5" sx={pageBackTitleCellSx}>
+          {INTAKE_PAGE_COPY.title}
+        </Typography>
+        <Typography variant="body2" sx={pageBackSubtitleCellSx}>
+          {INTAKE_PAGE_COPY.subtitle}
+        </Typography>
+      </Box>
 
       <IntakeModeTabs value={mode} onChange={handleModeChange} disabled={busy} />
 
       {isTextMode && (
-        <Stack spacing={1}>
+        <Stack spacing={textModeStackSpacing}>
           <Typography variant="body2" color="text.secondary" sx={voiceHintSx}>
             {INTAKE_PAGE_COPY.textHint}
           </Typography>

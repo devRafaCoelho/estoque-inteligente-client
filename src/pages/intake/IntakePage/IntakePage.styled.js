@@ -44,3 +44,5 @@ export const draftItemMetaSx = {
 export const voiceHintSx = {
   px: 0.25,
 };
+
+export const textModeStackSpacing = 1.75;

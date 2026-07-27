@@ -28,6 +28,36 @@ export const pageHeaderSubtitleSx = {
   color: "text.secondary",
 };
 
+/**
+ * Cabeçalho voltar + título + subtítulo.
+ * A seta fica alinhada só com a linha do título (não com o bloco inteiro).
+ */
+export const pageBackHeaderGridSx = {
+  display: "grid",
+  gridTemplateColumns: "auto 1fr",
+  gridTemplateRows: "auto auto",
+  columnGap: 1,
+  alignItems: "center",
+};
+
+export const pageBackIconCellSx = {
+  gridRow: 1,
+  gridColumn: 1,
+};
+
+export const pageBackTitleCellSx = {
+  gridRow: 1,
+  gridColumn: 2,
+  minWidth: 0,
+};
+
+export const pageBackSubtitleCellSx = {
+  gridRow: 2,
+  gridColumn: 2,
+  minWidth: 0,
+  color: "text.secondary",
+};
+
 export const pageToolbarRowSx = {
   display: "flex",
   flexDirection: "row",

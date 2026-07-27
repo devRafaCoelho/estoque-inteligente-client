@@ -1,7 +1,7 @@
 export const INTAKE_PAGE_COPY = {
   backAria: "Voltar",
   title: "Entrada no estoque",
-  subtitle: "Escolha texto, foto ou cadastro manual",
+  subtitle: "Escolha uma das opções",
   textLabel: "O que você comprou?",
   textPlaceholder: "Ex.: 2kg arroz, 1 leite, 500g feijão",
   textHint: "Digite ou use o microfone. Depois revise os itens.",

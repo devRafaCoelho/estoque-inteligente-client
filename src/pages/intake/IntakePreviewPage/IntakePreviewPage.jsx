@@ -32,8 +32,10 @@ import { moneyToDisplay, parseMoneyInput } from "../../../utils/moneyInput";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { isFilled, isPositiveNumber } from "../../../utils/formValidation";
 import {
-  pageBackHeaderSx,
-  pageHeaderSubtitleSx,
+  pageBackHeaderGridSx,
+  pageBackIconCellSx,
+  pageBackSubtitleCellSx,
+  pageBackTitleCellSx,
   pageLoadingBoxSx,
   rawInputBoxSx,
   rawInputOffsetSx,
@@ -244,20 +246,21 @@ export default function IntakePreviewPage() {
 
   return (
     <Stack spacing={intakePreviewStackSpacing}>
-      <Stack direction="row" alignItems="center" spacing={1}>
+      <Box sx={pageBackHeaderGridSx}>
         <IconButton
           onClick={() => navigate(INTAKE_PREVIEW_PAGE_CONFIG.paths.entrada)}
           aria-label={INTAKE_PREVIEW_PAGE_COPY.backAria}
+          sx={pageBackIconCellSx}
         >
           <ArrowBackIcon />
         </IconButton>
-        <Box sx={pageBackHeaderSx}>
-          <Typography variant="h5">{INTAKE_PREVIEW_PAGE_COPY.title}</Typography>
-          <Typography variant="body2" sx={pageHeaderSubtitleSx} noWrap>
-            {INTAKE_PREVIEW_PAGE_COPY.subtitle}
-          </Typography>
-        </Box>
-      </Stack>
+        <Typography variant="h5" sx={pageBackTitleCellSx}>
+          {INTAKE_PREVIEW_PAGE_COPY.title}
+        </Typography>
+        <Typography variant="body2" sx={pageBackSubtitleCellSx} noWrap>
+          {INTAKE_PREVIEW_PAGE_COPY.subtitle}
+        </Typography>
+      </Box>
 
       {intake.rawInput && (
         <Box sx={rawInputOffsetSx}>
