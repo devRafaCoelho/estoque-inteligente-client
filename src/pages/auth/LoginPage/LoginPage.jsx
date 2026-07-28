@@ -119,6 +119,11 @@ export default function LoginPage() {
             helperText={errors.password?.message}
             registerProps={register("password")}
           />
+          <Typography variant="body2" textAlign="right">
+            <Link component={RouterLink} to={LOGIN_PAGE_CONFIG.forgotPasswordPath} fontWeight={700}>
+              {LOGIN_PAGE_COPY.forgotPassword}
+            </Link>
+          </Typography>
           <LoadingButton
             type="submit"
             variant="contained"

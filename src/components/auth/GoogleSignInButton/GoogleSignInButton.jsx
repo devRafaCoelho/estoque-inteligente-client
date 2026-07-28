@@ -13,7 +13,7 @@ import { GOOGLE_SIGN_IN_BUTTON_COPY } from "./googleSignInButtonCopy";
 import {
   googleGlyphSx,
   googleSignInButtonSx,
-  googleSignInOverlaySx,
+  googleSignInHiddenHostSx,
   googleSignInWrapperSx,
 } from "./GoogleSignInButton.styled";
 
@@ -52,26 +52,25 @@ function GoogleGlyph() {
 }
 
 /**
- * Botão estilo Toolpad / MUI Sign-in (outlined + ícone),
- * com o widget oficial do Google invisível por cima para emitir o idToken.
+ * Botão MUI full-width clicável; o widget oficial do Google fica oculto
+ * e é acionado programaticamente para emitir o idToken.
  *
  * @param {{ onSuccess: (idToken: string) => void | Promise<void>, onError?: (message: string) => void, disabled?: boolean }} props
  */
 export default function GoogleSignInButton({ onSuccess, onError, disabled = false }) {
   const [busy, setBusy] = useState(false);
-  const overlayRef = useRef(null);
+  const [ready, setReady] = useState(false);
+  const hostRef = useRef(null);
   const handlersRef = useRef({ onSuccess, onError });
-  const lastWidthRef = useRef(0);
   const ownerIdRef = useRef(`google-btn-${Math.random().toString(36).slice(2)}`);
   handlersRef.current = { onSuccess, onError };
 
   useEffect(() => {
-    if (!isGoogleAuthConfigured() || !overlayRef.current) return undefined;
+    if (!isGoogleAuthConfigured() || !hostRef.current) return undefined;
 
-    const container = overlayRef.current;
+    const container = hostRef.current;
     const ownerId = ownerIdRef.current;
     let cancelled = false;
-    let resizeTimer = null;
 
     const handleCredential = async (response) => {
       if (!response?.credential) {
@@ -92,27 +91,20 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
 
     setGoogleCredentialHandler(ownerId, handleCredential);
 
-    const paintButton = () => {
-      if (cancelled || !container.isConnected) return;
-      const width = Math.max(Math.floor(container.getBoundingClientRect().width), 280);
-      if (width === lastWidthRef.current && container.childElementCount > 0) return;
-      lastWidthRef.current = width;
-      renderGoogleSignInButton(container, {
-        type: GOOGLE_SIGN_IN_BUTTON_CONFIG.type,
-        theme: GOOGLE_SIGN_IN_BUTTON_CONFIG.theme,
-        size: GOOGLE_SIGN_IN_BUTTON_CONFIG.size,
-        text: GOOGLE_SIGN_IN_BUTTON_CONFIG.text,
-        shape: GOOGLE_SIGN_IN_BUTTON_CONFIG.shape,
-        logo_alignment: GOOGLE_SIGN_IN_BUTTON_CONFIG.logoAlignment,
-        width,
-      });
-    };
-
     const setup = async () => {
       try {
         await ensureGoogleIdentityInitialized(googleClientId);
-        if (cancelled) return;
-        paintButton();
+        if (cancelled || !container.isConnected) return;
+        renderGoogleSignInButton(container, {
+          type: GOOGLE_SIGN_IN_BUTTON_CONFIG.type,
+          theme: GOOGLE_SIGN_IN_BUTTON_CONFIG.theme,
+          size: GOOGLE_SIGN_IN_BUTTON_CONFIG.size,
+          text: GOOGLE_SIGN_IN_BUTTON_CONFIG.text,
+          shape: GOOGLE_SIGN_IN_BUTTON_CONFIG.shape,
+          logo_alignment: GOOGLE_SIGN_IN_BUTTON_CONFIG.logoAlignment,
+          width: GOOGLE_SIGN_IN_BUTTON_CONFIG.width,
+        });
+        if (!cancelled) setReady(true);
       } catch {
         if (!cancelled) {
           handlersRef.current.onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed);
@@ -122,24 +114,25 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
 
     setup();
 
-    const observer =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => {
-            window.clearTimeout(resizeTimer);
-            resizeTimer = window.setTimeout(paintButton, 150);
-          })
-        : null;
-    observer?.observe(container);
-
     return () => {
       cancelled = true;
-      window.clearTimeout(resizeTimer);
-      observer?.disconnect();
       clearGoogleCredentialHandler(ownerId);
-      lastWidthRef.current = 0;
       container.innerHTML = "";
+      setReady(false);
     };
   }, []);
+
+  const handleClick = () => {
+    if (disabled || busy || !ready) return;
+    const googleButton = hostRef.current?.querySelector(
+      'div[role="button"], div[role="presentation"] div',
+    );
+    if (!googleButton) {
+      onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed);
+      return;
+    }
+    googleButton.click();
+  };
 
   if (!isGoogleAuthConfigured()) return null;
 
@@ -149,9 +142,8 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
         fullWidth
         size="large"
         variant="outlined"
-        tabIndex={-1}
-        aria-hidden
-        disabled={disabled || busy}
+        disabled={disabled || busy || !ready}
+        onClick={handleClick}
         startIcon={
           busy ? (
             <CircularProgress size={GOOGLE_SIGN_IN_BUTTON_CONFIG.progressSize} color="inherit" />
@@ -164,9 +156,9 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
         {GOOGLE_SIGN_IN_BUTTON_COPY.buttonLabel}
       </Button>
       <Box
-        ref={overlayRef}
-        sx={googleSignInOverlaySx}
-        aria-label={GOOGLE_SIGN_IN_BUTTON_COPY.buttonLabel}
+        ref={hostRef}
+        sx={googleSignInHiddenHostSx}
+        aria-hidden
       />
     </Box>
   );

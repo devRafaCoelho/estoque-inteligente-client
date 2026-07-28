@@ -38,6 +38,20 @@ export async function login(credentials) {
 }
 
 /**
+ * @param {{ email: string }} payload
+ */
+export async function forgotPassword(payload) {
+  return api.post(`${AUTH_URL}/forgot-password`, payload);
+}
+
+/**
+ * @param {{ token: string, password: string }} payload
+ */
+export async function resetPassword(payload) {
+  return api.post(`${AUTH_URL}/reset-password`, payload);
+}
+
+/**
  * @param {{ idToken: string }} payload
  */
 export async function loginWithGoogle(payload) {

@@ -3,6 +3,8 @@ import AppLayout from "../components/layout/AppLayout/AppLayout";
 import { PrivateRoute, PublicRoute } from "../components/auth/AuthSessionGuard/AuthSessionGuard";
 import LoginPage from "../pages/auth/LoginPage/LoginPage";
 import RegisterPage from "../pages/auth/RegisterPage/RegisterPage";
+import ForgotPasswordPage from "../pages/auth/ForgotPasswordPage/ForgotPasswordPage";
+import ResetPasswordPage from "../pages/auth/ResetPasswordPage/ResetPasswordPage";
 import DashboardPage from "../pages/dashboard/DashboardPage/DashboardPage";
 import ProductListPage from "../pages/products/ProductListPage/ProductListPage";
 import ProductDetailPage from "../pages/products/ProductDetailPage/ProductDetailPage";
@@ -23,6 +25,8 @@ export default function AppRouter() {
       <Route element={<PublicRoute />}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegisterPage />} />
+        <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+        <Route path="/resetar-senha" element={<ResetPasswordPage />} />
       </Route>
 
       <Route element={<PrivateRoute />}>

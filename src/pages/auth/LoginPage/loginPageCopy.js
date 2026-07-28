@@ -4,6 +4,7 @@ export const LOGIN_PAGE_COPY = {
   emailLabel: "E-mail",
   passwordLabel: "Senha",
   submit: "Entrar",
+  forgotPassword: "Esqueci minha senha",
   noAccount: "Não tem conta?",
   signUpLink: "Cadastre-se",
   successLogin: "Login realizado!",

@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { SnackbarProvider } from "notistack";
+import { registerSW } from "virtual:pwa-register";
 import "@fontsource/nunito/400.css";
 import "@fontsource/nunito/600.css";
 import "@fontsource/nunito/700.css";
@@ -18,6 +19,8 @@ import { refreshMuiInputNotches } from "./utils/refreshMuiInputNotches";
 if (typeof document !== "undefined" && document.fonts?.ready) {
   document.fonts.ready.then(refreshMuiInputNotches).catch(() => {});
 }
+
+registerSW({ immediate: true });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

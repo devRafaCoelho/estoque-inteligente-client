@@ -36,6 +36,9 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       VitePWA({
+        strategies: "injectManifest",
+        srcDir: "src",
+        filename: "sw.js",
         registerType: "autoUpdate",
         includeAssets: ["favicon.png"],
         manifest: {
@@ -73,7 +76,9 @@ export default defineConfig(({ mode }) => {
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
         },
         devOptions: {
-          enabled: false,
+          enabled: true,
+          type: "module",
+          navigateFallback: "index.html",
         },
       }),
     ],

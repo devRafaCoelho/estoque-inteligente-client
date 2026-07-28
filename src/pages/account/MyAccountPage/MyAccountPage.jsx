@@ -25,6 +25,13 @@ import {
   updateMe,
   updateMyPreferences,
 } from "../../../services/userService";
+import {
+  getPushConfig,
+  getServiceWorkerRegistration,
+  isPushSupported,
+  subscribePush,
+  unsubscribePush,
+} from "../../../services/pushNotificationService";
 import { resolveBrazilianStateLabel } from "../../../utils/entitySelectOptions";
 import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import ChangePasswordDialog from "./components/ChangePasswordDialog";
@@ -60,6 +67,7 @@ export default function MyAccountPage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [savingPreferences, setSavingPreferences] = useState(false);
+  const [savingPush, setSavingPush] = useState(false);
   const [linking, setLinking] = useState(false);
   const [preferences, setPreferences] = useState({
     ...MY_ACCOUNT_CONFIG.preferenceDefaults,
@@ -84,10 +92,22 @@ export default function MyAccountPage() {
         const nextPreferences = {
           notifyLowStock: data.preferences?.notifyLowStock !== false,
           notifyOutOfStock: data.preferences?.notifyOutOfStock !== false,
+          notifyRepurchase: data.preferences?.notifyRepurchase !== false,
           notifyConsumptionNudge: data.preferences?.notifyConsumptionNudge !== false,
+          notifyEmailDigest: Boolean(data.preferences?.notifyEmailDigest),
+          pushEnabled: Boolean(data.preferences?.pushEnabled),
           consumptionNudgeDays:
             data.preferences?.consumptionNudgeDays ||
             MY_ACCOUNT_CONFIG.preferenceDefaults.consumptionNudgeDays,
+          quietHoursEnabled: data.preferences?.quietHoursEnabled !== false,
+          quietHoursStart:
+            data.preferences?.quietHoursStart ||
+            MY_ACCOUNT_CONFIG.preferenceDefaults.quietHoursStart,
+          quietHoursEnd:
+            data.preferences?.quietHoursEnd || MY_ACCOUNT_CONFIG.preferenceDefaults.quietHoursEnd,
+          quietHoursTimezone:
+            data.preferences?.quietHoursTimezone ||
+            MY_ACCOUNT_CONFIG.preferenceDefaults.quietHoursTimezone,
         };
         setPreferences(nextPreferences);
         setSavedPreferences(nextPreferences);
@@ -152,14 +172,28 @@ export default function MyAccountPage() {
       setPreferences({
         notifyLowStock: data.preferences.notifyLowStock,
         notifyOutOfStock: data.preferences.notifyOutOfStock,
+        notifyRepurchase: data.preferences.notifyRepurchase,
         notifyConsumptionNudge: data.preferences.notifyConsumptionNudge,
+        notifyEmailDigest: data.preferences.notifyEmailDigest,
+        pushEnabled: data.preferences.pushEnabled,
         consumptionNudgeDays: data.preferences.consumptionNudgeDays,
+        quietHoursEnabled: data.preferences.quietHoursEnabled,
+        quietHoursStart: data.preferences.quietHoursStart,
+        quietHoursEnd: data.preferences.quietHoursEnd,
+        quietHoursTimezone: data.preferences.quietHoursTimezone,
       });
       setSavedPreferences({
         notifyLowStock: data.preferences.notifyLowStock,
         notifyOutOfStock: data.preferences.notifyOutOfStock,
+        notifyRepurchase: data.preferences.notifyRepurchase,
         notifyConsumptionNudge: data.preferences.notifyConsumptionNudge,
+        notifyEmailDigest: data.preferences.notifyEmailDigest,
+        pushEnabled: data.preferences.pushEnabled,
         consumptionNudgeDays: data.preferences.consumptionNudgeDays,
+        quietHoursEnabled: data.preferences.quietHoursEnabled,
+        quietHoursStart: data.preferences.quietHoursStart,
+        quietHoursEnd: data.preferences.quietHoursEnd,
+        quietHoursTimezone: data.preferences.quietHoursTimezone,
       });
       success(MY_ACCOUNT_PAGE_COPY.preferencesSuccess);
     } catch (err) {
@@ -173,11 +207,52 @@ export default function MyAccountPage() {
     }
   };
 
+  const handlePushToggle = async (enabled) => {
+    if (!isPushSupported()) {
+      error(MY_ACCOUNT_PAGE_COPY.pushUnsupported);
+      return;
+    }
+    setSavingPush(true);
+    try {
+      const registration = await getServiceWorkerRegistration();
+      if (enabled) {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+          error(MY_ACCOUNT_PAGE_COPY.pushDenied);
+          return;
+        }
+        const config = await getPushConfig();
+        if (!config.supported || !config.vapidPublicKey) {
+          throw new Error("Push não configurado no servidor");
+        }
+        const result = await subscribePush(registration, config.vapidPublicKey);
+        setPreferences((prev) => ({ ...prev, pushEnabled: result.pushEnabled }));
+        setSavedPreferences((prev) => ({ ...prev, pushEnabled: result.pushEnabled }));
+        success(MY_ACCOUNT_PAGE_COPY.pushEnabledSuccess);
+      } else {
+        const result = await unsubscribePush(registration);
+        setPreferences((prev) => ({ ...prev, pushEnabled: result.pushEnabled }));
+        setSavedPreferences((prev) => ({ ...prev, pushEnabled: result.pushEnabled }));
+        success(MY_ACCOUNT_PAGE_COPY.pushDisabledSuccess);
+      }
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : err?.message || MY_ACCOUNT_PAGE_COPY.pushError);
+    } finally {
+      setSavingPush(false);
+    }
+  };
+
   const nudgeDays = Number(preferences.consumptionNudgeDays);
   const preferencesDirty =
     preferences.notifyLowStock !== savedPreferences.notifyLowStock ||
     preferences.notifyOutOfStock !== savedPreferences.notifyOutOfStock ||
+    preferences.notifyRepurchase !== savedPreferences.notifyRepurchase ||
     preferences.notifyConsumptionNudge !== savedPreferences.notifyConsumptionNudge ||
+    preferences.notifyEmailDigest !== savedPreferences.notifyEmailDigest ||
+    preferences.quietHoursEnabled !== savedPreferences.quietHoursEnabled ||
+    preferences.quietHoursStart !== savedPreferences.quietHoursStart ||
+    preferences.quietHoursEnd !== savedPreferences.quietHoursEnd ||
+    preferences.quietHoursTimezone !== savedPreferences.quietHoursTimezone ||
     Number(preferences.consumptionNudgeDays) !== Number(savedPreferences.consumptionNudgeDays);
   const canSavePreferences =
     preferencesDirty &&
@@ -312,6 +387,20 @@ export default function MyAccountPage() {
                 <FormControlLabel
                   control={
                     <Switch
+                      checked={preferences.notifyRepurchase}
+                      onChange={(e) =>
+                        setPreferences((prev) => ({
+                          ...prev,
+                          notifyRepurchase: e.target.checked,
+                        }))
+                      }
+                    />
+                  }
+                  label={MY_ACCOUNT_PAGE_COPY.notifyRepurchase}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
                       checked={preferences.notifyConsumptionNudge}
                       onChange={(e) =>
                         setPreferences((prev) => ({
@@ -322,6 +411,20 @@ export default function MyAccountPage() {
                     />
                   }
                   label={MY_ACCOUNT_PAGE_COPY.notifyConsumptionNudge}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={preferences.notifyEmailDigest}
+                      onChange={(e) =>
+                        setPreferences((prev) => ({
+                          ...prev,
+                          notifyEmailDigest: e.target.checked,
+                        }))
+                      }
+                    />
+                  }
+                  label={MY_ACCOUNT_PAGE_COPY.notifyEmailDigest}
                 />
                 <TextField
                   type="number"
@@ -339,6 +442,50 @@ export default function MyAccountPage() {
                     max: MY_ACCOUNT_CONFIG.nudgeDaysMax,
                   }}
                 />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={preferences.quietHoursEnabled}
+                      onChange={(e) =>
+                        setPreferences((prev) => ({
+                          ...prev,
+                          quietHoursEnabled: e.target.checked,
+                        }))
+                      }
+                    />
+                  }
+                  label={MY_ACCOUNT_PAGE_COPY.quietHoursEnabled}
+                />
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ width: "100%" }}>
+                  <TextField
+                    type="time"
+                    label={MY_ACCOUNT_PAGE_COPY.quietHoursStart}
+                    disabled={!preferences.quietHoursEnabled}
+                    value={preferences.quietHoursStart}
+                    onChange={(e) =>
+                      setPreferences((prev) => ({
+                        ...prev,
+                        quietHoursStart: e.target.value,
+                      }))
+                    }
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ flex: { sm: 1 }, width: { xs: "100%", sm: "50%" } }}
+                  />
+                  <TextField
+                    type="time"
+                    label={MY_ACCOUNT_PAGE_COPY.quietHoursEnd}
+                    disabled={!preferences.quietHoursEnabled}
+                    value={preferences.quietHoursEnd}
+                    onChange={(e) =>
+                      setPreferences((prev) => ({
+                        ...prev,
+                        quietHoursEnd: e.target.value,
+                      }))
+                    }
+                    InputLabelProps={{ shrink: true }}
+                    sx={{ flex: { sm: 1 }, width: { xs: "100%", sm: "50%" } }}
+                  />
+                </Stack>
                 <LoadingButton
                   variant="contained"
                   loading={savingPreferences}
@@ -347,6 +494,27 @@ export default function MyAccountPage() {
                 >
                   {MY_ACCOUNT_PAGE_COPY.savePreferences}
                 </LoadingButton>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent sx={sectionCardContentSx}>
+                <Typography variant="h6" fontWeight={700} color="primary.dark">
+                  {MY_ACCOUNT_PAGE_COPY.pushTitle}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {MY_ACCOUNT_PAGE_COPY.pushSubtitle}
+                </Typography>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={preferences.pushEnabled}
+                      disabled={savingPush}
+                      onChange={(e) => handlePushToggle(e.target.checked)}
+                    />
+                  }
+                  label={MY_ACCOUNT_PAGE_COPY.pushEnabled}
+                />
               </CardContent>
             </Card>
 

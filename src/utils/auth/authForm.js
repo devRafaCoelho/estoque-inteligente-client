@@ -5,6 +5,19 @@ export function buildLoginPayload(formData) {
   };
 }
 
+export function buildForgotPasswordPayload(formData) {
+  return {
+    email: String(formData.email || "").trim().toLowerCase(),
+  };
+}
+
+export function buildResetPasswordPayload(token, formData) {
+  return {
+    token,
+    password: formData.password,
+  };
+}
+
 /**
  * Cadastro inicial com nome e sobrenome separados.
  * @param {object} formData

@@ -78,7 +78,14 @@ export function buildUpdatePreferencesPayload(preferences) {
   return {
     notifyLowStock: Boolean(preferences.notifyLowStock),
     notifyOutOfStock: Boolean(preferences.notifyOutOfStock),
+    notifyRepurchase: Boolean(preferences.notifyRepurchase),
     notifyConsumptionNudge: Boolean(preferences.notifyConsumptionNudge),
+    notifyEmailDigest: Boolean(preferences.notifyEmailDigest),
+    pushEnabled: Boolean(preferences.pushEnabled),
     consumptionNudgeDays: Number(preferences.consumptionNudgeDays),
+    quietHoursEnabled: Boolean(preferences.quietHoursEnabled),
+    quietHoursStart: preferences.quietHoursStart,
+    quietHoursEnd: preferences.quietHoursEnd,
+    quietHoursTimezone: preferences.quietHoursTimezone || "America/Sao_Paulo",
   };
 }
