@@ -8,5 +8,5 @@ export const SHARED_SHOPPING_LIST_PAGE_COPY = {
   spendLabel: "Estimativa",
   spendValue: (totalLabel) => `Estimativa: ${totalLabel}`,
   spendValuePartial: (totalLabel) => `Estimativa: ${totalLabel} · parcial`,
-  footerHint: "Lista compartilhada",
+  footerHint: "Lista compartilhada · somente leitura",
 };
