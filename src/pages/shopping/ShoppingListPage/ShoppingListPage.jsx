@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import ContentCopyOutlinedIcon from "@mui/icons-material/ContentCopyOutlined";
+import IosShareOutlinedIcon from "@mui/icons-material/IosShareOutlined";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import "@fontsource/caveat/400.css";
 import "@fontsource/caveat/700.css";
 import {
@@ -14,6 +21,7 @@ import {
   previewShoppingListSuggestions,
   setShoppingListViewMode,
 } from "../../../services/shoppingListService";
+import { createShoppingListShare } from "../../../services/shoppingListShareService";
 import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/ShoppingChecklist";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
 import ShoppingListSpendSummary, {
@@ -26,6 +34,11 @@ import SpeechTextField from "../../../components/voice/SpeechRecordButton/Speech
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
 import { updateProduct } from "../../../services/productService";
+import {
+  buildSharedListUrl,
+  buildWhatsAppShareUrl,
+  copyTextToClipboard,
+} from "../../../utils/shopping/shoppingListShare";
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
@@ -53,6 +66,9 @@ export default function ShoppingListPage() {
   const [addText, setAddText] = useState("");
   const [newSuggestionCount, setNewSuggestionCount] = useState(0);
   const [priceBusyId, setPriceBusyId] = useState(null);
+  const [sharing, setSharing] = useState(false);
+  const [shareMenuAnchor, setShareMenuAnchor] = useState(null);
+  const [shareUrl, setShareUrl] = useState(null);
 
   const applyList = useCallback((next) => {
     setList(next);
@@ -244,6 +260,47 @@ export default function ShoppingListPage() {
     }
   };
 
+  const handleShareOpen = async (event) => {
+    const anchor = event.currentTarget;
+    const currentItems = list?.items || [];
+    if (!currentItems.length) {
+      error(SHOPPING_LIST_PAGE_COPY.shareEmptyList);
+      return;
+    }
+    setSharing(true);
+    try {
+      const data = await createShoppingListShare();
+      const url = buildSharedListUrl(data.token);
+      setShareUrl(url);
+      setShareMenuAnchor(anchor);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.shareError);
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const handleShareMenuClose = () => {
+    setShareMenuAnchor(null);
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!shareUrl) return;
+    try {
+      await copyTextToClipboard(shareUrl);
+      success(SHOPPING_LIST_PAGE_COPY.shareLinkCopied);
+      handleShareMenuClose();
+    } catch {
+      error(SHOPPING_LIST_PAGE_COPY.shareCopyError);
+    }
+  };
+
+  const handleShareWhatsApp = () => {
+    if (!shareUrl) return;
+    window.open(buildWhatsAppShareUrl(shareUrl), "_blank", "noopener,noreferrer");
+    handleShareMenuClose();
+  };
+
   if (loading) {
     return (
       <Box sx={pageLoadingBoxSx}>
@@ -334,11 +391,52 @@ export default function ShoppingListPage() {
                 variant="text"
                 color="error"
                 size="small"
-                disabled={clearingList || Boolean(busyId)}
+                disabled={clearingList || Boolean(busyId) || sharing}
                 onClick={() => setClearListOpen(true)}
               >
                 {SHOPPING_LIST_PAGE_COPY.clearList}
               </LoadingButton>
+            ) : null}
+            {items.length > 0 ? (
+              <>
+                <LoadingButton
+                  type="button"
+                  variant="text"
+                  color="primary"
+                  size="small"
+                  loading={sharing}
+                  disabled={clearingList || Boolean(busyId)}
+                  startIcon={<IosShareOutlinedIcon fontSize="small" />}
+                  aria-haspopup="menu"
+                  aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
+                  aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
+                  aria-label={SHOPPING_LIST_PAGE_COPY.shareMenuAria}
+                  onClick={handleShareOpen}
+                >
+                  {SHOPPING_LIST_PAGE_COPY.share}
+                </LoadingButton>
+                <Menu
+                  id="shopping-list-share-menu"
+                  anchorEl={shareMenuAnchor}
+                  open={Boolean(shareMenuAnchor)}
+                  onClose={handleShareMenuClose}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <MenuItem onClick={handleCopyShareLink}>
+                    <ListItemIcon>
+                      <ContentCopyOutlinedIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareCopyLink}</ListItemText>
+                  </MenuItem>
+                  <MenuItem onClick={handleShareWhatsApp}>
+                    <ListItemIcon>
+                      <WhatsAppIcon fontSize="small" />
+                    </ListItemIcon>
+                    <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareWhatsApp}</ListItemText>
+                  </MenuItem>
+                </Menu>
+              </>
             ) : null}
           </Stack>
         </Stack>

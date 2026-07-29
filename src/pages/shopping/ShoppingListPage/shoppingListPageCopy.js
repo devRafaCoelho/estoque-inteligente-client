@@ -35,7 +35,7 @@ export const SHOPPING_LIST_PAGE_COPY = {
   viewPaper: "Paper",
   viewModeAria: "Modo de visualização",
   stats: (pending, checked) => `${pending} pendente(s) · ${checked} marcado(s)`,
-  spendBannerLabel: "Estimativa dos pendentes",
+  spendBannerLabel: "Estimativa da lista de compras",
   spendEstimate: (totalLabel) => totalLabel,
   spendEstimatePartial: (totalLabel, missing) =>
     `${totalLabel} · parcial (${missing} sem preço)`,
@@ -51,9 +51,19 @@ export const SHOPPING_LIST_PAGE_COPY = {
   saveAllUnitPrices: (count) =>
     count > 0 ? `Salvar todos (${count})` : "Salvar todos",
   unitPricesSaved: (count) =>
-    count === 1 ? "Preço unitário atualizado" : `${count} preços unitários atualizados`,
+    count === 1
+      ? "Preço unitário atualizado"
+      : `${count} preços unitários atualizados`,
   unitPricesError: "Não foi possível salvar os preços",
   addLabel: "O que você precisa comprar?",
   addPlaceholder: "Ex.: 2kg de arroz, 1 lata de leite em pó",
   addSubmit: "Adicionar",
+  share: "Compartilhar",
+  shareMenuAria: "Opções de compartilhamento",
+  shareCopyLink: "Copiar link",
+  shareWhatsApp: "WhatsApp",
+  shareLinkCopied: "Link copiado",
+  shareCopyError: "Não foi possível copiar o link",
+  shareError: "Não foi possível gerar o link",
+  shareEmptyList: "Adicione itens antes de compartilhar",
 };
