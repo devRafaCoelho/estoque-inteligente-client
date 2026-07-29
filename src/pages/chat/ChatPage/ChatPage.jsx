@@ -6,7 +6,10 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ChatOutlinedIcon from "@mui/icons-material/ChatOutlined";
 import ChatProposalCard from "../../../components/chat/ChatProposalCard/ChatProposalCard";
-import { isProposalPayload } from "../../../components/chat/ChatProposalCard/chatProposalCardCopy";
+import {
+  isProposalPayload,
+  resolveProposalNavigatePath,
+} from "../../../components/chat/ChatProposalCard/chatProposalCardCopy";
 import EmptyState from "../../../components/common/EmptyState/EmptyState";
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
@@ -68,17 +71,9 @@ export default function ChatPage() {
     const payload = message?.payload;
     if (!payload || ctaBusyId) return;
 
-    const type = payload.type;
-    const path =
-      typeof payload.path === "string" && payload.path
-        ? payload.path
-        : type === "finance_tip"
-          ? CHAT_PAGE_CONFIG.paths.finance
-          : type === "shopping_list_proposal" || type === "shopping_list"
-            ? CHAT_PAGE_CONFIG.paths.shoppingList
-            : null;
+    const path = resolveProposalNavigatePath(payload, CHAT_PAGE_CONFIG.paths);
 
-    if (type === "shopping_list_proposal" && payload.requiresSave) {
+    if (payload.type === "shopping_list_proposal" && payload.requiresSave) {
       setCtaBusyId(message.id);
       try {
         await generateShoppingList(CHAT_PAGE_CONFIG.shoppingListGenerateMode);
