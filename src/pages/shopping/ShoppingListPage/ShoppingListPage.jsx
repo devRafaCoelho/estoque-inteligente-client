@@ -25,7 +25,8 @@ import {
 import { createShoppingListShare } from "../../../services/shoppingListShareService";
 import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/ShoppingChecklist";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
-import ShoppingListSpendSummary, {
+import ShoppingListSpendEstimate, {
+  ShoppingListSpendMissingPrices,
   SAVE_ALL_BUSY_ID,
 } from "../../../components/shopping/ShoppingListSpendSummary/ShoppingListSpendSummary";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
@@ -49,10 +50,12 @@ import { SHOPPING_LIST_PAGE_CONFIG } from "./shoppingListPageConfig";
 import {
   actionButtonSx,
   addSectionSpacing,
+  estimateShareRowSx,
   listToolbarRowProps,
   shareButtonDesktopSx,
   shareButtonMobileSx,
   shoppingListStackSpacing,
+  spendBlockSpacing,
 } from "./ShoppingListPage.styled";
 
 export default function ShoppingListPage() {
@@ -497,13 +500,13 @@ export default function ShoppingListPage() {
           />
         )}
 
-        <ShoppingListSpendSummary
-          spendEstimate={list?.spendEstimate}
-          pendingCount={list?.stats?.pending || 0}
-          busyProductId={priceBusyId}
-          onSaveUnitPrices={handleSaveUnitPrices}
-          shareSlot={
-            items.length > 0 ? (
+        <Stack spacing={spendBlockSpacing}>
+          <Box sx={estimateShareRowSx}>
+            <ShoppingListSpendEstimate
+              spendEstimate={list?.spendEstimate}
+              pendingCount={list?.stats?.pending || 0}
+            />
+            {items.length > 0 ? (
               <Button
                 type="button"
                 variant="text"
@@ -520,10 +523,14 @@ export default function ShoppingListPage() {
               >
                 {SHOPPING_LIST_PAGE_COPY.share}
               </Button>
-            ) : null
-          }
-        />
-
+            ) : null}
+          </Box>
+          <ShoppingListSpendMissingPrices
+            spendEstimate={list?.spendEstimate}
+            busyProductId={priceBusyId}
+            onSaveUnitPrices={handleSaveUnitPrices}
+          />
+        </Stack>
         {items.length > 0 ? (
           <Menu
             id="shopping-list-share-menu"

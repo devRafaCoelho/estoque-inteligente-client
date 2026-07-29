@@ -22,4 +22,17 @@ export const shareButtonDesktopSx = {
 
 export const shareButtonMobileSx = {
   display: { xs: "inline-flex", md: "none" },
+  flex: "0 0 auto",
 };
+
+/** Estimativa + compartilhar (mobile/tablet) na mesma linha. */
+export const estimateShareRowSx = {
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 1,
+  width: "100%",
+};
+
+export const spendBlockSpacing = 1.25;

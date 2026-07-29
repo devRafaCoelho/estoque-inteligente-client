@@ -58,7 +58,7 @@ export const SHOPPING_LIST_PAGE_COPY = {
   addLabel: "O que você precisa comprar?",
   addPlaceholder: "Ex.: 2kg de arroz, 1 lata de leite em pó",
   addSubmit: "Adicionar",
-  share: "Compartilhar",
+  share: "Compartilhar lista",
   shareMenuAria: "Opções de compartilhamento",
   shareCopyLink: "Copiar link",
   shareWhatsApp: "WhatsApp",

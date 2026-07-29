@@ -4,21 +4,19 @@ import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
+import ShoppingListSpendEstimate from "../../../components/shopping/ShoppingListSpendSummary/ShoppingListSpendSummary";
 import {
   getSharedShoppingList,
   updateSharedShoppingListItem,
 } from "../../../services/shoppingListShareService";
 import { ApiError } from "../../../services/apiClient";
-import { formatMoney } from "../../../utils/money";
 import { pageLoadingBoxSx } from "../../../styles/pageStyles";
 import { SHARED_SHOPPING_LIST_PAGE_COPY } from "./sharedShoppingListPageCopy";
 import {
   sharedBrandSx,
   sharedPageInnerSx,
   sharedPageRootSx,
-  sharedSpendBannerSx,
 } from "./SharedShoppingListPage.styled";
 
 export default function SharedShoppingListPage() {
@@ -129,7 +127,6 @@ export default function SharedShoppingListPage() {
 
   const items = list.items || [];
   const spend = list.spendEstimate;
-  const hasEstimate = Boolean(spend?.hasEstimate);
 
   return (
     <Box sx={sharedPageRootSx}>
@@ -149,19 +146,8 @@ export default function SharedShoppingListPage() {
           </Typography>
         ) : null}
 
-        {hasEstimate ? (
-          <Box sx={sharedSpendBannerSx}>
-            <PaymentsOutlinedIcon color="primary" fontSize="small" />
-            <Typography variant="body2" fontWeight={700}>
-              {spend.isPartial
-                ? SHARED_SHOPPING_LIST_PAGE_COPY.spendValuePartial(
-                    formatMoney(spend.estimatedTotal),
-                  )
-                : SHARED_SHOPPING_LIST_PAGE_COPY.spendValue(
-                    formatMoney(spend.estimatedTotal),
-                  )}
-            </Typography>
-          </Box>
+        {spend?.hasEstimate ? (
+          <ShoppingListSpendEstimate spendEstimate={spend} />
         ) : null}
 
         {items.length ? (
