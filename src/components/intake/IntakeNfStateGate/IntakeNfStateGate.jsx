@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import BrazilianStateSelectField from "../../form/BrazilianStateSelectField";
 import LoadingButton from "../../common/LoadingButton/LoadingButton";
-import {
-  INTAKE_NF_STATE_GATE_COPY,
-} from "./intakeNfStateGateConfig";
+import { getNfCoverage } from "../../../services/nfService";
+import { INTAKE_NF_STATE_GATE_COPY } from "./intakeNfStateGateConfig";
 
 /**
  * Pedido único de UF quando o usuário ainda não tem default_state (F2-5.4).
@@ -23,6 +22,30 @@ export default function IntakeNfStateGate({
   const [stateCode, setStateCode] = useState(String(initialState || "").toUpperCase());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [supportedHint, setSupportedHint] = useState(
+    INTAKE_NF_STATE_GATE_COPY.supportedDefault,
+  );
+
+  useEffect(() => {
+    let ativo = true;
+    (async () => {
+      try {
+        const data = await getNfCoverage();
+        if (!ativo) return;
+        const list = data.supportedStates || [];
+        if (list.length) {
+          setSupportedHint(
+            INTAKE_NF_STATE_GATE_COPY.supportedHint(list.join(", ")),
+          );
+        }
+      } catch {
+        // mantém hint padrão
+      }
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   const busy = Boolean(loading || disabled || saving);
   const canContinue = /^[A-Z]{2}$/.test(stateCode);
@@ -46,6 +69,14 @@ export default function IntakeNfStateGate({
         <Typography fontWeight={700}>{INTAKE_NF_STATE_GATE_COPY.title}</Typography>
         <Typography variant="body2" color="text.secondary">
           {INTAKE_NF_STATE_GATE_COPY.hint}
+        </Typography>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          display="block"
+          sx={{ mt: 0.75 }}
+        >
+          {supportedHint}
         </Typography>
       </Box>
 

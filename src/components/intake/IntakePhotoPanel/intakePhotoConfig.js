@@ -22,6 +22,9 @@ export const INTAKE_PHOTO_COPY = {
   sefazFallbackTitle: "Consulta à SEFAZ indisponível",
   sefazFallbackHint:
     "Não bloqueamos você: tire uma foto da nota ou escolha da galeria para continuar pela leitura (OCR).",
+  ufUnsupportedTitle: "UF ainda sem leitura de QR",
+  ufUnsupportedHint:
+    "Para este estado, use a foto da nota (câmera ou galeria). O QR volta a funcionar quando a UF estiver na lista suportada.",
   sefazFallbackCamera: "Tirar foto da nota",
   sefazFallbackGallery: "Escolher da galeria",
   sefazFallbackRetryQr: "Tentar QR de novo",

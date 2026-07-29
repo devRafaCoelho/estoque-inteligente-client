@@ -52,6 +52,7 @@ export default function IntakePhotoPanel({
   disabled = false,
   errorMessage = null,
   sefazFallback = false,
+  ufUnsupported = false,
   needsState = false,
   canRetry = true,
   onClearError,
@@ -199,10 +200,19 @@ export default function IntakePhotoPanel({
           role="alert"
           sx={photoErrorAlertSx}
         >
-          <AlertTitle>{INTAKE_PHOTO_COPY.sefazFallbackTitle}</AlertTitle>
-          {errorMessage || INTAKE_PHOTO_COPY.sefazFallbackHint}
+          <AlertTitle>
+            {ufUnsupported
+              ? INTAKE_PHOTO_COPY.ufUnsupportedTitle
+              : INTAKE_PHOTO_COPY.sefazFallbackTitle}
+          </AlertTitle>
+          {errorMessage ||
+            (ufUnsupported
+              ? INTAKE_PHOTO_COPY.ufUnsupportedHint
+              : INTAKE_PHOTO_COPY.sefazFallbackHint)}
           <Typography variant="body2" sx={{ mt: 1 }}>
-            {INTAKE_PHOTO_COPY.sefazFallbackHint}
+            {ufUnsupported
+              ? INTAKE_PHOTO_COPY.ufUnsupportedHint
+              : INTAKE_PHOTO_COPY.sefazFallbackHint}
           </Typography>
           <Stack
             direction={{ xs: "column", lg: "row" }}
@@ -230,16 +240,18 @@ export default function IntakePhotoPanel({
             >
               {INTAKE_PHOTO_COPY.sefazFallbackGallery}
             </LoadingButton>
-            <LoadingButton
-              type="button"
-              size="small"
-              variant="text"
-              disabled={busy}
-              startIcon={<QrCodeScannerOutlinedIcon />}
-              onClick={openQrFlow}
-            >
-              {INTAKE_PHOTO_COPY.sefazFallbackRetryQr}
-            </LoadingButton>
+            {canRetry ? (
+              <LoadingButton
+                type="button"
+                size="small"
+                variant="text"
+                disabled={busy}
+                startIcon={<QrCodeScannerOutlinedIcon />}
+                onClick={openQrFlow}
+              >
+                {INTAKE_PHOTO_COPY.sefazFallbackRetryQr}
+              </LoadingButton>
+            ) : null}
           </Stack>
         </Alert>
       ) : null}

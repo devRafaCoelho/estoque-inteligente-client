@@ -221,6 +221,7 @@ export default function IntakePage() {
         canRetry: resolved.canRetryQr,
         fallbackPhoto: resolved.fallbackPhoto,
         needsState: Boolean(resolved.needsState),
+        ufUnsupported: resolved.kind === "uf_unsupported",
       });
       throw err;
     } finally {
@@ -317,6 +318,7 @@ export default function IntakePage() {
           onSaveDefaultState={handleSaveDefaultState}
           errorMessage={photoError?.message || null}
           sefazFallback={Boolean(photoError?.fallbackPhoto)}
+          ufUnsupported={Boolean(photoError?.ufUnsupported)}
           needsState={Boolean(photoError?.needsState)}
           canRetry={photoError?.canRetry !== false}
           onClearError={() => setPhotoError(null)}

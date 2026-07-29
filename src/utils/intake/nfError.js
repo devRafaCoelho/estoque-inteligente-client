@@ -83,14 +83,22 @@ export function resolveNfError(err) {
   }
 
   if (code === "nf_uf_unsupported" || /ainda não lemos notas|sem adapter/i.test(raw)) {
+    const supported = Array.isArray(details.supported)
+      ? details.supported.map((s) => String(s).toUpperCase())
+      : [];
     return {
       kind: NF_ERROR_KIND.ufUnsupported,
-      message: raw || "Esta UF ainda não é suportada no QR. Use a foto da nota.",
+      message:
+        raw ||
+        (supported.length
+          ? `QR ainda não disponível para esta UF. Hoje lemos: ${supported.join(", ")}. Use a foto da nota.`
+          : "Esta UF ainda não é suportada no QR. Use a foto da nota."),
       fallbackPhoto: true,
       canRetryQr: false,
       needsState: false,
       status,
       code,
+      supportedStates: supported,
     };
   }
 
