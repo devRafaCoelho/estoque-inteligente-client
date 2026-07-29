@@ -12,6 +12,8 @@ export const PRODUCT_DETAIL_COPY = {
   historyTitle: "Histórico",
   historyEmpty: "Sem movimentos ainda.",
   minPrefix: "mínimo",
+  unitPriceLabel: (priceLabel) => `Preço unitário: ${priceLabel}`,
+  unitPriceEmpty: "Sem preço unitário cadastrado",
   repurchaseLabel: (days) => `Recompra a cada ${days} dias`,
   repurchaseEmpty: "Sem intervalo de recompra definido",
   movementIn: "+",

@@ -35,10 +35,24 @@ export const SHOPPING_LIST_PAGE_COPY = {
   viewPaper: "Paper",
   viewModeAria: "Modo de visualização",
   stats: (pending, checked) => `${pending} pendente(s) · ${checked} marcado(s)`,
-  spendEstimate: (totalLabel) => `Estimativa: ${totalLabel}`,
+  spendBannerLabel: "Estimativa dos pendentes",
+  spendEstimate: (totalLabel) => totalLabel,
   spendEstimatePartial: (totalLabel, missing) =>
-    `Estimativa parcial: ${totalLabel} (${missing} sem preço)`,
-  spendEstimateEmpty: "Sem estimativa — cadastre o preço médio nos produtos.",
+    `${totalLabel} · parcial (${missing} sem preço)`,
+  spendEstimateEmpty: "Cadastre o preço médio dos itens para estimar o gasto.",
+  missingPricesAlert: (count) =>
+    count === 1
+      ? "Falta o preço unitário de 1 produto. Cadastre agora e a estimativa fica completa."
+      : `Falta o preço unitário de ${count} produtos. Cadastre agora e a estimativa fica completa.`,
+  missingPricesNoProduct:
+    "Itens manuais sem produto vinculado não entram no cálculo até serem associados a um produto.",
+  unitPriceLabel: "Preço unitário",
+  saveUnitPrice: "Salvar",
+  saveAllUnitPrices: (count) =>
+    count > 0 ? `Salvar todos (${count})` : "Salvar todos",
+  unitPricesSaved: (count) =>
+    count === 1 ? "Preço unitário atualizado" : `${count} preços unitários atualizados`,
+  unitPricesError: "Não foi possível salvar os preços",
   addLabel: "O que você precisa comprar?",
   addPlaceholder: "Ex.: 2kg de arroz, 1 lata de leite em pó",
   addSubmit: "Adicionar",

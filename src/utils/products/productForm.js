@@ -4,6 +4,7 @@ export const PRODUCT_FORM_DEFAULT_VALUES = {
   quantity: 0,
   unit: "",
   minQuantity: 0,
+  avgUnitPrice: null,
   repurchaseDays: null,
   notes: "",
 };
@@ -12,6 +13,12 @@ function normalizeRepurchaseDays(value) {
   if (value === "" || value == null) return null;
   const days = Number(value);
   return Number.isFinite(days) && days >= 1 ? Math.trunc(days) : null;
+}
+
+function normalizeAvgUnitPrice(value) {
+  if (value === "" || value == null) return null;
+  const price = Number(value);
+  return Number.isFinite(price) && price >= 0 ? price : null;
 }
 
 /**
@@ -24,6 +31,7 @@ export function buildCreateProductPayload(formData) {
     quantity: Number(formData.quantity),
     unit: formData.unit,
     minQuantity: Number(formData.minQuantity),
+    avgUnitPrice: normalizeAvgUnitPrice(formData.avgUnitPrice),
     repurchaseDays: normalizeRepurchaseDays(formData.repurchaseDays),
     notes: formData.notes || "",
   };
@@ -48,6 +56,7 @@ export function buildCreateProductsBatchPayload(stagedItems = []) {
       quantity: item.quantity,
       unit: item.unit,
       minQuantity: item.minQuantity,
+      avgUnitPrice: item.avgUnitPrice,
       repurchaseDays: item.repurchaseDays,
       notes: item.notes,
     }),
@@ -65,6 +74,7 @@ export function productToFormValues(product) {
     quantity: product?.quantity ?? "",
     unit: product?.unit || "",
     minQuantity: product?.minQuantity ?? "",
+    avgUnitPrice: product?.avgUnitPrice ?? null,
     repurchaseDays: product?.repurchaseDays ?? null,
     notes: product?.notes || "",
   };

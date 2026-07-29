@@ -41,6 +41,11 @@ const theme = createTheme({
     },
     MuiOutlinedInput: {
       styleOverrides: {
+        root: ({ ownerState }) => ({
+          ...(ownerState.size !== "small"
+            ? { minHeight: 56 }
+            : null),
+        }),
         notchedOutline: {
           // Safari/iOS: transição da legend gera notch desalinhado com o label
           "& legend": {

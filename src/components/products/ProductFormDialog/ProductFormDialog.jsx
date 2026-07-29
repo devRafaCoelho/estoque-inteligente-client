@@ -5,6 +5,7 @@ import TextField from "@mui/material/TextField";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import FormDialog from "../../common/FormDialog/FormDialog";
+import MoneyTextField from "../../form/MoneyTextField/MoneyTextField";
 import ProductCategorySelectField from "../../form/ProductCategorySelectField";
 import StockUnitSelectField from "../../form/StockUnitSelectField";
 import { productSchema } from "../../../schemas/products/productSchema";
@@ -166,6 +167,23 @@ export default function ProductFormDialog({
           {...register("minQuantity", {
             setValueAs: (value) => parseOptionalNumber(value),
           })}
+        />
+        <Controller
+          name="avgUnitPrice"
+          control={control}
+          render={({ field }) => (
+            <MoneyTextField
+              label={PRODUCT_FORM_DIALOG_COPY.avgUnitPriceLabel}
+              value={field.value}
+              onChange={(next) => field.onChange(next === "" ? null : next)}
+              onBlur={field.onBlur}
+              inputRef={field.ref}
+              error={Boolean(errors.avgUnitPrice)}
+              helperText={
+                errors.avgUnitPrice?.message || PRODUCT_FORM_DIALOG_COPY.avgUnitPriceHelper
+              }
+            />
+          )}
         />
         <TextField
           label={PRODUCT_FORM_DIALOG_COPY.repurchaseDaysLabel}

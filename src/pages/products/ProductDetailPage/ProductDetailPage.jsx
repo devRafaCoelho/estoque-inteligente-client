@@ -22,6 +22,7 @@ import ConsumeProductDialog from "../../../components/products/ConsumeProductDia
 import ProductFormDialog from "../../../components/products/ProductFormDialog/ProductFormDialog";
 import { PRODUCT_FORM_DIALOG_COPY } from "../../../components/products/ProductFormDialog/productFormDialogConfig";
 import { categoryLabel } from "../../../utils/categoryLabels";
+import { formatMoney } from "../../../utils/money";
 import { formatQuantity } from "../../../utils/unitLabels";
 import {
   buildConsumeProductPayload,
@@ -164,6 +165,11 @@ export default function ProductDetailPage() {
         <Typography sx={pageHeaderSubtitleSx}>
           {categoryLabel(product.category)} · {PRODUCT_DETAIL_COPY.minPrefix}{" "}
           {formatQuantity(product.minQuantity, product.unit)}
+        </Typography>
+        <Typography sx={pageHeaderSubtitleSx}>
+          {product.avgUnitPrice != null && Number(product.avgUnitPrice) >= 0
+            ? PRODUCT_DETAIL_COPY.unitPriceLabel(formatMoney(product.avgUnitPrice))
+            : PRODUCT_DETAIL_COPY.unitPriceEmpty}
         </Typography>
         <Typography sx={pageHeaderSubtitleSx}>
           {product.repurchaseDays

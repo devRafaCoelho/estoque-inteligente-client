@@ -16,13 +16,16 @@ import {
 } from "../../../services/shoppingListService";
 import ShoppingChecklist from "../../../components/shopping/ShoppingChecklist/ShoppingChecklist";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
+import ShoppingListSpendSummary, {
+  SAVE_ALL_BUSY_ID,
+} from "../../../components/shopping/ShoppingListSpendSummary/ShoppingListSpendSummary";
 import LoadingButton from "../../../components/common/LoadingButton/LoadingButton";
 import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
 import SegmentedControl from "../../../components/common/SegmentedControl/SegmentedControl";
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { formatMoney } from "../../../utils/money";
+import { updateProduct } from "../../../services/productService";
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
@@ -49,6 +52,7 @@ export default function ShoppingListPage() {
   const [viewMode, setViewMode] = useState(SHOPPING_LIST_PAGE_CONFIG.defaultViewMode);
   const [addText, setAddText] = useState("");
   const [newSuggestionCount, setNewSuggestionCount] = useState(0);
+  const [priceBusyId, setPriceBusyId] = useState(null);
 
   const applyList = useCallback((next) => {
     setList(next);
@@ -219,6 +223,27 @@ export default function ShoppingListPage() {
     }
   };
 
+  const handleSaveUnitPrices = async (entries = []) => {
+    const valid = entries.filter(
+      (entry) => entry?.productId && Number(entry.avgUnitPrice) > 0,
+    );
+    if (valid.length === 0) return;
+    setPriceBusyId(SAVE_ALL_BUSY_ID);
+    try {
+      await Promise.all(
+        valid.map((entry) =>
+          updateProduct(entry.productId, { avgUnitPrice: Number(entry.avgUnitPrice) }),
+        ),
+      );
+      success(SHOPPING_LIST_PAGE_COPY.unitPricesSaved(valid.length));
+      await load({ silent: true });
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.unitPricesError);
+    } finally {
+      setPriceBusyId(null);
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={pageLoadingBoxSx}>
@@ -270,7 +295,7 @@ export default function ShoppingListPage() {
         />
       </Stack>
 
-      <Stack spacing={1}>
+      <Stack spacing={1.25}>
         <Stack {...listToolbarRowProps}>
           <Box sx={{ minWidth: { sm: 220 }, maxWidth: { sm: 320 }, width: { xs: "100%", sm: "auto" } }}>
             <SegmentedControl
@@ -296,29 +321,14 @@ export default function ShoppingListPage() {
             justifyContent={{ xs: "space-between", sm: "flex-end" }}
             flexWrap="wrap"
             useFlexGap
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
-            {list?.stats && (
+            {list?.stats ? (
               <Typography variant="body2" color="text.secondary">
                 {SHOPPING_LIST_PAGE_COPY.stats(list.stats.pending, list.stats.checked)}
               </Typography>
-            )}
-            {list?.spendEstimate?.hasEstimate ? (
-              <Typography variant="body2" fontWeight={700} color="text.primary">
-                {list.spendEstimate.isPartial
-                  ? SHOPPING_LIST_PAGE_COPY.spendEstimatePartial(
-                      formatMoney(list.spendEstimate.estimatedTotal),
-                      list.spendEstimate.unpricedItemCount,
-                    )
-                  : SHOPPING_LIST_PAGE_COPY.spendEstimate(
-                      formatMoney(list.spendEstimate.estimatedTotal),
-                    )}
-              </Typography>
-            ) : items.some((item) => !item.checked) ? (
-              <Typography variant="caption" color="text.secondary">
-                {SHOPPING_LIST_PAGE_COPY.spendEstimateEmpty}
-              </Typography>
             ) : null}
-            {items.length > 0 && (
+            {items.length > 0 ? (
               <LoadingButton
                 type="button"
                 variant="text"
@@ -329,9 +339,16 @@ export default function ShoppingListPage() {
               >
                 {SHOPPING_LIST_PAGE_COPY.clearList}
               </LoadingButton>
-            )}
+            ) : null}
           </Stack>
         </Stack>
+
+        <ShoppingListSpendSummary
+          spendEstimate={list?.spendEstimate}
+          pendingCount={list?.stats?.pending || 0}
+          busyProductId={priceBusyId}
+          onSaveUnitPrices={handleSaveUnitPrices}
+        />
 
         {viewMode === SHOPPING_LIST_PAGE_CONFIG.paperViewMode ? (
           <PaperShoppingList

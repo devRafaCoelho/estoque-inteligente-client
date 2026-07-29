@@ -6,7 +6,6 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -22,13 +21,13 @@ import {
   reviewItemFieldsSpacing,
   reviewItemQtyUnitRowProps,
 } from "../../../components/common/ReviewItemAccordion/ReviewItemAccordion.styled";
+import MoneyTextField from "../../../components/form/MoneyTextField/MoneyTextField";
 import ProductCategorySelectField from "../../../components/form/ProductCategorySelectField";
 import StockUnitSelectField from "../../../components/form/StockUnitSelectField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { useExclusiveExpand } from "../../../hooks/useExclusiveExpand";
 import { ApiError } from "../../../services/apiClient";
 import { buildIntakePreviewPayload } from "../../../utils/intake/intakeForm";
-import { moneyToDisplay, parseMoneyInput } from "../../../utils/moneyInput";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { isFilled, isPositiveNumber } from "../../../utils/formValidation";
 import {
@@ -374,22 +373,10 @@ export default function IntakePreviewPage() {
                   productCategories={productCategories}
                 />
 
-                <TextField
+                <MoneyTextField
                   label={INTAKE_PREVIEW_PAGE_COPY.unitPriceLabel}
-                  value={moneyToDisplay(item.unitPrice)}
-                  onChange={(e) =>
-                    updateItem(item.id, { unitPrice: parseMoneyInput(e.target.value) })
-                  }
-                  fullWidth
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    input: {
-                      startAdornment: (
-                        <InputAdornment position="start">R$</InputAdornment>
-                      ),
-                      inputMode: "numeric",
-                    },
-                  }}
+                  value={item.unitPrice}
+                  onChange={(next) => updateItem(item.id, { unitPrice: next })}
                 />
               </Stack>
             </ReviewItemAccordion>

@@ -1,16 +1,25 @@
-/** Track pill cinza claro + opção ativa branca com sombra suave. */
+import { CARD_BORDER_RADIUS_PX, cardBorderRadius } from "../../../styles/surfaceStyles";
+
+/** Track cinza claro + opção ativa branca com sombra suave (radius padrão do projeto). */
+
+const SEGMENTED_OPTION_RADIUS_PX = Math.max(CARD_BORDER_RADIUS_PX - 4, 8);
 
 export const segmentedControlTrackSx = {
-  borderRadius: 999,
+  borderRadius: cardBorderRadius,
   bgcolor: "action.hover",
   p: 0.5,
 };
 
+/**
+ * Frame fixo no modo scrollable: radius/fundo ficam no viewport,
+ * e o conteúdo rola por dentro sem “levar” as bordas arredondadas.
+ */
 export const segmentedControlScrollSx = {
+  ...segmentedControlTrackSx,
+  width: "100%",
   overflowX: "auto",
   WebkitOverflowScrolling: "touch",
   scrollbarWidth: "thin",
-  pb: 0.25,
   "&::-webkit-scrollbar": {
     height: 4,
   },
@@ -18,13 +27,19 @@ export const segmentedControlScrollSx = {
 
 export function segmentedControlGroupSx({ stretch, scrollable }) {
   return {
-    ...segmentedControlTrackSx,
+    ...(scrollable
+      ? {
+          bgcolor: "transparent",
+          p: 0,
+          borderRadius: 0,
+        }
+      : segmentedControlTrackSx),
     gap: 0.5,
     width: stretch ? "100%" : "max-content",
     minWidth: scrollable ? "100%" : undefined,
     "& .MuiToggleButtonGroup-grouped": {
       border: 0,
-      borderRadius: "999px !important",
+      borderRadius: `${SEGMENTED_OPTION_RADIUS_PX}px !important`,
       margin: 0,
     },
   };

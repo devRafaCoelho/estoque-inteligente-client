@@ -24,7 +24,8 @@ function fromInternal(value, options) {
 }
 
 /**
- * Controle segmentado reutilizável (pill track + opção selecionada em branco).
+ * Controle segmentado reutilizável (track + opção selecionada em branco).
+ * Em modo scrollable, o radius fica no frame externo (viewport), não no conteúdo.
  *
  * @param {{
  *   value: string | number,

@@ -2,6 +2,15 @@
  * Estilos compartilhados para formulários.
  */
 
+/** Altura padrão dos OutlinedInput médios (alinha com SpeechTextField compact). */
+export const FORM_OUTLINED_INPUT_MIN_HEIGHT_PX = 56;
+
+export const formOutlinedInputMinHeightSx = {
+  "& .MuiOutlinedInput-root": {
+    minHeight: FORM_OUTLINED_INPUT_MIN_HEIGHT_PX,
+  },
+};
+
 export const formStackSpacing = 2.5;
 
 export const formGridSx = {
