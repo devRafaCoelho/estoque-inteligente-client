@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useAppSnackbar } from "./useAppSnackbar";
 import { ApiError } from "../services/apiClient";
 import { markNotificationRead } from "../services/notificationService";
-import { resolveNotificationDestination } from "../utils/notifications/resolveNotificationDestination";
+import {
+  resolveNotificationDestination,
+  resolveSuggestedQuantity,
+} from "../utils/notifications/resolveNotificationDestination";
 
 /**
  * Ações reutilizáveis de notificação (dashboard + página de alertas).
@@ -51,7 +54,23 @@ export function useNotificationActions({
         await markRead(notification, { silent: true });
       }
 
-      navigate(destination.path, destination.state ? { state: destination.state } : undefined);
+      const suggestedQuantity = resolveSuggestedQuantity(notification);
+      const state = {
+        ...(destination.state || {}),
+        ...(suggestedQuantity != null
+          ? {
+              suggestedQuantity,
+              unit:
+                destination.state?.unit ||
+                notification?.payload?.unit ||
+                notification?.payload?.items?.[0]?.unit ||
+                null,
+            }
+          : {}),
+      };
+      const hasState = Object.keys(state).length > 0;
+
+      navigate(destination.path, hasState ? { state } : undefined);
       return true;
     },
     [markRead, navigate],

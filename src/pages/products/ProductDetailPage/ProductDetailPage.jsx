@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -51,11 +51,13 @@ import {
 export default function ProductDetailPage() {
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { success, error } = useAppSnackbar();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [consumeOpen, setConsumeOpen] = useState(false);
+  const [suggestedConsumeQty, setSuggestedConsumeQty] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
 
   const editInitialValues = useMemo(
@@ -84,12 +86,22 @@ export default function ProductDetailPage() {
     if (loading || !product) return;
     if (searchParams.get("baixa") !== "1") return;
     if (Number(product.quantity) > 0) {
+      const fromQuery = Number(searchParams.get("qty"));
+      const fromState = Number(location.state?.suggestedQuantity);
+      const suggested =
+        Number.isFinite(fromQuery) && fromQuery > 0
+          ? fromQuery
+          : Number.isFinite(fromState) && fromState > 0
+            ? fromState
+            : null;
+      setSuggestedConsumeQty(suggested);
       setConsumeOpen(true);
     }
     const next = new URLSearchParams(searchParams);
     next.delete("baixa");
+    next.delete("qty");
     setSearchParams(next, { replace: true });
-  }, [loading, product, searchParams, setSearchParams]);
+  }, [loading, product, searchParams, setSearchParams, location.state]);
   const handleConsume = async (values) => {
     try {
       await consumeProduct(id, buildConsumeProductPayload(values));
@@ -170,7 +182,10 @@ export default function ProductDetailPage() {
         <Button
           variant="contained"
           disabled={Number(product.quantity) <= 0}
-          onClick={() => setConsumeOpen(true)}
+          onClick={() => {
+            setSuggestedConsumeQty(null);
+            setConsumeOpen(true);
+          }}
         >
           {PRODUCT_DETAIL_COPY.consumeAction}
         </Button>
@@ -216,8 +231,12 @@ export default function ProductDetailPage() {
 
       <ConsumeProductDialog
         open={consumeOpen}
-        onClose={() => setConsumeOpen(false)}
+        onClose={() => {
+          setConsumeOpen(false);
+          setSuggestedConsumeQty(null);
+        }}
         product={product}
+        initialQuantity={suggestedConsumeQty}
         onConfirm={handleConsume}
       />
 

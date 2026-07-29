@@ -185,6 +185,9 @@ export default function ChatPage() {
         onChange={setDraft}
         onKeyDown={handleKeyDown}
         fullWidth
+        multiline
+        minRows={1}
+        maxRows={4}
         speechDisabled={sending}
         showSubmit
         submitType="button"

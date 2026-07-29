@@ -286,8 +286,9 @@ export default function IntakePage() {
             label={INTAKE_PAGE_COPY.textLabel}
             placeholder={INTAKE_PAGE_COPY.textPlaceholder}
             fullWidth
-            minRows={2}
-            maxRows={8}
+            multiline
+            minRows={1}
+            maxRows={6}
             error={Boolean(errors.text)}
             helperText={errors.text?.message}
             value={text ?? ""}

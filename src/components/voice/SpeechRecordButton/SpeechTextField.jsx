@@ -46,7 +46,7 @@ import {
  * @param {boolean} [props.submitDisabled]
  * @param {boolean} [props.submitLoading]
  * @param {string} [props.submitAriaLabel]
- * @param {boolean} [props.multiline=true]
+ * @param {boolean} [props.multiline] — se omitido: false (altura padrão); true se minRows > 1
  * @param {number} [props.minRows=1]
  * @param {number} [props.maxRows=6]
  */
@@ -61,7 +61,7 @@ export default function SpeechTextField({
   submitDisabled = false,
   submitLoading = false,
   submitAriaLabel = SPEECH_RECORD_BUTTON_COPY.submitAria,
-  multiline = true,
+  multiline,
   minRows = 1,
   maxRows = 6,
   slotProps,
@@ -71,6 +71,10 @@ export default function SpeechTextField({
   const valueRef = useRef(value);
   const [cancelledHint, setCancelledHint] = useState(false);
   const cancelTimerRef = useRef(null);
+
+  const effectiveMultiline =
+    multiline != null ? Boolean(multiline) : minRows > 1;
+  const compact = !effectiveMultiline || Number(minRows) <= 1;
 
   useEffect(() => {
     valueRef.current = value;
@@ -142,16 +146,19 @@ export default function SpeechTextField({
         {...textFieldProps}
         value={value}
         onChange={handleTextChange}
-        multiline={multiline}
-        minRows={minRows}
-        maxRows={maxRows}
-        sx={[speechFieldInputSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
+        multiline={effectiveMultiline}
+        minRows={effectiveMultiline ? minRows : undefined}
+        maxRows={effectiveMultiline ? maxRows : undefined}
+        sx={[
+          speechFieldInputSx({ compact }),
+          ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+        ]}
         slotProps={{
           ...slotProps,
           input: {
             ...inputSlotProps,
             endAdornment: (
-              <InputAdornment position="end" sx={speechMicAdornmentSx}>
+              <InputAdornment position="end" sx={speechMicAdornmentSx({ compact })}>
                 {inputSlotProps.endAdornment}
                 <IconButton
                   type="button"

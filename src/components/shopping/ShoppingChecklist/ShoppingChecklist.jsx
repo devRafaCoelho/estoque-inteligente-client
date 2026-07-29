@@ -14,7 +14,6 @@ import {
   checklistCheckboxSx,
   checklistChipsRowSx,
   checklistItemSx,
-  checklistNameBoxSx,
   checklistNameSx,
 } from "./ShoppingChecklist.styled";
 
@@ -42,24 +41,21 @@ export default function ShoppingChecklist({ items, onToggle, onDelete, busyId })
       {items.map((item) => {
         const stockStatus = stockStatusFor(item.origin);
         return (
-        <Box key={item.id} sx={checklistItemSx(item.checked)}>
-          <Checkbox
-            checked={Boolean(item.checked)}
-            disabled={busyId === item.id}
-            onChange={() => onToggle(item)}
-            sx={checklistCheckboxSx}
-          />
-          <Box sx={checklistNameBoxSx}>
-            <Typography fontWeight={700} sx={checklistNameSx(item.checked)} noWrap>
+          <Box key={item.id} sx={checklistItemSx(item.checked)}>
+            <Checkbox
+              checked={Boolean(item.checked)}
+              disabled={busyId === item.id}
+              onChange={() => onToggle(item)}
+              sx={checklistCheckboxSx}
+            />
+            <Typography
+              fontWeight={700}
+              sx={checklistNameSx(item.checked)}
+              noWrap
+            >
               {item.name}
             </Typography>
-            <Stack
-              direction="row"
-              spacing={0.75}
-              flexWrap="wrap"
-              useFlexGap
-              sx={checklistChipsRowSx}
-            >
+            <Stack direction="row" spacing={0.75} sx={checklistChipsRowSx}>
               {item.suggestedQty != null && (
                 <Chip
                   size="small"
@@ -74,16 +70,15 @@ export default function ShoppingChecklist({ items, onToggle, onDelete, busyId })
                 label={SHOPPING_CHECKLIST_COPY.stockStatusLabels[stockStatus]}
               />
             </Stack>
+            <IconButton
+              size="small"
+              aria-label={SHOPPING_CHECKLIST_COPY.removeAria}
+              disabled={busyId === item.id}
+              onClick={() => onDelete(item)}
+            >
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
           </Box>
-          <IconButton
-            size="small"
-            aria-label={SHOPPING_CHECKLIST_COPY.removeAria}
-            disabled={busyId === item.id}
-            onClick={() => onDelete(item)}
-          >
-            <DeleteOutlineIcon fontSize="small" />
-          </IconButton>
-        </Box>
         );
       })}
     </Stack>

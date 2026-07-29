@@ -4,36 +4,66 @@ export const speechFieldRootSx = {
   gap: 0.75,
 };
 
-/** Mantém espaçamento à direita para mic/seta não colarem na borda. */
-export const speechFieldInputSx = {
+/**
+ * @param {{ compact?: boolean }} [options]
+ * compact = altura padrão do OutlinedInput médio (56px);
+ * !compact = textarea com minRows > 1 (entrada/baixa).
+ */
+export const speechFieldInputSx = ({ compact = true } = {}) => ({
   "& .MuiOutlinedInput-root": {
-    alignItems: "flex-start",
-    paddingRight: 1.25,
-    paddingTop: 1.25,
-    paddingBottom: 1.25,
+    alignItems: "center",
+    paddingRight: 0.75,
+    ...(compact
+      ? {
+          minHeight: 56,
+          paddingTop: 0,
+          paddingBottom: 0,
+        }
+      : {
+          alignItems: "flex-start",
+          paddingTop: "10px",
+          paddingBottom: "10px",
+        }),
   },
-  "& .MuiOutlinedInput-input": {
-    overflowWrap: "anywhere",
-    wordBreak: "break-word",
-    whiteSpace: "pre-wrap",
-  },
-};
+  // Multiline compact (ex.: chat com minRows=1): mesma altura de um TextField padrão
+  "& textarea.MuiOutlinedInput-input": compact
+    ? {
+        lineHeight: 1.4375,
+        paddingTop: "16.5px",
+        paddingBottom: "16.5px",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+        whiteSpace: "pre-wrap",
+      }
+    : {
+        lineHeight: 1.4375,
+        paddingTop: 0,
+        paddingBottom: 0,
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+        whiteSpace: "pre-wrap",
+      },
+});
 
-export const speechMicAdornmentSx = {
-  alignSelf: "flex-end",
-  maxHeight: "none",
-  height: "auto",
+/**
+ * @param {{ compact?: boolean }} [options]
+ */
+export const speechMicAdornmentSx = ({ compact = true } = {}) => ({
+  alignSelf: compact ? "center" : "flex-end",
+  height: compact ? "100%" : "auto",
+  maxHeight: compact ? 56 : "none",
   marginRight: 0.25,
   marginLeft: 0,
-  marginBottom: 0.25,
+  marginTop: 0,
+  marginBottom: compact ? 0 : 0.25,
   display: "flex",
   alignItems: "center",
-  gap: 1,
-};
+  gap: 0.75,
+});
 
 export const speechMicButtonSx = (listening) => ({
   color: listening ? "error.contrastText" : "text.secondary",
-  p: 0.75,
+  p: 0.5,
   ...(listening
     ? {
         bgcolor: "error.main",
@@ -53,6 +83,7 @@ export const speechSubmitButtonSx = {
   width: 32,
   height: 32,
   p: 0.5,
+  flexShrink: 0,
   "&:hover": {
     bgcolor: "primary.dark",
   },

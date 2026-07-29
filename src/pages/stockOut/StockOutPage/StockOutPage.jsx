@@ -157,8 +157,9 @@ export default function StockOutPage() {
         label={STOCK_OUT_PAGE_COPY.textLabel}
         placeholder={STOCK_OUT_PAGE_COPY.textPlaceholder}
         fullWidth
-        minRows={2}
-        maxRows={8}
+        multiline
+        minRows={1}
+        maxRows={6}
         error={Boolean(errors.text)}
         helperText={errors.text?.message}
         value={text ?? ""}

@@ -4,6 +4,7 @@ import {
   NOTIFICATION_DESTINATION,
   buildStockOutDraftText,
   resolveNotificationDestination,
+  resolveSuggestedQuantity,
 } from "../src/utils/notifications/resolveNotificationDestination.js";
 
 {
@@ -24,8 +25,8 @@ import {
       action: NOTIFICATION_ACTIONS.openQuickConsume,
       productIds: ["a", "b", "c"],
       items: [
-        { name: "Sabonete em barra" },
-        { name: "Banana prata" },
+        { name: "Sabonete em barra", suggestedQuantity: 2 },
+        { name: "Banana prata", suggestedQuantity: 1 },
         { name: "Tomate" },
       ],
     },
@@ -35,26 +36,33 @@ import {
   assert.equal(dest.path, "/baixa");
   assert.equal(
     dest.state.draftText,
-    "dê baixa em 1 Sabonete em barra, 1 Banana prata e 1 Tomate",
+    "dê baixa em 2 Sabonete em barra, 1 Banana prata e 1 Tomate",
   );
   assert.equal(
     buildStockOutDraftText(notification),
-    "dê baixa em 1 Sabonete em barra, 1 Banana prata e 1 Tomate",
+    "dê baixa em 2 Sabonete em barra, 1 Banana prata e 1 Tomate",
   );
 }
 
 {
-  const dest = resolveNotificationDestination({
+  const notification = {
     type: "missing_consumption",
     productId: "p2",
     payload: {
       action: NOTIFICATION_ACTIONS.openQuickConsume,
       productId: "p2",
       productIds: ["p2"],
+      suggestedQuantity: 1.5,
+      unit: "kg",
+      items: [{ name: "Arroz", suggestedQuantity: 1.5, unit: "kg" }],
     },
-  });
+  };
+  assert.equal(resolveSuggestedQuantity(notification), 1.5);
+  const dest = resolveNotificationDestination(notification);
   assert.equal(dest.kind, NOTIFICATION_DESTINATION.quickConsume);
-  assert.equal(dest.path, "/produtos/p2?baixa=1");
+  assert.equal(dest.path, "/produtos/p2?baixa=1&qty=1.5");
+  assert.equal(dest.state.suggestedQuantity, 1.5);
+  assert.equal(dest.state.unit, "kg");
 }
 
 console.log("resolveNotificationDestination.test.mjs: ok");

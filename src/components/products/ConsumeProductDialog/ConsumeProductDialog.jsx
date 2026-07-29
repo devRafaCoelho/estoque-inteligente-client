@@ -7,14 +7,20 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import FormDialog from "../../common/FormDialog/FormDialog";
 import { consumeSchema } from "../../../schemas/products/productSchema";
 import { formatQuantity } from "../../../utils/unitLabels";
-import { isPositiveNumber, parseOptionalNumber } from "../../../utils/formValidation";
+import { isPositiveNumber } from "../../../utils/formValidation";
 import { CONSUME_PRODUCT_DIALOG_COPY } from "./consumeProductDialogCopy";
 import { CONSUME_PRODUCT_DIALOG_CONFIG } from "./consumeProductDialogConfig";
 import { formStackSpacing } from "./ConsumeProductDialog.styled";
 
 const FORM_ID = "consume-product-form";
 
-export default function ConsumeProductDialog({ open, onClose, product, onConfirm }) {
+export default function ConsumeProductDialog({
+  open,
+  onClose,
+  product,
+  onConfirm,
+  initialQuantity,
+}) {
   const [loading, setLoading] = useState(false);
   const {
     register,
@@ -30,16 +36,28 @@ export default function ConsumeProductDialog({ open, onClose, product, onConfirm
   const quantity = watch("quantity");
   const canSubmit = isPositiveNumber(quantity);
 
+  const resolvedInitialQuantity = (() => {
+    const n = Number(initialQuantity);
+    if (Number.isFinite(n) && n > 0) return n;
+    return CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues.quantity;
+  })();
+
   useEffect(() => {
     if (open) {
-      reset({ ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues });
+      reset({
+        ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues,
+        quantity: resolvedInitialQuantity,
+      });
     }
-  }, [open, reset]);
+  }, [open, reset, resolvedInitialQuantity]);
 
   if (!product) return null;
 
   const handleDiscard = () => {
-    reset({ ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues });
+    reset({
+      ...CONSUME_PRODUCT_DIALOG_CONFIG.defaultValues,
+      quantity: resolvedInitialQuantity,
+    });
   };
 
   const handleFormSubmit = handleSubmit(async (values) => {
@@ -52,6 +70,9 @@ export default function ConsumeProductDialog({ open, onClose, product, onConfirm
       setLoading(false);
     }
   });
+
+  const showUsualHint =
+    Number.isFinite(Number(initialQuantity)) && Number(initialQuantity) > 0;
 
   return (
     <FormDialog
@@ -74,6 +95,13 @@ export default function ConsumeProductDialog({ open, onClose, product, onConfirm
           {CONSUME_PRODUCT_DIALOG_COPY.currentStockPrefix}{" "}
           {formatQuantity(product.quantity, product.unit)}
         </Typography>
+        {showUsualHint ? (
+          <Typography variant="body2" color="text.secondary">
+            {CONSUME_PRODUCT_DIALOG_COPY.usualHint(
+              formatQuantity(initialQuantity, product.unit),
+            )}
+          </Typography>
+        ) : null}
         <TextField
           label={CONSUME_PRODUCT_DIALOG_COPY.quantityLabel}
           type="number"

@@ -14,17 +14,16 @@ export const checklistItemSx = (checked) => ({
 
 export const checklistCheckboxSx = {
   p: 0.5,
+  flexShrink: 0,
 };
 
 export const checklistNameSx = (checked) => ({
+  flex: 1,
+  minWidth: 0,
   textDecoration: checked ? "line-through" : "none",
 });
 
 export const checklistChipsRowSx = {
-  mt: 0.5,
-};
-
-export const checklistNameBoxSx = {
-  flex: 1,
-  minWidth: 0,
+  flexShrink: 0,
+  alignItems: "center",
 };
