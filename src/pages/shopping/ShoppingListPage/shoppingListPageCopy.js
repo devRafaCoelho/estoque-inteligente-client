@@ -35,6 +35,10 @@ export const SHOPPING_LIST_PAGE_COPY = {
   viewPaper: "Paper",
   viewModeAria: "Modo de visualização",
   stats: (pending, checked) => `${pending} pendente(s) · ${checked} marcado(s)`,
+  spendEstimate: (totalLabel) => `Estimativa: ${totalLabel}`,
+  spendEstimatePartial: (totalLabel, missing) =>
+    `Estimativa parcial: ${totalLabel} (${missing} sem preço)`,
+  spendEstimateEmpty: "Sem estimativa — cadastre o preço médio nos produtos.",
   addLabel: "O que você precisa comprar?",
   addPlaceholder: "Ex.: 2kg de arroz, 1 lata de leite em pó",
   addSubmit: "Adicionar",

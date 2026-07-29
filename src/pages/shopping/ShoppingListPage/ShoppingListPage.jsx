@@ -22,6 +22,7 @@ import SegmentedControl from "../../../components/common/SegmentedControl/Segmen
 import SpeechTextField from "../../../components/voice/SpeechRecordButton/SpeechTextField";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
+import { formatMoney } from "../../../utils/money";
 import {
   pageHeaderSubtitleSx,
   pageLoadingBoxSx,
@@ -301,6 +302,22 @@ export default function ShoppingListPage() {
                 {SHOPPING_LIST_PAGE_COPY.stats(list.stats.pending, list.stats.checked)}
               </Typography>
             )}
+            {list?.spendEstimate?.hasEstimate ? (
+              <Typography variant="body2" fontWeight={700} color="text.primary">
+                {list.spendEstimate.isPartial
+                  ? SHOPPING_LIST_PAGE_COPY.spendEstimatePartial(
+                      formatMoney(list.spendEstimate.estimatedTotal),
+                      list.spendEstimate.unpricedItemCount,
+                    )
+                  : SHOPPING_LIST_PAGE_COPY.spendEstimate(
+                      formatMoney(list.spendEstimate.estimatedTotal),
+                    )}
+              </Typography>
+            ) : items.some((item) => !item.checked) ? (
+              <Typography variant="caption" color="text.secondary">
+                {SHOPPING_LIST_PAGE_COPY.spendEstimateEmpty}
+              </Typography>
+            ) : null}
             {items.length > 0 && (
               <LoadingButton
                 type="button"
