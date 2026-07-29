@@ -12,6 +12,10 @@ export const CHAT_PROPOSAL_CARD_COPY = {
     count === 1
       ? "1 item pronto para revisar — o estoque só muda após confirmar."
       : `${count} itens prontos para revisar — o estoque só muda após confirmar.`,
+  intakeBodyLowConfidence: (count, lowCount) =>
+    lowCount === 1
+      ? `${count} item(ns) no rascunho · 1 com baixa confiança — revise antes de confirmar.`
+      : `${count} item(ns) no rascunho · ${lowCount} com baixa confiança — revise antes de confirmar.`,
   shoppingListBodySave: (count) =>
     count === 1
       ? "1 item sugerido. Nada foi gravado ainda."
@@ -27,7 +31,8 @@ export const CHAT_PROPOSAL_CARD_COPY = {
   itemLine: (item) => {
     const qty = item.quantity != null ? `${item.quantity} ` : "";
     const unit = item.unit ? `${item.unit} ` : "";
-    return `${qty}${unit}${item.name}`.trim();
+    const base = `${qty}${unit}${item.name}`.trim();
+    return item.lowConfidence ? `${base} (revisar)` : base;
   },
 };
 
@@ -75,9 +80,14 @@ export function proposalCardTitle(payload) {
 
 export function proposalCardBody(payload) {
   if (isIntakeProposalPayload(payload)) {
-    return CHAT_PROPOSAL_CARD_COPY.intakeBody(
-      payload.itemCount ?? payload.items?.length ?? 0,
-    );
+    const count = payload.itemCount ?? payload.items?.length ?? 0;
+    if (payload.hasLowConfidenceItems && payload.lowConfidenceCount > 0) {
+      return CHAT_PROPOSAL_CARD_COPY.intakeBodyLowConfidence(
+        count,
+        payload.lowConfidenceCount,
+      );
+    }
+    return CHAT_PROPOSAL_CARD_COPY.intakeBody(count);
   }
   switch (payload?.type) {
     case "stock_out_draft":
