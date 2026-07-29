@@ -65,7 +65,9 @@ export default function ShoppingListPage() {
   const [clearListOpen, setClearListOpen] = useState(false);
   const [clearingList, setClearingList] = useState(false);
   const [list, setList] = useState(null);
-  const [viewMode, setViewMode] = useState(SHOPPING_LIST_PAGE_CONFIG.defaultViewMode);
+  const [viewMode, setViewMode] = useState(
+    SHOPPING_LIST_PAGE_CONFIG.defaultViewMode,
+  );
   const [addText, setAddText] = useState("");
   const [newSuggestionCount, setNewSuggestionCount] = useState(0);
   const [priceBusyId, setPriceBusyId] = useState(null);
@@ -87,7 +89,9 @@ export default function ShoppingListPage() {
       const data = await previewShoppingListSuggestions(
         SHOPPING_LIST_PAGE_CONFIG.generateMode,
       );
-      setNewSuggestionCount(data.preview?.newCount ?? data.preview?.newSuggestions?.length ?? 0);
+      setNewSuggestionCount(
+        data.preview?.newCount ?? data.preview?.newSuggestions?.length ?? 0,
+      );
     } catch {
       // Mantém o último valor conhecido; o botão de gerar ainda funciona.
     }
@@ -117,7 +121,11 @@ export default function ShoppingListPage() {
         applyList(data.list);
         await refreshSuggestions();
       } catch (err) {
-        error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.loadError);
+        error(
+          err instanceof ApiError
+            ? err.message
+            : SHOPPING_LIST_PAGE_COPY.loadError,
+        );
       } finally {
         if (!silent) setLoading(false);
       }
@@ -132,7 +140,9 @@ export default function ShoppingListPage() {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      const data = await generateShoppingList(SHOPPING_LIST_PAGE_CONFIG.generateMode);
+      const data = await generateShoppingList(
+        SHOPPING_LIST_PAGE_CONFIG.generateMode,
+      );
       applyList(data.list);
       await refreshSuggestions();
       success(
@@ -141,7 +151,11 @@ export default function ShoppingListPage() {
           : SHOPPING_LIST_PAGE_COPY.generateEmpty,
       );
     } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.generateError);
+      error(
+        err instanceof ApiError
+          ? err.message
+          : SHOPPING_LIST_PAGE_COPY.generateError,
+      );
     } finally {
       setGenerating(false);
     }
@@ -155,7 +169,11 @@ export default function ShoppingListPage() {
       const data = await setShoppingListViewMode(value);
       applyList(data.list);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.viewModeError);
+      error(
+        err instanceof ApiError
+          ? err.message
+          : SHOPPING_LIST_PAGE_COPY.viewModeError,
+      );
       setViewMode(previous);
     }
   };
@@ -188,7 +206,11 @@ export default function ShoppingListPage() {
       await refreshSuggestions();
       success(SHOPPING_LIST_PAGE_COPY.itemRemoved);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.deleteError);
+      error(
+        err instanceof ApiError
+          ? err.message
+          : SHOPPING_LIST_PAGE_COPY.deleteError,
+      );
     } finally {
       setBusyId(null);
     }
@@ -203,7 +225,11 @@ export default function ShoppingListPage() {
       setClearListOpen(false);
       success(SHOPPING_LIST_PAGE_COPY.listCleared);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.clearError);
+      error(
+        err instanceof ApiError
+          ? err.message
+          : SHOPPING_LIST_PAGE_COPY.clearError,
+      );
     } finally {
       setClearingList(false);
     }
@@ -236,7 +262,11 @@ export default function ShoppingListPage() {
         success(SHOPPING_LIST_PAGE_COPY.itemAdded);
       }
     } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.addError);
+      error(
+        err instanceof ApiError
+          ? err.message
+          : SHOPPING_LIST_PAGE_COPY.addError,
+      );
     } finally {
       setAdding(false);
     }
@@ -251,13 +281,19 @@ export default function ShoppingListPage() {
     try {
       await Promise.all(
         valid.map((entry) =>
-          updateProduct(entry.productId, { avgUnitPrice: Number(entry.avgUnitPrice) }),
+          updateProduct(entry.productId, {
+            avgUnitPrice: Number(entry.avgUnitPrice),
+          }),
         ),
       );
       success(SHOPPING_LIST_PAGE_COPY.unitPricesSaved(valid.length));
       await load({ silent: true });
     } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.unitPricesError);
+      error(
+        err instanceof ApiError
+          ? err.message
+          : SHOPPING_LIST_PAGE_COPY.unitPricesError,
+      );
     } finally {
       setPriceBusyId(null);
     }
@@ -277,7 +313,11 @@ export default function ShoppingListPage() {
       setShareUrl(url);
       setShareMenuAnchor(anchor);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : SHOPPING_LIST_PAGE_COPY.shareError);
+      error(
+        err instanceof ApiError
+          ? err.message
+          : SHOPPING_LIST_PAGE_COPY.shareError,
+      );
     } finally {
       setSharing(false);
     }
@@ -300,7 +340,11 @@ export default function ShoppingListPage() {
 
   const handleShareWhatsApp = () => {
     if (!shareUrl) return;
-    window.open(buildWhatsAppShareUrl(shareUrl), "_blank", "noopener,noreferrer");
+    window.open(
+      buildWhatsAppShareUrl(shareUrl),
+      "_blank",
+      "noopener,noreferrer",
+    );
     handleShareMenuClose();
   };
 
@@ -323,7 +367,9 @@ export default function ShoppingListPage() {
     <Stack spacing={shoppingListStackSpacing}>
       <Box>
         <Typography variant="h5">{SHOPPING_LIST_PAGE_COPY.title}</Typography>
-        <Typography sx={pageHeaderSubtitleSx}>{SHOPPING_LIST_PAGE_COPY.subtitle}</Typography>
+        <Typography sx={pageHeaderSubtitleSx}>
+          {SHOPPING_LIST_PAGE_COPY.subtitle}
+        </Typography>
       </Box>
 
       <LoadingButton
@@ -331,7 +377,11 @@ export default function ShoppingListPage() {
         loading={generating}
         disabled={!canGenerate}
         onClick={handleGenerate}
-        title={!canGenerate ? SHOPPING_LIST_PAGE_COPY.generateDisabledHint : undefined}
+        title={
+          !canGenerate
+            ? SHOPPING_LIST_PAGE_COPY.generateDisabledHint
+            : undefined
+        }
         sx={actionButtonSx}
       >
         {generateLabel}
@@ -357,7 +407,13 @@ export default function ShoppingListPage() {
 
       <Stack spacing={1.25}>
         <Stack {...listToolbarRowProps}>
-          <Box sx={{ minWidth: { sm: 220 }, maxWidth: { sm: 320 }, width: { xs: "100%", sm: "auto" } }}>
+          <Box
+            sx={{
+              minWidth: { sm: 220 },
+              maxWidth: { sm: 320 },
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
             <SegmentedControl
               value={viewMode}
               onChange={handleViewMode}
@@ -385,7 +441,10 @@ export default function ShoppingListPage() {
           >
             {list?.stats ? (
               <Typography variant="body2" color="text.secondary">
-                {SHOPPING_LIST_PAGE_COPY.stats(list.stats.pending, list.stats.checked)}
+                {SHOPPING_LIST_PAGE_COPY.stats(
+                  list.stats.pending,
+                  list.stats.checked,
+                )}
               </Typography>
             ) : null}
             {items.length > 0 ? (
@@ -402,16 +461,15 @@ export default function ShoppingListPage() {
             ) : null}
             {items.length > 0 ? (
               <Button
+                type="button"
                 variant="text"
-                color="primary"
                 size="small"
-                disabled={clearingList || Boolean(busyId) || sharing}
                 startIcon={<IosShareOutlinedIcon />}
+                onClick={handleShareOpen}
+                disabled={clearingList || Boolean(busyId) || sharing}
                 aria-haspopup="menu"
                 aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
                 aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
-                aria-label={SHOPPING_LIST_PAGE_COPY.shareMenuAria}
-                onClick={handleShareOpen}
                 sx={shareButtonDesktopSx}
               >
                 {SHOPPING_LIST_PAGE_COPY.share}
@@ -445,16 +503,15 @@ export default function ShoppingListPage() {
           shareSlot={
             items.length > 0 ? (
               <Button
+                type="button"
                 variant="text"
-                color="primary"
                 size="small"
-                disabled={clearingList || Boolean(busyId) || sharing}
                 startIcon={<IosShareOutlinedIcon />}
+                onClick={handleShareOpen}
+                disabled={clearingList || Boolean(busyId) || sharing}
                 aria-haspopup="menu"
                 aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
                 aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
-                aria-label={SHOPPING_LIST_PAGE_COPY.shareMenuAria}
-                onClick={handleShareOpen}
                 sx={shareButtonMobileSx}
               >
                 {SHOPPING_LIST_PAGE_COPY.share}
@@ -476,13 +533,17 @@ export default function ShoppingListPage() {
               <ListItemIcon>
                 <ContentCopyOutlinedIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareCopyLink}</ListItemText>
+              <ListItemText>
+                {SHOPPING_LIST_PAGE_COPY.shareCopyLink}
+              </ListItemText>
             </MenuItem>
             <MenuItem onClick={handleShareWhatsApp}>
               <ListItemIcon>
                 <WhatsAppIcon fontSize="small" />
               </ListItemIcon>
-              <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareWhatsApp}</ListItemText>
+              <ListItemText>
+                {SHOPPING_LIST_PAGE_COPY.shareWhatsApp}
+              </ListItemText>
             </MenuItem>
           </Menu>
         ) : null}
@@ -494,7 +555,9 @@ export default function ShoppingListPage() {
         title={SHOPPING_LIST_PAGE_COPY.deleteConfirmTitle}
         description={
           itemToDelete
-            ? SHOPPING_LIST_PAGE_COPY.deleteConfirmDescription(itemToDelete.name)
+            ? SHOPPING_LIST_PAGE_COPY.deleteConfirmDescription(
+                itemToDelete.name,
+              )
             : ""
         }
         onConfirm={handleDeleteConfirm}

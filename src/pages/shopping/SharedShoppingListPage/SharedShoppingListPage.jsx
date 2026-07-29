@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -6,7 +6,10 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import PaymentsOutlinedIcon from "@mui/icons-material/PaymentsOutlined";
 import PaperShoppingList from "../../../components/shopping/PaperShoppingList/PaperShoppingList";
-import { getSharedShoppingList } from "../../../services/shoppingListShareService";
+import {
+  getSharedShoppingList,
+  updateSharedShoppingListItem,
+} from "../../../services/shoppingListShareService";
 import { ApiError } from "../../../services/apiClient";
 import { formatMoney } from "../../../utils/money";
 import { pageLoadingBoxSx } from "../../../styles/pageStyles";
@@ -23,6 +26,7 @@ export default function SharedShoppingListPage() {
   const [loading, setLoading] = useState(true);
   const [list, setList] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [busyId, setBusyId] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +55,54 @@ export default function SharedShoppingListPage() {
       cancelled = true;
     };
   }, [token]);
+
+  const handleToggle = useCallback(
+    async (item) => {
+      if (!token || !item?.id || busyId) return;
+      const nextChecked = !item.checked;
+      setBusyId(item.id);
+      setList((prev) => {
+        if (!prev) return prev;
+        const items = (prev.items || []).map((row) =>
+          row.id === item.id ? { ...row, checked: nextChecked } : row,
+        );
+        const checked = items.filter((row) => row.checked).length;
+        return {
+          ...prev,
+          items,
+          stats: {
+            total: items.length,
+            checked,
+            pending: items.length - checked,
+          },
+        };
+      });
+      try {
+        const data = await updateSharedShoppingListItem(token, item.id, nextChecked);
+        if (data?.list) setList(data.list);
+      } catch {
+        setList((prev) => {
+          if (!prev) return prev;
+          const items = (prev.items || []).map((row) =>
+            row.id === item.id ? { ...row, checked: item.checked } : row,
+          );
+          const checked = items.filter((row) => row.checked).length;
+          return {
+            ...prev,
+            items,
+            stats: {
+              total: items.length,
+              checked,
+              pending: items.length - checked,
+            },
+          };
+        });
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [token, busyId],
+  );
 
   if (loading) {
     return (
@@ -116,6 +168,8 @@ export default function SharedShoppingListPage() {
           <PaperShoppingList
             title={list.title}
             items={items}
+            onToggle={handleToggle}
+            busyId={busyId}
             canToggle
             canDelete={false}
           />
