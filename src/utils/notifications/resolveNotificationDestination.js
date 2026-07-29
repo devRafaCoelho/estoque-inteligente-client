@@ -13,9 +13,13 @@ export const NOTIFICATION_DESTINATION = {
 
 const { types, actions } = NOTIFICATION_CARD_CONFIG;
 const CONSUMPTION_TYPES = new Set([types.consumptionNudge, types.missingConsumption]);
+const QUICK_CONSUME_ACTIONS = new Set([
+  actions.openQuickConsume,
+  actions.quickConsumeUsual,
+]);
 
 /**
- * Quantidade sugerida no payload (top-level ou primeiro item).
+ * Quantidade sugerida no payload (top-level ou primeiro item com qty).
  * @param {object} notification
  * @returns {number|null}
  */
@@ -25,11 +29,40 @@ export function resolveSuggestedQuantity(notification) {
   if (Number.isFinite(top) && top > 0) return top;
 
   const items = Array.isArray(payload.items) ? payload.items : [];
-  if (items.length === 1) {
-    const itemQty = Number(items[0]?.suggestedQuantity);
+  for (const item of items) {
+    const itemQty = Number(item?.suggestedQuantity);
     if (Number.isFinite(itemQty) && itemQty > 0) return itemQty;
   }
   return null;
+}
+
+/**
+ * Há alguma quantidade usual no payload (topo ou itens).
+ * @param {object} notification
+ */
+export function hasSuggestedUsualQuantity(notification) {
+  return resolveSuggestedQuantity(notification) != null;
+}
+
+/**
+ * CTA de baixa usual (F3-1.3): action nova ou nudge com quantidade sugerida.
+ * @param {object} notification
+ */
+export function isUsualConsumeNotification(notification) {
+  const action = notification?.payload?.action;
+  if (action === actions.quickConsumeUsual) return true;
+  if (!QUICK_CONSUME_ACTIONS.has(action) && !CONSUMPTION_TYPES.has(notification?.type)) {
+    return false;
+  }
+  return hasSuggestedUsualQuantity(notification);
+}
+
+/**
+ * Action de payload é fluxo de baixa rápida (Fase 2 ou 3).
+ * @param {string|null|undefined} action
+ */
+export function isQuickConsumeAction(action) {
+  return QUICK_CONSUME_ACTIONS.has(action);
 }
 
 function formatSuggestedQty(value) {
@@ -70,8 +103,39 @@ function buildQuickConsumePath(productId, suggestedQuantity) {
   return `/produtos/${productId}?${params.toString()}`;
 }
 
+function buildQuickConsumeDestination(notification, productId, suggestedQuantity) {
+  const payload = notification?.payload || {};
+  const ids = Array.isArray(payload.productIds)
+    ? payload.productIds.filter(Boolean)
+    : [];
+
+  if (productId && ids.length <= 1) {
+    return {
+      kind: NOTIFICATION_DESTINATION.quickConsume,
+      path: buildQuickConsumePath(productId, suggestedQuantity),
+      productId,
+      state:
+        suggestedQuantity != null
+          ? {
+              suggestedQuantity,
+              unit: payload.unit || payload.items?.[0]?.unit || null,
+            }
+          : undefined,
+    };
+  }
+
+  const draftText = buildStockOutDraftText(notification);
+  return {
+    kind: NOTIFICATION_DESTINATION.stockOut,
+    path: "/baixa",
+    state: draftText ? { draftText } : undefined,
+  };
+}
+
 /**
  * Destino de navegação a partir de `payload.action` (com fallbacks).
+ * Compatível com actions Fase 2 (`open_product`, `open_quick_consume`)
+ * e Fase 3 (`quick_consume_usual`).
  *
  * @param {object} notification
  * @returns {{ kind: string, path: string, productId?: string, state?: object } | null}
@@ -89,28 +153,8 @@ export function resolveNotificationDestination(notification) {
       : null);
   const suggestedQuantity = resolveSuggestedQuantity(notification);
 
-  if (action === actions.openQuickConsume) {
-    const ids = Array.isArray(payload.productIds) ? payload.productIds.filter(Boolean) : [];
-    if (productId && ids.length <= 1) {
-      return {
-        kind: NOTIFICATION_DESTINATION.quickConsume,
-        path: buildQuickConsumePath(productId, suggestedQuantity),
-        productId,
-        state:
-          suggestedQuantity != null
-            ? {
-                suggestedQuantity,
-                unit: payload.unit || payload.items?.[0]?.unit || null,
-              }
-            : undefined,
-      };
-    }
-    const draftText = buildStockOutDraftText(notification);
-    return {
-      kind: NOTIFICATION_DESTINATION.stockOut,
-      path: "/baixa",
-      state: draftText ? { draftText } : undefined,
-    };
+  if (isQuickConsumeAction(action)) {
+    return buildQuickConsumeDestination(notification, productId, suggestedQuantity);
   }
 
   if (action === actions.openProduct && productId) {
@@ -121,27 +165,9 @@ export function resolveNotificationDestination(notification) {
     };
   }
 
+  // Fallbacks por tipo (payload.action ausente ou legado)
   if (CONSUMPTION_TYPES.has(notification.type)) {
-    if (productId) {
-      return {
-        kind: NOTIFICATION_DESTINATION.quickConsume,
-        path: buildQuickConsumePath(productId, suggestedQuantity),
-        productId,
-        state:
-          suggestedQuantity != null
-            ? {
-                suggestedQuantity,
-                unit: payload.unit || payload.items?.[0]?.unit || null,
-              }
-            : undefined,
-      };
-    }
-    const draftText = buildStockOutDraftText(notification);
-    return {
-      kind: NOTIFICATION_DESTINATION.stockOut,
-      path: "/baixa",
-      state: draftText ? { draftText } : undefined,
-    };
+    return buildQuickConsumeDestination(notification, productId, suggestedQuantity);
   }
 
   if (productId) {

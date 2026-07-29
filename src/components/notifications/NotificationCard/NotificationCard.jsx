@@ -5,6 +5,7 @@ import Typography from "@mui/material/Typography";
 import LoadingButton from "../../common/LoadingButton/LoadingButton";
 import {
   isConsumptionNudge,
+  resolveNotificationCtaLabel,
   resolveNotificationTone,
 } from "./notificationCardConfig";
 import { NOTIFICATION_CARD_COPY } from "./notificationCardCopy";
@@ -41,6 +42,11 @@ export default function NotificationCard({
   const tone = resolveNotificationTone(notification.type);
   const isNudge = isConsumptionNudge(notification);
   const clickable = Boolean(onNavigate);
+  const primaryCta = resolveNotificationCtaLabel(notification, {
+    usual: NOTIFICATION_CARD_COPY.registerUsualStockOut,
+    stockOut: NOTIFICATION_CARD_COPY.registerStockOut,
+    product: NOTIFICATION_CARD_COPY.openProduct,
+  });
 
   return (
     <Box
@@ -97,7 +103,7 @@ export default function NotificationCard({
               onNavigate();
             }}
           >
-            {NOTIFICATION_CARD_COPY.registerStockOut}
+            {primaryCta || NOTIFICATION_CARD_COPY.registerStockOut}
           </Button>
         ) : null}
 
@@ -110,7 +116,7 @@ export default function NotificationCard({
               onNavigate();
             }}
           >
-            {NOTIFICATION_CARD_COPY.openProduct}
+            {primaryCta || NOTIFICATION_CARD_COPY.openProduct}
           </Button>
         ) : null}
       </Stack>

@@ -6,10 +6,12 @@ import { markNotificationRead } from "../services/notificationService";
 import {
   resolveNotificationDestination,
   resolveSuggestedQuantity,
+  isUsualConsumeNotification,
 } from "../utils/notifications/resolveNotificationDestination";
 
 /**
  * Ações reutilizáveis de notificação (dashboard + página de alertas).
+ * Deep link: produto, /baixa ou diálogo rápido com quantidade usual (F3-1.3).
  *
  * @param {{
  *   onAfterMarkRead?: () => void | Promise<void>,
@@ -55,6 +57,7 @@ export function useNotificationActions({
       }
 
       const suggestedQuantity = resolveSuggestedQuantity(notification);
+      const usual = isUsualConsumeNotification(notification);
       const state = {
         ...(destination.state || {}),
         ...(suggestedQuantity != null
@@ -67,6 +70,7 @@ export function useNotificationActions({
                 null,
             }
           : {}),
+        ...(usual ? { usualConsume: true } : {}),
       };
       const hasState = Object.keys(state).length > 0;
 

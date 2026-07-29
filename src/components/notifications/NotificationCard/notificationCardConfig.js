@@ -3,6 +3,7 @@ import {
   NOTIFICATION_CARD_CONFIG,
   NOTIFICATION_TYPES,
 } from "../../../utils/notifications/notificationConstants.js";
+import { isUsualConsumeNotification } from "../../../utils/notifications/resolveNotificationDestination.js";
 
 export { NOTIFICATION_ACTIONS, NOTIFICATION_CARD_CONFIG, NOTIFICATION_TYPES };
 
@@ -33,6 +34,20 @@ export function isConsumptionNudge(notification) {
   return (
     notification?.type === NOTIFICATION_TYPES.consumptionNudge ||
     notification?.type === NOTIFICATION_TYPES.missingConsumption ||
-    notification?.payload?.action === NOTIFICATION_ACTIONS.openQuickConsume
+    notification?.payload?.action === NOTIFICATION_ACTIONS.openQuickConsume ||
+    notification?.payload?.action === NOTIFICATION_ACTIONS.quickConsumeUsual
   );
+}
+
+/**
+ * Label do CTA principal do card (baixa usual vs baixa genérica vs produto).
+ * @param {object} notification
+ * @param {{ usual: string, stockOut: string, product: string }} labels
+ * @returns {string|null}
+ */
+export function resolveNotificationCtaLabel(notification, labels) {
+  if (isUsualConsumeNotification(notification)) return labels.usual;
+  if (isConsumptionNudge(notification)) return labels.stockOut;
+  if (notification?.productId) return labels.product;
+  return null;
 }
