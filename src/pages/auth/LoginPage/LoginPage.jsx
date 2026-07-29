@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -19,9 +19,22 @@ import { LOGIN_PAGE_CONFIG } from "./loginPageConfig";
 import { LOGIN_PAGE_COPY } from "./loginPageCopy";
 import { isFilled } from "../../../utils/formValidation";
 
+function resolvePostLoginPath(redirectParam) {
+  if (!redirectParam || typeof redirectParam !== "string") {
+    return LOGIN_PAGE_CONFIG.dashboardPath;
+  }
+  // Só paths relativos internos (evita open redirect)
+  if (!redirectParam.startsWith("/") || redirectParam.startsWith("//")) {
+    return LOGIN_PAGE_CONFIG.dashboardPath;
+  }
+  return redirectParam;
+}
+
 export default function LoginPage() {
   const { login, loginWithGoogle, loginWithApple } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const postLoginPath = resolvePostLoginPath(searchParams.get("redirect"));
   const { success, error } = useAppSnackbar();
   const [loading, setLoading] = useState(false);
   const {
@@ -42,7 +55,7 @@ export default function LoginPage() {
   const finishSocial = (data) => {
     if (data.isNewUser) success(LOGIN_PAGE_COPY.successNewUser);
     else success(LOGIN_PAGE_COPY.successLogin);
-    navigate(LOGIN_PAGE_CONFIG.dashboardPath);
+    navigate(postLoginPath);
   };
 
   const handleGoogle = async (idToken) => {
@@ -76,7 +89,7 @@ export default function LoginPage() {
     try {
       await login(buildLoginPayload(values));
       success(LOGIN_PAGE_COPY.successLogin);
-      navigate(LOGIN_PAGE_CONFIG.dashboardPath);
+      navigate(postLoginPath);
     } catch (err) {
       error(err instanceof ApiError ? err.message : LOGIN_PAGE_COPY.errorLogin);
     } finally {

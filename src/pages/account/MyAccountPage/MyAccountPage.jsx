@@ -38,6 +38,7 @@ import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import ChangePasswordDialog from "./components/ChangePasswordDialog";
 import EditProfileDialog from "./components/EditProfileDialog";
 import MyAccountResumoCard from "./components/MyAccountResumoCard";
+import HouseholdSection from "./components/HouseholdSection";
 import { MY_ACCOUNT_CONFIG } from "./myAccountConfig";
 import { MY_ACCOUNT_PAGE_COPY, MY_ACCOUNT_RESUMO_COPY } from "./myAccountCopy";
 import { buildUpdatePreferencesPayload } from "../../../utils/account/accountForm";
@@ -349,6 +350,8 @@ export default function MyAccountPage() {
 
         <Box sx={columnSx}>
           <Stack spacing={rightColumnStackSpacing}>
+            <HouseholdSection currentUserId={user?.id} />
+
             <Card>
               <CardContent sx={sectionCardContentSx}>
                 <Typography variant="h6" fontWeight={700} color="primary.dark">

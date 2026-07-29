@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useAuth } from "../../../hooks/useAuth";
@@ -7,6 +7,7 @@ import { authSessionBootBoxSx } from "./AuthSessionGuard.styled";
 
 export function PrivateRoute() {
   const { isAuthenticated, booting } = useAuth();
+  const location = useLocation();
 
   if (booting) {
     return (
@@ -17,7 +18,13 @@ export function PrivateRoute() {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to={AUTH_SESSION_GUARD_CONFIG.loginPath} replace />;
+    const redirect = encodeURIComponent(`${location.pathname}${location.search}`);
+    return (
+      <Navigate
+        to={`${AUTH_SESSION_GUARD_CONFIG.loginPath}?redirect=${redirect}`}
+        replace
+      />
+    );
   }
   return <Outlet />;
 }

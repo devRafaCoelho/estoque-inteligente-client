@@ -77,7 +77,8 @@ export async function apiRequest(path, options = {}) {
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403) {
+    // Só 401 encerra sessão. 403 é falta de permissão (ex.: member vs owner).
+    if (response.status === 401) {
       clearSessionStorage();
       const path = window.location.pathname;
       const isPublicAuthPath =

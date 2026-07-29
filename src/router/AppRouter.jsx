@@ -10,6 +10,7 @@ import ProductListPage from "../pages/products/ProductListPage/ProductListPage";
 import ProductDetailPage from "../pages/products/ProductDetailPage/ProductDetailPage";
 import ProductCreatePage from "../pages/products/ProductCreatePage/ProductCreatePage";
 import MyAccountPage from "../pages/account/MyAccountPage/MyAccountPage";
+import HouseholdInviteAcceptPage from "../pages/account/HouseholdInviteAcceptPage/HouseholdInviteAcceptPage";
 import IntakePage from "../pages/intake/IntakePage/IntakePage";
 import IntakePreviewPage from "../pages/intake/IntakePreviewPage/IntakePreviewPage";
 import StockOutPage from "../pages/stockOut/StockOutPage/StockOutPage";
@@ -48,6 +49,10 @@ export default function AppRouter() {
           <Route path="/produtos/novo" element={<ProductCreatePage />} />
           <Route path="/produtos/:id" element={<ProductDetailPage />} />
           <Route path="/minha-conta" element={<MyAccountPage />} />
+          <Route
+            path="/conta-familiar/convite"
+            element={<HouseholdInviteAcceptPage />}
+          />
         </Route>
       </Route>
 

@@ -41,7 +41,7 @@ export const CHANGE_PASSWORD_DIALOG_COPY = {
 
 export const MY_ACCOUNT_PAGE_COPY = {
   title: "Minha Conta",
-  subtitle: "Gerencie seus dados, alertas e formas de acesso",
+  subtitle: "Gerencie seus dados, alertas, conta familiar e formas de acesso",
   profileSuccess: "Dados atualizados com sucesso!",
   profileError: "Não foi possível atualizar os dados da conta.",
   passwordSuccess: "Senha alterada com sucesso!",
@@ -57,7 +57,7 @@ export const MY_ACCOUNT_PAGE_COPY = {
   appleLinkError: "Falha ao vincular Apple",
   alertsTitle: "Alertas e lembretes",
   alertsSubtitle: "Escolha o que deseja receber no app",
-  pushTitle: "Web Push da PWA",
+  pushTitle: "Notificações no dispositivo",
   pushSubtitle: "Receba alertas no navegador e quando o app estiver instalado.",
   notifyLowStock: "Estoque baixo",
   notifyOutOfStock: "Estoque zerado",

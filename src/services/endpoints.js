@@ -17,3 +17,4 @@ export const PRODUCT_CATEGORIES_URL = `${API_PREFIX}/product-categories`;
 export const STOCK_UNITS_URL = `${API_PREFIX}/stock-units`;
 export const BRAZILIAN_STATES_URL = `${API_PREFIX}/brazilian-states`;
 export const CHAT_URL = `${API_PREFIX}/chat`;
+export const HOUSEHOLDS_URL = `${API_PREFIX}/households`;
