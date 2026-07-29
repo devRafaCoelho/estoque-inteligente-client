@@ -5,38 +5,72 @@ import CardContent from "@mui/material/CardContent";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { useAppSnackbar } from "../../../hooks/useAppSnackbar";
 import { ApiError } from "../../../services/apiClient";
-import { acceptHouseholdInvite } from "../../../services/householdService";
+import {
+  acceptHouseholdInvite,
+  getMyHousehold,
+} from "../../../services/householdService";
 import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import { HOUSEHOLD_INVITE_PAGE_COPY as COPY } from "../MyAccountPage/householdCopy";
 
+const PENDING_HOUSEHOLD_INVITE_KEY = "pendingHouseholdInviteToken";
+
+function clearPendingToken() {
+  sessionStorage.removeItem(PENDING_HOUSEHOLD_INVITE_KEY);
+}
+
 export default function HouseholdInviteAcceptPage() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") || "";
+  const tokenFromUrl = searchParams.get("token") || "";
+  const tokenFromSession =
+    typeof sessionStorage !== "undefined"
+      ? sessionStorage.getItem(PENDING_HOUSEHOLD_INVITE_KEY) || ""
+      : "";
+  const token = tokenFromUrl || tokenFromSession;
   const { success, error } = useAppSnackbar();
   const [status, setStatus] = useState(token ? "loading" : "missing");
   const [message, setMessage] = useState("");
   const [householdName, setHouseholdName] = useState("");
-  const ran = useRef(false);
 
   useEffect(() => {
-    if (!token || ran.current) return undefined;
-    ran.current = true;
+    if (!token) {
+      setStatus("missing");
+      return undefined;
+    }
 
-    let ativo = true;
+    let cancelled = false;
+
     (async () => {
       try {
         const data = await acceptHouseholdInvite({ token });
-        if (!ativo) return;
+        if (cancelled) return;
+        clearPendingToken();
         setHouseholdName(data.household?.name || "");
         setStatus("ok");
         setMessage(COPY.success);
         success(COPY.success);
       } catch (err) {
-        if (!ativo) return;
+        if (cancelled) return;
+
+        // Convite já usado / já membro: se já está na casa, tratar como sucesso
+        if (err instanceof ApiError && (err.status === 409 || err.status === 410)) {
+          try {
+            const me = await getMyHousehold();
+            if (!cancelled && me.household) {
+              clearPendingToken();
+              setHouseholdName(me.household.name || "");
+              setStatus("ok");
+              setMessage(COPY.success);
+              return;
+            }
+          } catch {
+            // cai no erro abaixo
+          }
+        }
+
         const msg = err instanceof ApiError ? err.message : COPY.error;
         setStatus("error");
         setMessage(msg);
@@ -45,9 +79,11 @@ export default function HouseholdInviteAcceptPage() {
     })();
 
     return () => {
-      ativo = false;
+      cancelled = true;
     };
-  }, [token, success, error]);
+    // snackbars omitidos de deps de propósito (evitam cancelar o request no Strict Mode)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   return (
     <Stack spacing={3} sx={{ maxWidth: 520, mx: "auto", width: "100%" }}>

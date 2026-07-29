@@ -15,26 +15,19 @@ import PasswordTextField from "../../../components/form/PasswordTextField/Passwo
 import AuthSplitLayout from "../../../components/auth/AuthSplitLayout/AuthSplitLayout";
 import SocialAuthButtons from "../../../components/auth/SocialAuthButtons/SocialAuthButtons";
 import { ApiError } from "../../../services/apiClient";
+import { resolveSafeInternalPath } from "../../../utils/resolveSafeInternalPath";
 import { LOGIN_PAGE_CONFIG } from "./loginPageConfig";
 import { LOGIN_PAGE_COPY } from "./loginPageCopy";
 import { isFilled } from "../../../utils/formValidation";
-
-function resolvePostLoginPath(redirectParam) {
-  if (!redirectParam || typeof redirectParam !== "string") {
-    return LOGIN_PAGE_CONFIG.dashboardPath;
-  }
-  // Só paths relativos internos (evita open redirect)
-  if (!redirectParam.startsWith("/") || redirectParam.startsWith("//")) {
-    return LOGIN_PAGE_CONFIG.dashboardPath;
-  }
-  return redirectParam;
-}
 
 export default function LoginPage() {
   const { login, loginWithGoogle, loginWithApple } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const postLoginPath = resolvePostLoginPath(searchParams.get("redirect"));
+  const postLoginPath = resolveSafeInternalPath(
+    searchParams.get("redirect"),
+    LOGIN_PAGE_CONFIG.dashboardPath,
+  );
   const { success, error } = useAppSnackbar();
   const [loading, setLoading] = useState(false);
   const {

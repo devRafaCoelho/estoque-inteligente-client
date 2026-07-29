@@ -469,7 +469,9 @@ export default function ShoppingListPage() {
                 disabled={clearingList || Boolean(busyId) || sharing}
                 aria-haspopup="menu"
                 aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
-                aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
+                aria-controls={
+                  shareMenuAnchor ? "shopping-list-share-menu" : undefined
+                }
                 sx={shareButtonDesktopSx}
               >
                 {SHOPPING_LIST_PAGE_COPY.share}
@@ -511,7 +513,9 @@ export default function ShoppingListPage() {
                 disabled={clearingList || Boolean(busyId) || sharing}
                 aria-haspopup="menu"
                 aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
-                aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
+                aria-controls={
+                  shareMenuAnchor ? "shopping-list-share-menu" : undefined
+                }
                 sx={shareButtonMobileSx}
               >
                 {SHOPPING_LIST_PAGE_COPY.share}
