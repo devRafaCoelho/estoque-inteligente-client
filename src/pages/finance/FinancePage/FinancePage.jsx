@@ -7,6 +7,7 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -284,6 +285,12 @@ export default function FinancePage() {
                 tip.category && tip.message
                   ? tip.message.replaceAll(`"${tip.category}"`, `"${categoryLabel(tip.category)}"`)
                   : tip.message;
+              const sourceLabel =
+                tip.source === "consumption"
+                  ? FINANCE_PAGE_COPY.tipSourceConsumption
+                  : tip.source === "spend"
+                    ? FINANCE_PAGE_COPY.tipSourceSpend
+                    : null;
               return (
                 <Alert
                   key={tip.id}
@@ -291,7 +298,17 @@ export default function FinancePage() {
                   variant="outlined"
                   sx={tipItemSx}
                 >
-                  {message}
+                  {sourceLabel ? (
+                    <Chip
+                      size="small"
+                      label={sourceLabel}
+                      variant="outlined"
+                      sx={{ mb: 0.75, height: 22 }}
+                    />
+                  ) : null}
+                  <Typography variant="body2" component="div">
+                    {message}
+                  </Typography>
                 </Alert>
               );
             })
