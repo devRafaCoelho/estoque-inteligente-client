@@ -62,10 +62,14 @@ export const MY_ACCOUNT_PAGE_COPY = {
   notifyLowStock: "Estoque baixo",
   notifyOutOfStock: "Estoque zerado",
   notifyRepurchase: "Sugestões de recompra",
-  notifyConsumptionNudge: "Lembrete periódico de baixa",
+  notifyConsumptionNudge: "Lembrete de baixa usual",
+  notifyConsumptionNudgeHelp:
+    "Avisa quando o consumo está fora do ritmo usual. No máximo 1 lembrete (atraso no padrão ou genérico) por intervalo.",
   notifyEmailDigest: "Receber digest por e-mail",
   pushEnabled: "Ativar notificações push neste dispositivo",
-  consumptionNudgeDays: "Intervalo do lembrete (dias)",
+  consumptionNudgeDays: "Intervalo mínimo entre lembretes (dias)",
+  consumptionNudgeDaysHelp:
+    "Anti-fadiga: só um nudge de baixa usual a cada N dias. Vale para o padrão de uso e o lembrete genérico.",
   quietHoursEnabled: "Respeitar horário silencioso",
   quietHoursStart: "Início do silêncio",
   quietHoursEnd: "Fim do silêncio",

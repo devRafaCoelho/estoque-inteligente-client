@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import FormHelperText from "@mui/material/FormHelperText";
 import Stack from "@mui/material/Stack";
 import Switch from "@mui/material/Switch";
 import TextField from "@mui/material/TextField";
@@ -412,6 +413,9 @@ export default function MyAccountPage() {
                   }
                   label={MY_ACCOUNT_PAGE_COPY.notifyConsumptionNudge}
                 />
+                <FormHelperText sx={{ mt: -0.5, mb: 0.5, mx: 0 }}>
+                  {MY_ACCOUNT_PAGE_COPY.notifyConsumptionNudgeHelp}
+                </FormHelperText>
                 <FormControlLabel
                   control={
                     <Switch
@@ -437,6 +441,7 @@ export default function MyAccountPage() {
                       consumptionNudgeDays: e.target.value,
                     }))
                   }
+                  helperText={MY_ACCOUNT_PAGE_COPY.consumptionNudgeDaysHelp}
                   inputProps={{
                     min: MY_ACCOUNT_CONFIG.nudgeDaysMin,
                     max: MY_ACCOUNT_CONFIG.nudgeDaysMax,
