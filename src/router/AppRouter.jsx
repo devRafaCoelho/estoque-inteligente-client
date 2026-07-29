@@ -15,6 +15,7 @@ import IntakePreviewPage from "../pages/intake/IntakePreviewPage/IntakePreviewPa
 import StockOutPage from "../pages/stockOut/StockOutPage/StockOutPage";
 import StockOutPreviewPage from "../pages/stockOut/StockOutPreviewPage/StockOutPreviewPage";
 import ShoppingListPage from "../pages/shopping/ShoppingListPage/ShoppingListPage";
+import SharedShoppingListPage from "../pages/shopping/SharedShoppingListPage/SharedShoppingListPage";
 import NotificationsPage from "../pages/notifications/NotificationsPage/NotificationsPage";
 import FinancePage from "../pages/finance/FinancePage/FinancePage";
 import ChatPage from "../pages/chat/ChatPage/ChatPage";
@@ -28,6 +29,9 @@ export default function AppRouter() {
         <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
         <Route path="/resetar-senha" element={<ResetPasswordPage />} />
       </Route>
+
+      {/* Público: lista compartilhada (sem login, sem redirecionar autenticados) */}
+      <Route path="/lista-compartilhada/:token" element={<SharedShoppingListPage />} />
 
       <Route element={<PrivateRoute />}>
         <Route element={<AppLayout />}>

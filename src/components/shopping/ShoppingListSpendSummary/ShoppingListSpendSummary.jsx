@@ -11,8 +11,8 @@ import { formatMoney } from "../../../utils/money";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { SHOPPING_LIST_PAGE_COPY } from "../../../pages/shopping/ShoppingListPage/shoppingListPageCopy";
 import {
+  spendBannerRowSx,
   spendBannerSx,
-  spendEstimateValueSx,
   spendMissingCardSx,
   spendMissingHeaderSx,
   spendMissingInfoSx,
@@ -21,18 +21,21 @@ import {
   spendMissingPanelSx,
   spendMissingPriceFieldSx,
   spendSectionSx,
+  spendShareSlotSx,
 } from "./ShoppingListSpendSummary.styled";
 
 const SAVE_ALL_BUSY_ID = "__all__";
 
 /**
  * Resumo de estimativa da lista + cadastro rápido de preço unitário faltante.
+ * @param {import("react").ReactNode} [shareSlot] — ação abaixo do banner (ex.: compartilhar)
  */
 export default function ShoppingListSpendSummary({
   spendEstimate,
   pendingCount = 0,
   busyProductId = null,
   onSaveUnitPrices,
+  shareSlot = null,
 }) {
   const [draftPrices, setDraftPrices] = useState({});
   const unpricedItems = spendEstimate?.unpricedItems || [];
@@ -67,9 +70,10 @@ export default function ShoppingListSpendSummary({
     [priceable, draftPrices],
   );
 
-  if (!spendEstimate && pendingCount <= 0) return null;
+  if (!spendEstimate && pendingCount <= 0 && !shareSlot) return null;
 
   const hasEstimate = Boolean(spendEstimate?.hasEstimate);
+  const showBanner = Boolean(spendEstimate) || pendingCount > 0;
   const showMissing = unpricedItems.length > 0;
   const saving = busyProductId === SAVE_ALL_BUSY_ID;
   const allPricesFilled =
@@ -82,30 +86,35 @@ export default function ShoppingListSpendSummary({
 
   return (
     <Stack spacing={1.25} sx={spendSectionSx}>
-      <Box sx={spendBannerSx(hasEstimate)}>
-        <PaymentsOutlinedIcon color={hasEstimate ? "primary" : "disabled"} />
-        <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Typography variant="caption" color="text.secondary" display="block">
-            {SHOPPING_LIST_PAGE_COPY.spendBannerLabel}
-          </Typography>
-          {hasEstimate ? (
-            <Typography sx={spendEstimateValueSx}>
-              {spendEstimate.isPartial
-                ? SHOPPING_LIST_PAGE_COPY.spendEstimatePartial(
-                    formatMoney(spendEstimate.estimatedTotal),
-                    spendEstimate.unpricedItemCount,
-                  )
-                : SHOPPING_LIST_PAGE_COPY.spendEstimate(
-                    formatMoney(spendEstimate.estimatedTotal),
-                  )}
-            </Typography>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              {SHOPPING_LIST_PAGE_COPY.spendEstimateEmpty}
-            </Typography>
-          )}
+      {showBanner || shareSlot ? (
+        <Box sx={spendBannerRowSx}>
+          {showBanner ? (
+            <Box sx={spendBannerSx(hasEstimate)}>
+              <PaymentsOutlinedIcon
+                color={hasEstimate ? "primary" : "disabled"}
+                fontSize="small"
+              />
+              {hasEstimate ? (
+                <Typography variant="body2" fontWeight={700} noWrap sx={{ minWidth: 0 }}>
+                  {spendEstimate.isPartial
+                    ? SHOPPING_LIST_PAGE_COPY.spendEstimatePartial(
+                        formatMoney(spendEstimate.estimatedTotal),
+                        spendEstimate.unpricedItemCount,
+                      )
+                    : SHOPPING_LIST_PAGE_COPY.spendEstimate(
+                        formatMoney(spendEstimate.estimatedTotal),
+                      )}
+                </Typography>
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ minWidth: 0 }}>
+                  {SHOPPING_LIST_PAGE_COPY.spendEstimateEmpty}
+                </Typography>
+              )}
+            </Box>
+          ) : null}
+          {shareSlot ? <Box sx={spendShareSlotSx}>{shareSlot}</Box> : null}
         </Box>
-      </Box>
+      ) : null}
 
       {showMissing ? (
         <Box sx={spendMissingPanelSx}>

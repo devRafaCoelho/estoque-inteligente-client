@@ -6,23 +6,37 @@ export const spendSectionSx = {
   width: "100%",
 };
 
-export const spendBannerSx = (hasEstimate) => ({
+export const spendBannerRowSx = {
   display: "flex",
+  flexDirection: "row",
   alignItems: "center",
-  gap: 1.25,
+  justifyContent: "space-between",
+  gap: 1,
+  width: "100%",
+};
+
+export const spendBannerSx = (hasEstimate) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 0.75,
+  flex: "1 1 auto",
+  minWidth: 0,
+  width: "fit-content",
+  maxWidth: "100%",
+  boxSizing: "border-box",
   px: 1.5,
-  py: 1.25,
+  py: 1.1,
   borderRadius: cardBorderRadius,
   border: "1px solid",
   borderColor: hasEstimate ? "primary.light" : "divider",
   bgcolor: hasEstimate ? "rgba(31, 122, 77, 0.08)" : "background.paper",
 });
 
-export const spendEstimateValueSx = {
-  fontWeight: 800,
-  fontSize: "1.05rem",
-  lineHeight: 1.3,
-  color: "text.primary",
+/** Slot do botão compartilhar na mesma linha da estimativa (mobile/tablet). */
+export const spendShareSlotSx = {
+  display: { xs: "flex", md: "none" },
+  flex: "0 0 auto",
+  alignItems: "center",
 };
 
 /** Painel de preços faltantes — cards e botão ocupam 100% da largura. */

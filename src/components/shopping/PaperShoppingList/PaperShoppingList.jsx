@@ -18,8 +18,18 @@ import {
 
 /**
  * Mesmos dados/ações do checklist, visual de papel manuscrito.
+ * @param {boolean} [canToggle=true] — exibe checkbox
+ * @param {boolean} [canDelete=true] — exibe botão remover
  */
-export default function PaperShoppingList({ items, onToggle, onDelete, busyId, title }) {
+export default function PaperShoppingList({
+  items,
+  onToggle,
+  onDelete,
+  busyId,
+  title,
+  canToggle = true,
+  canDelete = true,
+}) {
   return (
     <Box sx={paperRootSx}>
       <Typography sx={paperTitleSx}>
@@ -32,28 +42,32 @@ export default function PaperShoppingList({ items, onToggle, onDelete, busyId, t
         <Stack spacing={0.25}>
           {items.map((item) => (
             <Box key={item.id} sx={paperItemRowSx(item.checked)}>
-              <Checkbox
-                checked={Boolean(item.checked)}
-                disabled={busyId === item.id}
-                onChange={() => onToggle(item)}
-                size="small"
-                sx={paperCheckboxSx}
-              />
+              {canToggle ? (
+                <Checkbox
+                  checked={Boolean(item.checked)}
+                  disabled={busyId === item.id || !onToggle}
+                  onChange={() => onToggle?.(item)}
+                  size="small"
+                  sx={paperCheckboxSx}
+                />
+              ) : null}
               <Typography sx={paperItemTextSx(item.checked)}>
                 {item.name}
                 {item.suggestedQty != null
                   ? ` — ${formatQuantity(item.suggestedQty, item.unit)}`
                   : ""}
               </Typography>
-              <IconButton
-                size="small"
-                aria-label={PAPER_SHOPPING_LIST_COPY.removeAria}
-                disabled={busyId === item.id}
-                onClick={() => onDelete(item)}
-                sx={paperDeleteSx}
-              >
-                <DeleteOutlineIcon fontSize="small" />
-              </IconButton>
+              {canDelete ? (
+                <IconButton
+                  size="small"
+                  aria-label={PAPER_SHOPPING_LIST_COPY.removeAria}
+                  disabled={busyId === item.id || !onDelete}
+                  onClick={() => onDelete?.(item)}
+                  sx={paperDeleteSx}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              ) : null}
             </Box>
           ))}
         </Stack>

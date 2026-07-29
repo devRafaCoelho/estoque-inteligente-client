@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
@@ -49,6 +50,8 @@ import {
   actionButtonSx,
   addSectionSpacing,
   listToolbarRowProps,
+  shareButtonDesktopSx,
+  shareButtonMobileSx,
   shoppingListStackSpacing,
 } from "./ShoppingListPage.styled";
 
@@ -398,55 +401,24 @@ export default function ShoppingListPage() {
               </LoadingButton>
             ) : null}
             {items.length > 0 ? (
-              <>
-                <LoadingButton
-                  type="button"
-                  variant="text"
-                  color="primary"
-                  size="small"
-                  loading={sharing}
-                  disabled={clearingList || Boolean(busyId)}
-                  startIcon={<IosShareOutlinedIcon fontSize="small" />}
-                  aria-haspopup="menu"
-                  aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
-                  aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
-                  aria-label={SHOPPING_LIST_PAGE_COPY.shareMenuAria}
-                  onClick={handleShareOpen}
-                >
-                  {SHOPPING_LIST_PAGE_COPY.share}
-                </LoadingButton>
-                <Menu
-                  id="shopping-list-share-menu"
-                  anchorEl={shareMenuAnchor}
-                  open={Boolean(shareMenuAnchor)}
-                  onClose={handleShareMenuClose}
-                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-                  transformOrigin={{ vertical: "top", horizontal: "right" }}
-                >
-                  <MenuItem onClick={handleCopyShareLink}>
-                    <ListItemIcon>
-                      <ContentCopyOutlinedIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareCopyLink}</ListItemText>
-                  </MenuItem>
-                  <MenuItem onClick={handleShareWhatsApp}>
-                    <ListItemIcon>
-                      <WhatsAppIcon fontSize="small" />
-                    </ListItemIcon>
-                    <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareWhatsApp}</ListItemText>
-                  </MenuItem>
-                </Menu>
-              </>
+              <Button
+                variant="text"
+                color="primary"
+                size="small"
+                disabled={clearingList || Boolean(busyId) || sharing}
+                startIcon={<IosShareOutlinedIcon />}
+                aria-haspopup="menu"
+                aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
+                aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
+                aria-label={SHOPPING_LIST_PAGE_COPY.shareMenuAria}
+                onClick={handleShareOpen}
+                sx={shareButtonDesktopSx}
+              >
+                {SHOPPING_LIST_PAGE_COPY.share}
+              </Button>
             ) : null}
           </Stack>
         </Stack>
-
-        <ShoppingListSpendSummary
-          spendEstimate={list?.spendEstimate}
-          pendingCount={list?.stats?.pending || 0}
-          busyProductId={priceBusyId}
-          onSaveUnitPrices={handleSaveUnitPrices}
-        />
 
         {viewMode === SHOPPING_LIST_PAGE_CONFIG.paperViewMode ? (
           <PaperShoppingList
@@ -464,6 +436,56 @@ export default function ShoppingListPage() {
             busyId={busyId}
           />
         )}
+
+        <ShoppingListSpendSummary
+          spendEstimate={list?.spendEstimate}
+          pendingCount={list?.stats?.pending || 0}
+          busyProductId={priceBusyId}
+          onSaveUnitPrices={handleSaveUnitPrices}
+          shareSlot={
+            items.length > 0 ? (
+              <Button
+                variant="text"
+                color="primary"
+                size="small"
+                disabled={clearingList || Boolean(busyId) || sharing}
+                startIcon={<IosShareOutlinedIcon />}
+                aria-haspopup="menu"
+                aria-expanded={Boolean(shareMenuAnchor) ? "true" : undefined}
+                aria-controls={shareMenuAnchor ? "shopping-list-share-menu" : undefined}
+                aria-label={SHOPPING_LIST_PAGE_COPY.shareMenuAria}
+                onClick={handleShareOpen}
+                sx={shareButtonMobileSx}
+              >
+                {SHOPPING_LIST_PAGE_COPY.share}
+              </Button>
+            ) : null
+          }
+        />
+
+        {items.length > 0 ? (
+          <Menu
+            id="shopping-list-share-menu"
+            anchorEl={shareMenuAnchor}
+            open={Boolean(shareMenuAnchor)}
+            onClose={handleShareMenuClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <MenuItem onClick={handleCopyShareLink}>
+              <ListItemIcon>
+                <ContentCopyOutlinedIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareCopyLink}</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleShareWhatsApp}>
+              <ListItemIcon>
+                <WhatsAppIcon fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>{SHOPPING_LIST_PAGE_COPY.shareWhatsApp}</ListItemText>
+            </MenuItem>
+          </Menu>
+        ) : null}
       </Stack>
 
       <ConfirmDialog

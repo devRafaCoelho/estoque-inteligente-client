@@ -35,10 +35,10 @@ export const SHOPPING_LIST_PAGE_COPY = {
   viewPaper: "Paper",
   viewModeAria: "Modo de visualização",
   stats: (pending, checked) => `${pending} pendente(s) · ${checked} marcado(s)`,
-  spendBannerLabel: "Estimativa da lista de compras",
-  spendEstimate: (totalLabel) => totalLabel,
+  spendBannerLabel: "Estimativa",
+  spendEstimate: (totalLabel) => `Estimativa: ${totalLabel}`,
   spendEstimatePartial: (totalLabel, missing) =>
-    `${totalLabel} · parcial (${missing} sem preço)`,
+    `Estimativa: ${totalLabel} · parcial (${missing} sem preço)`,
   spendEstimateEmpty: "Cadastre o preço médio dos itens para estimar o gasto.",
   missingPricesAlert: (count) =>
     count === 1

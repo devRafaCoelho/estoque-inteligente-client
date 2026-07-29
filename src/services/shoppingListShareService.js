@@ -23,3 +23,25 @@ export async function listShoppingListShares() {
 export async function revokeShoppingListShare(shareId) {
   return api.delete(`${SHOPPING_LIST_SHARES_URL}/${shareId}`);
 }
+
+/**
+ * Lê lista compartilhada por token (público, sem autenticação).
+ * @param {string} token
+ * @returns {Promise<{ list: object }>}
+ */
+export async function getSharedShoppingList(token) {
+  return api.get(`${SHOPPING_LIST_SHARES_URL}/public/${encodeURIComponent(token)}`);
+}
+
+/**
+ * Marca/desmarca item na lista compartilhada (público).
+ * @param {string} token
+ * @param {string} itemId
+ * @param {boolean} checked
+ */
+export async function updateSharedShoppingListItem(token, itemId, checked) {
+  return api.patch(
+    `${SHOPPING_LIST_SHARES_URL}/public/${encodeURIComponent(token)}/items/${itemId}`,
+    { checked },
+  );
+}

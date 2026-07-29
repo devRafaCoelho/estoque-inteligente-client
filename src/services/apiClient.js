@@ -79,10 +79,14 @@ export async function apiRequest(path, options = {}) {
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       clearSessionStorage();
-      if (
-        !window.location.pathname.startsWith("/login") &&
-        !window.location.pathname.startsWith("/cadastro")
-      ) {
+      const path = window.location.pathname;
+      const isPublicAuthPath =
+        path.startsWith("/login") ||
+        path.startsWith("/cadastro") ||
+        path.startsWith("/esqueci-senha") ||
+        path.startsWith("/resetar-senha") ||
+        path.startsWith("/lista-compartilhada");
+      if (!isPublicAuthPath) {
         window.location.assign("/login");
       }
     }
