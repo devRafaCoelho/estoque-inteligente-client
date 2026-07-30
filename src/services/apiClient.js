@@ -77,16 +77,26 @@ export async function apiRequest(path, options = {}) {
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
-    // Só 401 encerra sessão. 403 é falta de permissão (ex.: member vs owner).
-    if (response.status === 401) {
+    // 401 em rotas de "obter sessão" encerra a sessão do client.
+    // Em login/cadastro/oauth o 401 é credencial inválida — não limpa nem redireciona.
+    const requestPath = String(path || "");
+    const isCredentialAttempt =
+      requestPath.startsWith("/api/auth/login") ||
+      requestPath.startsWith("/api/auth/register") ||
+      requestPath.startsWith("/api/auth/google") ||
+      requestPath.startsWith("/api/auth/apple") ||
+      requestPath.startsWith("/api/auth/forgot-password") ||
+      requestPath.startsWith("/api/auth/reset-password");
+
+    if (response.status === 401 && !isCredentialAttempt) {
       clearSessionStorage();
-      const path = window.location.pathname;
+      const pagePath = window.location.pathname;
       const isPublicAuthPath =
-        path.startsWith("/login") ||
-        path.startsWith("/cadastro") ||
-        path.startsWith("/esqueci-senha") ||
-        path.startsWith("/resetar-senha") ||
-        path.startsWith("/lista-compartilhada");
+        pagePath.startsWith("/login") ||
+        pagePath.startsWith("/cadastro") ||
+        pagePath.startsWith("/esqueci-senha") ||
+        pagePath.startsWith("/resetar-senha") ||
+        pagePath.startsWith("/lista-compartilhada");
       if (!isPublicAuthPath) {
         window.location.assign("/login");
       }

@@ -107,7 +107,7 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
         if (!cancelled) setReady(true);
       } catch {
         if (!cancelled) {
-          handlersRef.current.onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed);
+          handlersRef.current.onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.connectFailed);
         }
       }
     };
@@ -123,12 +123,16 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
   }, []);
 
   const handleClick = () => {
-    if (disabled || busy || !ready) return;
+    if (disabled || busy) return;
+    if (!ready) {
+      onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.widgetNotReady);
+      return;
+    }
     const googleButton = hostRef.current?.querySelector(
       'div[role="button"], div[role="presentation"] div',
     );
     if (!googleButton) {
-      onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.loginFailed);
+      onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.connectFailed);
       return;
     }
     googleButton.click();
