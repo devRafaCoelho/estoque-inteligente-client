@@ -1,6 +1,6 @@
 import { TOKEN_KEY, USER_KEY } from "../config/constants";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
+const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").trim();
 
 export class ApiError extends Error {
   constructor(message, status, body) {
