@@ -15,6 +15,7 @@ import PasswordTextField from "../../../components/form/PasswordTextField/Passwo
 import AuthSplitLayout from "../../../components/auth/AuthSplitLayout/AuthSplitLayout";
 import SocialAuthButtons from "../../../components/auth/SocialAuthButtons/SocialAuthButtons";
 import { ApiError } from "../../../services/apiClient";
+import { socialAuthErrorMessage } from "../../../services/authService";
 import { resolveSafeInternalPath } from "../../../utils/resolveSafeInternalPath";
 import { LOGIN_PAGE_CONFIG } from "./loginPageConfig";
 import { LOGIN_PAGE_COPY } from "./loginPageCopy";
@@ -57,8 +58,7 @@ export default function LoginPage() {
       const data = await loginWithGoogle(idToken);
       finishSocial(data);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : LOGIN_PAGE_COPY.errorGoogle);
-      throw err;
+      error(socialAuthErrorMessage(err, LOGIN_PAGE_COPY.errorGoogle));
     } finally {
       setLoading(false);
     }
@@ -70,8 +70,7 @@ export default function LoginPage() {
       const data = await loginWithApple({ idToken, fullName });
       finishSocial(data);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : LOGIN_PAGE_COPY.errorApple);
-      throw err;
+      error(socialAuthErrorMessage(err, LOGIN_PAGE_COPY.errorApple));
     } finally {
       setLoading(false);
     }

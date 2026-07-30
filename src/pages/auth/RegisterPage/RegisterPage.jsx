@@ -24,6 +24,7 @@ import BrazilianStateSelectField from "../../../components/form/BrazilianStateSe
 import AuthSplitLayout from "../../../components/auth/AuthSplitLayout/AuthSplitLayout";
 import SocialAuthButtons from "../../../components/auth/SocialAuthButtons/SocialAuthButtons";
 import { ApiError } from "../../../services/apiClient";
+import { socialAuthErrorMessage } from "../../../services/authService";
 import { REGISTER_PAGE_CONFIG } from "./registerPageConfig";
 import { REGISTER_PAGE_COPY } from "./registerPageCopy";
 import {
@@ -104,8 +105,7 @@ export default function RegisterPage() {
       const data = await loginWithGoogle(idToken);
       finishSocial(data);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : REGISTER_PAGE_COPY.errorGoogle);
-      throw err;
+      error(socialAuthErrorMessage(err, REGISTER_PAGE_COPY.errorGoogle));
     } finally {
       setLoading(false);
     }
@@ -117,8 +117,7 @@ export default function RegisterPage() {
       const data = await loginWithApple({ idToken, fullName });
       finishSocial(data);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : REGISTER_PAGE_COPY.errorApple);
-      throw err;
+      error(socialAuthErrorMessage(err, REGISTER_PAGE_COPY.errorApple));
     } finally {
       setLoading(false);
     }

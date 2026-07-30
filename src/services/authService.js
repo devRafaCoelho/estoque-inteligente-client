@@ -1,26 +1,48 @@
 import { ApiError, api } from "./apiClient";
 import { AUTH_URL } from "./endpoints";
 
-async function withNetworkRetry(requestFn, { retries = 1 } = {}) {
+function isRetryableAuthError(err) {
+  if (err instanceof ApiError) {
+    return err.status === 502 || err.status === 503 || err.status === 504;
+  }
+  return (
+    err?.name === "TypeError" ||
+    /failed to fetch|network|econnreset|load failed|timeout/i.test(
+      String(err?.message || ""),
+    )
+  );
+}
+
+/**
+ * Retry com backoff — cobre cold start do Render free (~20–60s).
+ */
+async function withNetworkRetry(
+  requestFn,
+  { retries = 3, baseDelayMs = 1500 } = {},
+) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
     try {
       return await requestFn();
     } catch (err) {
       lastError = err;
-      const isTransientStatus =
-        err instanceof ApiError && (err.status === 502 || err.status === 503);
-      const isNetwork =
-        !(err instanceof ApiError) &&
-        (err?.name === "TypeError" ||
-          /failed to fetch|network|econnreset|load failed/i.test(
-            String(err?.message || ""),
-          ));
-      if ((!isNetwork && !isTransientStatus) || attempt === retries) throw err;
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      if (!isRetryableAuthError(err) || attempt === retries) throw err;
+      const wait = baseDelayMs * (attempt + 1);
+      await new Promise((resolve) => setTimeout(resolve, wait));
     }
   }
   throw lastError;
+}
+
+export function socialAuthErrorMessage(err, fallback) {
+  if (err instanceof ApiError) return err.message || fallback;
+  if (
+    err?.name === "TypeError" ||
+    /failed to fetch|network|load failed/i.test(String(err?.message || ""))
+  ) {
+    return "Não foi possível falar com o servidor. Se a API acabou de acordar, tente de novo em alguns segundos.";
+  }
+  return err?.message || fallback;
 }
 
 /**
