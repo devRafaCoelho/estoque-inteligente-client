@@ -1,76 +1,149 @@
 # Estoque Inteligente — Client
 
-Front-end web **app-first**: autenticação, estoque, entrada/baixa por texto e voz, foto/OCR, QR NF-e, lista de compras (share + estimativa), financeiro, notificações in-app, **Web Push (PWA)**, conta familiar e chat com assistente.
+Front-end web **mobile-first** (PWA) do Estoque Inteligente: autenticação, estoque, entrada e baixa, lista de compras, financeiro, chat, notificações, Web Push e conta familiar.
 
-Visão de produto: [`../documentacoes/DOCUMENTACAO.md`](../documentacoes/DOCUMENTACAO.md). Este README descreve **como rodar o client**.
+Consome a API em `estoque-inteligente-service-api`.
 
 ## Stack
 
-- React 18 + Vite 5
-- Material UI 6 + Nunito (+ Caveat no modo paper)
-- react-router-dom
-- react-hook-form + yup
-- notistack
-- Web Speech API (STT pt-BR no browser)
-- PWA com service worker custom (`src/sw.js` via Vite PWA / injectManifest) para Web Push
+| Item | Tecnologia |
+|------|------------|
+| UI | React 18 + Vite 5 |
+| Componentes | Material UI 6 + Emotion |
+| Fontes | Nunito (app) + Caveat (modo paper da lista) |
+| Rotas | react-router-dom 6 |
+| Formulários | react-hook-form + yup |
+| Feedback | notistack |
+| QR | `@zxing/browser` |
+| OAuth UI | Google Identity (GIS) / botão Apple quando configurado |
+| PWA / Push | `vite-plugin-pwa` + `src/sw.js` (injectManifest) |
+| Voz | Web Speech API (pt-BR no browser) |
+
+## Arquitetura
+
+```
+pages/          # telas por domínio
+components/     # UI reutilizável
+hooks/          # lógica de tela / speech / notificações
+context/        # AuthContext (sessão)
+services/       # apiClient + clientes por domínio
+utils/          # NF, erros, Google Identity, etc.
+config/         # constantes, tema
+```
+
+Fluxo típico de mutação de estoque: **captura (texto/voz/foto/QR) → chamada de parse na API → preview → confirmar**.
 
 ## Como rodar
 
-Com a API em `http://localhost:3001`:
+1. API local em `http://localhost:3001` **ou** API remota (ex.: Render).
+2. Configure o `.env` (veja abaixo).
+3. Instale e suba:
 
 ```bash
-cd estoque-inteligente-client
 npm install
 npm run dev
 ```
 
-Abre em **http://localhost:5173**. Em dev, o Vite faz proxy de `/api` para a API (deixe `VITE_API_BASE_URL` vazio).
+Abre em **http://localhost:5173**.
 
-> Push em desenvolvimento: o service worker fica ativo também no `npm run dev`. Após mudar a PWA, faça hard refresh (`Ctrl+Shift+R`).
+| Cenário | `VITE_API_BASE_URL` |
+|---------|---------------------|
+| API local | vazio — o Vite faz proxy de `/api` → `localhost:3001` |
+| API remota | URL absoluta da API (sem barra no final), ex. `https://…onrender.com` |
 
-## Telas entregues
+Outros scripts:
 
-| Rota | Função |
-|------|--------|
-| `/login` | Login e-mail/senha + Google/Apple (se configurados) |
-| `/cadastro` | Cadastro local + atalho social |
-| `/esqueci-senha` | Pedido de reset de senha |
-| `/resetar-senha` | Nova senha via token do e-mail (`?token=`) |
-| `/dashboard` | Resumo ok/low/out, card do assistente e atalhos |
-| `/entrada` | Entrada: Texto \| Foto \| Manual (+ rascunhos IA / QR) |
-| `/entrada/:id/preview` | Conferir itens, preço opcional e confirmar no estoque |
-| `/baixa` | Baixa por texto/voz (consumo) + rascunhos |
-| `/baixa/:id/preview` | Conferir e confirmar baixa |
-| `/lista-compras` | Lista por regras, share, estimativa, modos lista/paper |
-| `/lista-compartilhada/:token` | Lista compartilhada (visão controlada) |
-| `/chat` | Assistente: perguntas, proposta de baixa/lista/compra, dicas |
-| `/financeiro` | Gastos do mês, série do ano, categorias e dicas |
-| `/notificacoes` | Alertas in-app (estoque baixo/zerado, recompra, nudges) |
-| `/produtos` | Lista em cards + filtros |
-| `/produtos/novo` | Cadastro manual (`repurchaseDays` opcional) |
-| `/produtos/:id` | Detalhe, baixa, marcar acabou, histórico |
-| `/minha-conta` | Perfil, preferências, push, quiet hours, digest, conta familiar |
-| `/conta-familiar/convite` | Aceite de convite familiar |
+```bash
+npm run build      # build de produção
+npm run preview    # serve o build
+```
 
-Arquitetura: `pages/` → `components/` → `hooks/` → `services/` → `apiClient`. Visão geral em [`../documentacoes/FRONTEND.md`](../documentacoes/FRONTEND.md).
+> Após mudar o service worker / PWA, faça hard refresh (`Ctrl+Shift+R`).
 
 ## Variáveis de ambiente
 
 Copie `.env.example` → `.env`:
 
 ```env
-# Em dev deixe vazio para usar o proxy do Vite (/api → localhost:3001)
 VITE_API_BASE_URL=
-
 VITE_GOOGLE_CLIENT_ID=
 VITE_APPLE_CLIENT_ID=
 VITE_APPLE_REDIRECT_URI=http://localhost:5173
 ```
 
-Sem Client IDs, os botões sociais ficam ocultos e o login local continua normal.
+| Variável | Uso |
+|----------|-----|
+| `VITE_API_BASE_URL` | Base da API; vazio = proxy em dev |
+| `VITE_GOOGLE_CLIENT_ID` | Exibe login Google (mesmo Client ID da API) |
+| `VITE_APPLE_CLIENT_ID` / `VITE_APPLE_REDIRECT_URI` | Login Apple (quando configurado) |
 
-Voz depende do suporte do navegador à Web Speech API (melhor em Chrome/Edge). Push depende de HTTPS (ou localhost), permissão do navegador e VAPID na API.
+Sem Client IDs sociais, os botões ficam ocultos e o login e-mail/senha segue normal.
 
-## Próximos passos
+Em produção (ex.: Vercel), defina as mesmas `VITE_*` no painel e faça **redeploy** (elas entram no build).
 
-Landing page de marketing, app nativo nas lojas, offline parcial, etc. — [`../documentacoes/PROXIMOS-PASSOS.md`](../documentacoes/PROXIMOS-PASSOS.md).
+## Rotas da aplicação
+
+| Rota | Função |
+|------|--------|
+| `/login` | E-mail/senha + Google/Apple |
+| `/cadastro` | Cadastro local |
+| `/esqueci-senha` / `/resetar-senha` | Fluxo de reset |
+| `/dashboard` | Resumo do estoque e atalhos |
+| `/entrada` | Texto, foto/QR, manual + rascunhos |
+| `/entrada/:id/preview` | Revisar e confirmar compra |
+| `/baixa` | Consumo por texto/voz + rascunhos |
+| `/baixa/:id/preview` | Revisar e confirmar baixa |
+| `/produtos` | Lista em cards + filtros |
+| `/produtos/novo` | Cadastro manual |
+| `/produtos/:id` | Detalhe, baixa, marcar acabou, histórico |
+| `/lista-compras` | Lista, paper, share, estimativa de gasto |
+| `/lista-compartilhada/:token` | Visualização pública controlada |
+| `/chat` | Assistente com CTAs para preview |
+| `/financeiro` | Gastos, categorias, série, dicas |
+| `/notificacoes` | Centro de alertas |
+| `/minha-conta` | Perfil, preferências, push, quiet hours, família |
+| `/conta-familiar/convite` | Aceite de convite |
+
+## Funcionalidades (visão técnica)
+
+- **Sessão:** JWT em `sessionStorage` via `apiClient`; `AuthContext` hidrata o usuário.
+- **Entrada/baixa:** serviços de intake/stock-out; preview obrigatório antes de confirmar.
+- **Voz:** `SpeechTextField` / hooks de STT no browser (Chrome/Edge melhores).
+- **NF-e:** leitura de QR/chave; se UF não suportada ou SEFAZ falhar, UI sugere foto.
+- **Lista:** modos lista/paper; compartilhar gera link; estimativa usa `avg_unit_price`.
+- **Família:** criar casa, convidar, aceitar; estoque/lista no escopo da casa.
+- **Push:** toggle em Minha conta; SW escuta `push` e navega para notificações (HTTPS ou localhost; VAPID na API).
+- **Proxy Vite:** em `vite.config` o `/api` local evita CORS em desenvolvimento.
+
+## Como testar
+
+```bash
+# Teste de lógica de share (sem browser)
+npm run test:shopping-share
+
+# Manual sugerido
+# 1. API no ar (local ou Render com CORS incluindo http://localhost:5173)
+# 2. npm run dev
+# 3. Cadastro/login → entrada texto → preview → confirmar
+# 4. Lista, baixa, chat, Minha conta (preferências / família)
+```
+
+Para Google em localhost: origem `http://localhost:5173` autorizada no Google Cloud Console e o mesmo Client ID na API e no client.
+
+## Estrutura de pastas (resumo)
+
+```
+src/
+  pages/          # por domínio (auth, products, shopping, …)
+  components/     # intake, shopping, auth, layout, …
+  services/       # apiClient + *Service.js
+  hooks/ context/ utils/ config/
+  sw.js           # service worker (push)
+tests/
+```
+
+## Integração com a API
+
+- Em erros HTTP, `ApiError` expõe `status` e `body` (mensagens/`details` da API).
+- Rotas públicas (login, share, aceite de convite) vs rotas autenticadas (Bearer JWT).
+- Preferências (push, quiet hours, digest) espelham `GET/PATCH /api/users/me/preferences`.
