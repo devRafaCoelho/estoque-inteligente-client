@@ -25,6 +25,6 @@ export const REGISTER_PAGE_COPY = {
   successNewUser: "Conta criada! Bem-vindo ao Estoque Inteligente.",
   successLogin: "Login realizado!",
   errorRegister: "Falha no cadastro",
-  errorGoogle: "Falha no cadastro com Google",
-  errorApple: "Falha no cadastro com Apple",
+  errorGoogle: "Não foi possível entrar com Google. Tente novamente.",
+  errorApple: "Não foi possível entrar com Apple. Tente novamente.",
 };

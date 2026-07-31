@@ -10,6 +10,6 @@ export const LOGIN_PAGE_COPY = {
   successLogin: "Login realizado!",
   successNewUser: "Conta criada! Bem-vindo ao Estoque Inteligente.",
   errorLogin: "Falha no login",
-  errorGoogle: "Falha no login com Google",
-  errorApple: "Falha no login com Apple",
+  errorGoogle: "Não foi possível entrar com Google. Tente novamente.",
+  errorApple: "Não foi possível entrar com Apple. Tente novamente.",
 };

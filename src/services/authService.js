@@ -35,14 +35,8 @@ async function withNetworkRetry(
 }
 
 export function socialAuthErrorMessage(err, fallback) {
-  if (err instanceof ApiError) return err.message || fallback;
-  if (
-    err?.name === "TypeError" ||
-    /failed to fetch|network|load failed/i.test(String(err?.message || ""))
-  ) {
-    return "Não foi possível falar com o servidor. Se a API acabou de acordar, tente de novo em alguns segundos.";
-  }
-  return err?.message || fallback;
+  if (err instanceof ApiError && err.message) return err.message;
+  return fallback || "Não foi possível entrar. Tente novamente.";
 }
 
 /**
