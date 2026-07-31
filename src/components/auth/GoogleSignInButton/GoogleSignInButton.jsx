@@ -52,10 +52,8 @@ function GoogleGlyph() {
 }
 
 /**
- * Botão MUI full-width clicável; o widget oficial do Google fica oculto
- * e é acionado programaticamente para emitir o idToken.
- *
- * @param {{ onSuccess: (idToken: string) => void | Promise<void>, onError?: (message: string) => void, disabled?: boolean }} props
+ * Botão MUI visual; o widget oficial do Google fica por cima (quase invisível)
+ * para o clique real ir ao GIS e emitir o idToken.
  */
 export default function GoogleSignInButton({ onSuccess, onError, disabled = false }) {
   const [busy, setBusy] = useState(false);
@@ -122,22 +120,6 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
     };
   }, []);
 
-  const handleClick = () => {
-    if (disabled || busy) return;
-    if (!ready) {
-      onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.widgetNotReady);
-      return;
-    }
-    const googleButton = hostRef.current?.querySelector(
-      'div[role="button"], div[role="presentation"] div',
-    );
-    if (!googleButton) {
-      onError?.(GOOGLE_SIGN_IN_BUTTON_COPY.connectFailed);
-      return;
-    }
-    googleButton.click();
-  };
-
   if (!isGoogleAuthConfigured()) return null;
 
   return (
@@ -146,8 +128,8 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
         fullWidth
         size="large"
         variant="outlined"
+        tabIndex={-1}
         disabled={disabled || busy || !ready}
-        onClick={handleClick}
         startIcon={
           busy ? (
             <CircularProgress size={GOOGLE_SIGN_IN_BUTTON_CONFIG.progressSize} color="inherit" />
@@ -161,7 +143,10 @@ export default function GoogleSignInButton({ onSuccess, onError, disabled = fals
       </Button>
       <Box
         ref={hostRef}
-        sx={googleSignInHiddenHostSx}
+        sx={{
+          ...googleSignInHiddenHostSx,
+          pointerEvents: disabled || busy || !ready ? "none" : "auto",
+        }}
         aria-hidden
       />
     </Box>

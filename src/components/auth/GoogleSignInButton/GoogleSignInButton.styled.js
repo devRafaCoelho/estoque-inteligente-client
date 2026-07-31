@@ -25,21 +25,25 @@ export const googleSignInButtonSx = {
 };
 
 /**
- * Host oculto do widget oficial do Google (só para emitir o credential).
- * O clique do usuário fica no botão MUI em largura total.
+ * Host do widget oficial do Google: cobre o botão MUI (invisível, mas clicável).
+ * GIS exige elemento real/visível o suficiente; clip + pointer-events:none impede o fluxo.
  */
 export const googleSignInHiddenHostSx = {
   position: "absolute",
-  width: 1,
-  height: 1,
+  inset: 0,
+  zIndex: 2,
+  opacity: 0.01,
   overflow: "hidden",
-  clip: "rect(0 0 0 0)",
-  clipPath: "inset(50%)",
-  whiteSpace: "nowrap",
-  border: 0,
-  padding: 0,
-  margin: -1,
-  pointerEvents: "none",
+  cursor: "pointer",
+  "& > div": {
+    width: "100% !important",
+    height: "100% !important",
+  },
+  "& iframe": {
+    width: "100% !important",
+    minWidth: "100% !important",
+    height: "100% !important",
+  },
 };
 
 export const googleGlyphSx = {

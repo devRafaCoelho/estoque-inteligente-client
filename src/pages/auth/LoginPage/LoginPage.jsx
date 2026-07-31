@@ -83,7 +83,11 @@ export default function LoginPage() {
       success(LOGIN_PAGE_COPY.successLogin);
       navigate(postLoginPath);
     } catch (err) {
-      error(err instanceof ApiError ? err.message : LOGIN_PAGE_COPY.errorLogin);
+      error(
+        err instanceof ApiError
+          ? err.message || LOGIN_PAGE_COPY.errorLogin
+          : LOGIN_PAGE_COPY.errorLogin,
+      );
     } finally {
       setLoading(false);
     }
