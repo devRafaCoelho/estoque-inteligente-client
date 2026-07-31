@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
+import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
@@ -21,6 +22,13 @@ import { LOGIN_PAGE_CONFIG } from "./loginPageConfig";
 import { LOGIN_PAGE_COPY } from "./loginPageCopy";
 import { isFilled } from "../../../utils/formValidation";
 
+function isInvalidCredentialsError(err) {
+  if (!(err instanceof ApiError) || err.status !== 401) return false;
+  return String(err.message || "")
+    .toLowerCase()
+    .includes("credenciais");
+}
+
 export default function LoginPage() {
   const { login, loginWithGoogle, loginWithApple } = useAuth();
   const navigate = useNavigate();
@@ -31,6 +39,7 @@ export default function LoginPage() {
   );
   const { success, error } = useAppSnackbar();
   const [loading, setLoading] = useState(false);
+  const [formAlert, setFormAlert] = useState("");
   const {
     register,
     handleSubmit,
@@ -46,6 +55,10 @@ export default function LoginPage() {
   const password = watch("password");
   const canSubmit = isFilled(email) && isFilled(password);
 
+  const clearFormAlert = () => {
+    if (formAlert) setFormAlert("");
+  };
+
   const finishSocial = (data) => {
     if (data.isNewUser) success(LOGIN_PAGE_COPY.successNewUser);
     else success(LOGIN_PAGE_COPY.successLogin);
@@ -54,6 +67,7 @@ export default function LoginPage() {
 
   const handleGoogle = async (idToken) => {
     setLoading(true);
+    setFormAlert("");
     try {
       const data = await loginWithGoogle(idToken);
       finishSocial(data);
@@ -66,6 +80,7 @@ export default function LoginPage() {
 
   const handleApple = async ({ idToken, fullName }) => {
     setLoading(true);
+    setFormAlert("");
     try {
       const data = await loginWithApple({ idToken, fullName });
       finishSocial(data);
@@ -78,20 +93,28 @@ export default function LoginPage() {
 
   const onSubmit = async (values) => {
     setLoading(true);
+    setFormAlert("");
     try {
       await login(buildLoginPayload(values));
       success(LOGIN_PAGE_COPY.successLogin);
       navigate(postLoginPath);
     } catch (err) {
-      error(
-        err instanceof ApiError
-          ? err.message || LOGIN_PAGE_COPY.errorLogin
-          : LOGIN_PAGE_COPY.errorLogin,
-      );
+      if (isInvalidCredentialsError(err)) {
+        setFormAlert(LOGIN_PAGE_COPY.errorInvalidCredentials);
+      } else {
+        setFormAlert(
+          err instanceof ApiError
+            ? err.message || LOGIN_PAGE_COPY.errorLogin
+            : LOGIN_PAGE_COPY.errorLogin,
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  const emailRegister = register("email");
+  const passwordRegister = register("password");
 
   return (
     <AuthSplitLayout
@@ -112,6 +135,11 @@ export default function LoginPage() {
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
+          {formAlert ? (
+            <Alert severity="error" role="alert" onClose={() => setFormAlert("")}>
+              {formAlert}
+            </Alert>
+          ) : null}
           <TextField
             label={LOGIN_PAGE_COPY.emailLabel}
             type="email"
@@ -119,14 +147,24 @@ export default function LoginPage() {
             autoComplete="email"
             error={Boolean(errors.email)}
             helperText={errors.email?.message}
-            {...register("email")}
+            {...emailRegister}
+            onChange={(event) => {
+              clearFormAlert();
+              emailRegister.onChange(event);
+            }}
           />
           <PasswordTextField
             label={LOGIN_PAGE_COPY.passwordLabel}
             autoComplete="current-password"
             error={errors.password}
             helperText={errors.password?.message}
-            registerProps={register("password")}
+            registerProps={{
+              ...passwordRegister,
+              onChange: (event) => {
+                clearFormAlert();
+                passwordRegister.onChange(event);
+              },
+            }}
           />
           <Typography variant="body2" textAlign="right">
             <Link component={RouterLink} to={LOGIN_PAGE_CONFIG.forgotPasswordPath} fontWeight={700}>
