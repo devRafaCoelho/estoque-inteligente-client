@@ -1,4 +1,5 @@
 import GroupAddOutlinedIcon from "@mui/icons-material/GroupAddOutlined";
+import IosShareOutlinedIcon from "@mui/icons-material/IosShareOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -35,6 +36,16 @@ function memberDisplayName(member) {
   return name || member.email || member.userId;
 }
 
+function normalizeInviteEmail(email) {
+  return String(email || "")
+    .trim()
+    .toLowerCase();
+}
+
+function buildInviteLink(token) {
+  return `${window.location.origin}/conta-familiar/convite?token=${encodeURIComponent(token)}`;
+}
+
 /**
  * Seção Conta familiar em Minha Conta (F3-4.3 + ações F3-4.4).
  *
@@ -55,10 +66,14 @@ export default function HouseholdSection({ currentUserId }) {
   const [editing, setEditing] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviting, setInviting] = useState(false);
+  /** Links gerados nesta sessão (token bruto não volta da API). */
+  const [inviteLinksByEmail, setInviteLinksByEmail] = useState({});
   const [leaveOpen, setLeaveOpen] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [removeTarget, setRemoveTarget] = useState(null);
   const [removing, setRemoving] = useState(false);
+  const [revokeTarget, setRevokeTarget] = useState(null);
+  const [revoking, setRevoking] = useState(false);
 
   const isOwner = membership?.role === "owner";
   const ownerHasOtherMembers =
@@ -138,17 +153,43 @@ export default function HouseholdSection({ currentUserId }) {
     }
   };
 
+  const copyInviteLink = async (link) => {
+    try {
+      await navigator.clipboard.writeText(link);
+      success(COPY.inviteLinkCopied);
+    } catch {
+      error(COPY.inviteLinkCopyError);
+    }
+  };
+
+  const shareInviteLink = async (link, email) => {
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: COPY.inviteShareTitle,
+          text: COPY.inviteShareText(email),
+          url: link,
+        });
+        return;
+      } catch (err) {
+        if (err?.name === "AbortError") return;
+      }
+    }
+    await copyInviteLink(link);
+  };
+
   const onInvite = async (e) => {
     e.preventDefault();
     if (!household?.id || !inviteEmail.trim()) return;
+    const email = inviteEmail.trim();
     setInviting(true);
     try {
-      const result = await inviteHouseholdMember(household.id, {
-        email: inviteEmail.trim(),
-      });
+      const result = await inviteHouseholdMember(household.id, { email });
       setInviteEmail("");
-      if (result?.token && typeof navigator !== "undefined" && navigator.clipboard) {
-        const link = `${window.location.origin}/conta-familiar/convite?token=${encodeURIComponent(result.token)}`;
+      if (result?.token) {
+        const link = result.inviteUrl || buildInviteLink(result.token);
+        const emailKey = normalizeInviteEmail(email);
+        setInviteLinksByEmail((prev) => ({ ...prev, [emailKey]: link }));
         try {
           await navigator.clipboard.writeText(link);
           success(COPY.inviteSuccessWithLink);
@@ -166,14 +207,24 @@ export default function HouseholdSection({ currentUserId }) {
     }
   };
 
-  const onRevokeInvite = async (inviteId) => {
-    if (!household?.id) return;
+  const onConfirmRevokeInvite = async () => {
+    if (!household?.id || !revokeTarget) return;
+    setRevoking(true);
     try {
-      await revokeHouseholdInvite(household.id, inviteId);
+      await revokeHouseholdInvite(household.id, revokeTarget.id);
+      const emailKey = normalizeInviteEmail(revokeTarget.email);
+      setInviteLinksByEmail((prev) => {
+        const next = { ...prev };
+        delete next[emailKey];
+        return next;
+      });
+      setRevokeTarget(null);
       success(COPY.revokeInviteSuccess);
       await load();
     } catch (err) {
       error(err instanceof ApiError ? err.message : COPY.revokeInviteError);
+    } finally {
+      setRevoking(false);
     }
   };
 
@@ -311,7 +362,7 @@ export default function HouseholdSection({ currentUserId }) {
                   onSubmit={onInvite}
                   direction={{ xs: "column", lg: "row" }}
                   spacing={1.5}
-                  alignItems={{ lg: "center" }}
+                  alignItems={{ lg: "flex-start" }}
                   sx={{ width: "100%" }}
                 >
                   <TextField
@@ -319,6 +370,7 @@ export default function HouseholdSection({ currentUserId }) {
                     type="email"
                     label={COPY.inviteLabel}
                     placeholder={COPY.invitePlaceholder}
+                    helperText={COPY.inviteHelper}
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     sx={formOutlinedInputMinHeightSx}
@@ -329,7 +381,11 @@ export default function HouseholdSection({ currentUserId }) {
                     variant="contained"
                     loading={inviting}
                     disabled={!inviteEmail.trim()}
-                    sx={{ width: { xs: "100%", lg: "auto" }, flexShrink: 0 }}
+                    sx={{
+                      width: { xs: "100%", lg: "auto" },
+                      flexShrink: 0,
+                      mt: { lg: 0.5 },
+                    }}
                   >
                     {COPY.inviteSubmit}
                   </LoadingButton>
@@ -340,30 +396,48 @@ export default function HouseholdSection({ currentUserId }) {
                   </Typography>
                 ) : (
                   <Stack spacing={1}>
-                    {invites.map((inv) => (
-                      <Stack
-                        key={inv.id}
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        spacing={1}
-                      >
-                        <Box sx={{ minWidth: 0 }}>
-                          <Typography variant="body2" noWrap>
-                            {inv.email}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {COPY.expiresAt(inv.expiresAt)}
-                          </Typography>
-                        </Box>
-                        <Button
-                          size="small"
-                          onClick={() => onRevokeInvite(inv.id)}
+                    {invites.map((inv) => {
+                      const sessionLink =
+                        inviteLinksByEmail[normalizeInviteEmail(inv.email)];
+                      return (
+                        <Stack
+                          key={inv.id}
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          spacing={1}
                         >
-                          {COPY.revokeInvite}
-                        </Button>
-                      </Stack>
-                    ))}
+                          <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="body2" noWrap>
+                              {inv.email}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {COPY.expiresAt(inv.expiresAt)}
+                            </Typography>
+                          </Box>
+                          <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                            {sessionLink ? (
+                              <Button
+                                size="small"
+                                startIcon={<IosShareOutlinedIcon />}
+                                onClick={() =>
+                                  shareInviteLink(sessionLink, inv.email)
+                                }
+                              >
+                                {COPY.inviteLinkShare}
+                              </Button>
+                            ) : null}
+                            <Button
+                              size="small"
+                              color="error"
+                              onClick={() => setRevokeTarget(inv)}
+                            >
+                              {COPY.revokeInvite}
+                            </Button>
+                          </Stack>
+                        </Stack>
+                      );
+                    })}
                   </Stack>
                 )}
               </>
@@ -441,6 +515,20 @@ export default function HouseholdSection({ currentUserId }) {
           />
         </FormDialog>
       ) : null}
+
+      <ConfirmDialog
+        open={Boolean(revokeTarget)}
+        onClose={() => !revoking && setRevokeTarget(null)}
+        title={COPY.revokeInviteTitle}
+        description={
+          revokeTarget
+            ? COPY.revokeInviteDescription(revokeTarget.email)
+            : ""
+        }
+        onConfirm={onConfirmRevokeInvite}
+        confirmLoading={revoking}
+        confirmLabel={COPY.revokeInviteConfirm}
+      />
 
       <ConfirmDialog
         open={Boolean(removeTarget)}
