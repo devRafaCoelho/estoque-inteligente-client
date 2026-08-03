@@ -55,3 +55,11 @@ export async function consumeProduct(id, payload) {
 export async function markProductOut(id) {
   return api.post(`${PRODUCTS_URL}/${id}/mark-out`, {});
 }
+
+/**
+ * Soft-delete do produto (preserva histórico; remove da lista de compras).
+ * @param {string} id
+ */
+export async function deleteProduct(id) {
+  return api.delete(`${PRODUCTS_URL}/${id}`);
+}

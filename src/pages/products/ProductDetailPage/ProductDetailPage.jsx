@@ -13,6 +13,7 @@ import IconButton from "@mui/material/IconButton";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   consumeProduct,
+  deleteProduct,
   getProductById,
   markProductOut,
   updateProduct,
@@ -20,6 +21,7 @@ import {
 import StockStatusChip from "../../../components/products/StockStatusChip/StockStatusChip";
 import ConsumeProductDialog from "../../../components/products/ConsumeProductDialog/ConsumeProductDialog";
 import ProductFormDialog from "../../../components/products/ProductFormDialog/ProductFormDialog";
+import ConfirmDialog from "../../../components/common/ConfirmDialog/ConfirmDialog";
 import { PRODUCT_FORM_DIALOG_COPY } from "../../../components/products/ProductFormDialog/productFormDialogConfig";
 import { categoryLabel } from "../../../utils/categoryLabels";
 import { formatMoney } from "../../../utils/money";
@@ -60,6 +62,8 @@ export default function ProductDetailPage() {
   const [consumeOpen, setConsumeOpen] = useState(false);
   const [suggestedConsumeQty, setSuggestedConsumeQty] = useState(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const editInitialValues = useMemo(
     () => productToFormValues(product),
@@ -136,6 +140,20 @@ export default function ProductDetailPage() {
     }
   };
 
+  const handleDeleteConfirm = async () => {
+    setDeleting(true);
+    try {
+      await deleteProduct(id);
+      success(PRODUCT_DETAIL_COPY.deleteSuccess);
+      setDeleteOpen(false);
+      navigate(PRODUCT_DETAIL_CONFIG.paths.list);
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : PRODUCT_DETAIL_COPY.deleteError);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading || !product) {
     return (
       <Box sx={pageLoadingBoxSx}>
@@ -203,6 +221,9 @@ export default function ProductDetailPage() {
         >
           {PRODUCT_DETAIL_COPY.markOutAction}
         </Button>
+        <Button variant="outlined" color="error" onClick={() => setDeleteOpen(true)}>
+          {PRODUCT_DETAIL_COPY.deleteAction}
+        </Button>
       </Stack>
 
       <Divider />
@@ -253,6 +274,17 @@ export default function ProductDetailPage() {
         initialValues={editInitialValues}
         isEditing
         submitLabel={PRODUCT_FORM_DIALOG_COPY.save}
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => !deleting && setDeleteOpen(false)}
+        title={PRODUCT_DETAIL_COPY.deleteConfirmTitle}
+        description={PRODUCT_DETAIL_COPY.deleteConfirmDescription(product.name)}
+        onConfirm={handleDeleteConfirm}
+        confirmLoading={deleting}
+        confirmLabel={PRODUCT_DETAIL_COPY.deleteConfirmLabel}
+        cancelLabel={PRODUCT_DETAIL_COPY.deleteCancelLabel}
       />
     </Stack>
   );

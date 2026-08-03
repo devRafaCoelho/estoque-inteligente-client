@@ -1,3 +1,8 @@
+import {
+  nonNegativeDecimalInputProps,
+  positiveIntegerInputProps,
+} from "../../../utils/numberInput";
+
 export const PRODUCT_FORM_DIALOG_COPY = {
   createTitle: "Novo produto",
   editTitle: "Editar produto",
@@ -20,7 +25,7 @@ export const PRODUCT_FORM_DIALOG_COPY = {
 export const PRODUCT_FORM_DIALOG_CONFIG = {
   formId: "product-stage-form",
   maxWidth: "sm",
-  quantityInputProps: { step: "any", min: 0 },
-  minQuantityInputProps: { step: "any", min: 0 },
-  repurchaseDaysInputProps: { step: 1, min: 1 },
+  quantityInputProps: nonNegativeDecimalInputProps(),
+  minQuantityInputProps: nonNegativeDecimalInputProps(),
+  repurchaseDaysInputProps: positiveIntegerInputProps(),
 };

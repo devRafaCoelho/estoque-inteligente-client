@@ -30,6 +30,7 @@ import { ApiError } from "../../../services/apiClient";
 import { buildIntakePreviewPayload } from "../../../utils/intake/intakeForm";
 import { formatQuantity } from "../../../utils/unitLabels";
 import { isFilled, isPositiveNumber } from "../../../utils/formValidation";
+import { nonNegativeDecimalInputProps } from "../../../utils/numberInput";
 import {
   pageBackHeaderGridSx,
   pageBackIconCellSx,
@@ -352,7 +353,7 @@ export default function IntakePreviewPage() {
                     label={INTAKE_PREVIEW_PAGE_COPY.qtyLabel}
                     type="number"
                     value={item.quantity}
-                    inputProps={{ step: "any", min: 0 }}
+                    inputProps={nonNegativeDecimalInputProps()}
                     onChange={(e) => updateItem(item.id, { quantity: e.target.value })}
                     sx={{ flex: 1, minWidth: 0 }}
                   />

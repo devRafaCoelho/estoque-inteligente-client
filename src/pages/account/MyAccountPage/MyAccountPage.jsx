@@ -34,6 +34,7 @@ import {
   unsubscribePush,
 } from "../../../services/pushNotificationService";
 import { resolveBrazilianStateLabel } from "../../../utils/entitySelectOptions";
+import { positiveIntegerInputProps } from "../../../utils/numberInput";
 import { pageHeaderSubtitleSx } from "../../../styles/pageStyles";
 import ChangePasswordDialog from "./components/ChangePasswordDialog";
 import EditProfileDialog from "./components/EditProfileDialog";
@@ -445,10 +446,10 @@ export default function MyAccountPage() {
                     }))
                   }
                   helperText={MY_ACCOUNT_PAGE_COPY.consumptionNudgeDaysHelp}
-                  inputProps={{
+                  inputProps={positiveIntegerInputProps({
                     min: MY_ACCOUNT_CONFIG.nudgeDaysMin,
                     max: MY_ACCOUNT_CONFIG.nudgeDaysMax,
-                  }}
+                  })}
                 />
                 <FormControlLabel
                   control={
