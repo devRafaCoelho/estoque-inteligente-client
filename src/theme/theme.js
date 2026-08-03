@@ -28,7 +28,8 @@ const theme = createTheme({
     h4: { fontWeight: 800 },
     h5: { fontWeight: 800 },
     h6: { fontWeight: 700 },
-    button: { fontWeight: 700, textTransform: "none" },
+    // lineHeight 1.75 (padrão MUI) deixa o glifo Nunito visualmente alto vs. o ícone
+    button: { fontWeight: 700, textTransform: "none", lineHeight: 1 },
   },
   shape: {
     borderRadius: 14,
@@ -79,7 +80,40 @@ const theme = createTheme({
     MuiButton: {
       defaultProps: { disableElevation: true },
       styleOverrides: {
-        root: { minHeight: 44, borderRadius: 12 },
+        root: {
+          minHeight: 44,
+          borderRadius: 12,
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          lineHeight: 1,
+          // Garante que start/endIcon batam o centro óptico do texto (Nunito)
+          "& .MuiButton-startIcon, & .MuiButton-endIcon": {
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            alignSelf: "center",
+            marginTop: 0,
+            marginBottom: 0,
+            // Texto Nunito “sobe”; sobe o ícone na mesma medida
+            transform: "translateY(-2px)",
+            "& .MuiSvgIcon-root, & > *:nth-of-type(1)": {
+              display: "block",
+              margin: 0,
+              verticalAlign: "unset",
+            },
+          },
+        },
+        startIcon: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        endIcon: {
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
       },
     },
     MuiFab: {

@@ -24,6 +24,7 @@ import {
   listHouseholdMembers,
   removeHouseholdMember,
   revokeHouseholdInvite,
+  updateHousehold,
 } from "../../../../services/householdService";
 import { formOutlinedInputMinHeightSx } from "../../../../styles/formStyles";
 import { HOUSEHOLD_SECTION_COPY as COPY } from "../householdCopy";
@@ -49,6 +50,9 @@ export default function HouseholdSection({ currentUserId }) {
   const [createOpen, setCreateOpen] = useState(false);
   const [createName, setCreateName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editing, setEditing] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviting, setInviting] = useState(false);
   const [leaveOpen, setLeaveOpen] = useState(false);
@@ -108,6 +112,29 @@ export default function HouseholdSection({ currentUserId }) {
       error(err instanceof ApiError ? err.message : COPY.createError);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const openEdit = () => {
+    setEditName(household?.name || "");
+    setEditOpen(true);
+  };
+
+  const onEdit = async (e) => {
+    e.preventDefault();
+    if (!household?.id) return;
+    const name = editName.trim();
+    if (name.length < 2) return;
+    setEditing(true);
+    try {
+      await updateHousehold(household.id, { name });
+      setEditOpen(false);
+      success(COPY.editSuccess);
+      await load();
+    } catch (err) {
+      error(err instanceof ApiError ? err.message : COPY.editError);
+    } finally {
+      setEditing(false);
     }
   };
 
@@ -209,12 +236,26 @@ export default function HouseholdSection({ currentUserId }) {
         ) : (
           <Stack spacing={2}>
             <Box>
-              <Typography variant="subtitle1" fontWeight={700}>
-                {household.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {isOwner ? COPY.roleOwner : COPY.roleMember}
-              </Typography>
+              <Stack
+                direction="row"
+                alignItems="flex-start"
+                justifyContent="space-between"
+                spacing={1}
+              >
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography variant="subtitle1" fontWeight={700}>
+                    {household.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {isOwner ? COPY.roleOwner : COPY.roleMember}
+                  </Typography>
+                </Box>
+                {isOwner ? (
+                  <Button size="small" onClick={openEdit} sx={{ flexShrink: 0 }}>
+                    {COPY.editNameLabel}
+                  </Button>
+                ) : null}
+              </Stack>
             </Box>
 
             <Divider />
@@ -366,6 +407,36 @@ export default function HouseholdSection({ currentUserId }) {
             placeholder={COPY.namePlaceholder}
             value={createName}
             onChange={(e) => setCreateName(e.target.value)}
+            inputProps={{ maxLength: 120 }}
+          />
+        </FormDialog>
+      ) : null}
+
+      {editOpen ? (
+        <FormDialog
+          open={editOpen}
+          onClose={() => !editing && setEditOpen(false)}
+          title={COPY.editDialogTitle}
+          formId="edit-household-form"
+          onSubmit={onEdit}
+          isSubmitting={editing}
+          cancelButtonLabel={COPY.cancel}
+          submitLabel={COPY.editSubmit}
+          submitDisabled={
+            editName.trim().length < 2 ||
+            editName.trim() === (household?.name || "").trim()
+          }
+          hasUnsavedChanges={
+            editName.trim() !== (household?.name || "").trim()
+          }
+        >
+          <TextField
+            autoFocus
+            fullWidth
+            label={COPY.nameLabel}
+            placeholder={COPY.namePlaceholder}
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
             inputProps={{ maxLength: 120 }}
           />
         </FormDialog>

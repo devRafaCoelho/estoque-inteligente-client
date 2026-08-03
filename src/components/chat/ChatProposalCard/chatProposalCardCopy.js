@@ -12,10 +12,15 @@ export const CHAT_PROPOSAL_CARD_COPY = {
     count === 1
       ? "1 item pronto para revisar — o estoque só muda após confirmar."
       : `${count} itens prontos para revisar — o estoque só muda após confirmar.`,
-  intakeBodyLowConfidence: (count, lowCount) =>
-    lowCount === 1
-      ? `${count} item(ns) no rascunho · 1 com baixa confiança — revise antes de confirmar.`
-      : `${count} item(ns) no rascunho · ${lowCount} com baixa confiança — revise antes de confirmar.`,
+  intakeBodyLowConfidence: (count, lowCount) => {
+    const draft =
+      count === 1 ? "1 item no rascunho" : `${count} itens no rascunho`;
+    const low =
+      lowCount === 1
+        ? "1 com baixa confiança"
+        : `${lowCount} com baixa confiança`;
+    return `${draft} · ${low} — revise antes de confirmar.`;
+  },
   shoppingListBodySave: (count) =>
     count === 1
       ? "1 item sugerido. Nada foi gravado ainda."

@@ -11,6 +11,14 @@ export async function createHousehold(payload) {
   return api.post(HOUSEHOLDS_URL, payload);
 }
 
+/**
+ * @param {string} householdId
+ * @param {{ name: string }} payload
+ */
+export async function updateHousehold(householdId, payload) {
+  return api.patch(`${HOUSEHOLDS_URL}/${householdId}`, payload);
+}
+
 /** @param {string} householdId */
 export async function listHouseholdMembers(householdId) {
   return api.get(`${HOUSEHOLDS_URL}/${householdId}/members`);

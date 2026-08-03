@@ -12,7 +12,7 @@ export const STOCK_OUT_PAGE_COPY = {
   draftsTitle: "Rascunhos salvos",
   draftsLoadError: "Erro ao carregar rascunhos",
   draftUntitled: "Baixa sem título",
-  draftItems: (count) => `${count} item(ns)`,
+  draftItems: (count) => (count === 1 ? "1 item" : `${count} itens`),
   draftContinueAria: "Continuar rascunho",
   draftDiscardAria: "Descartar rascunho",
   draftDiscardTitle: "Descartar rascunho?",

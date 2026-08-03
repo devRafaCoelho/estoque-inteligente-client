@@ -21,7 +21,7 @@ export const INTAKE_PAGE_COPY = {
   draftsLoadError: "Erro ao carregar rascunhos",
   draftUntitled: "Entrada sem título",
   draftPhotoTitle: "Nota (foto)",
-  draftItems: (count) => `${count} item(ns)`,
+  draftItems: (count) => (count === 1 ? "1 item" : `${count} itens`),
   draftContinueAria: "Continuar rascunho",
   draftDiscardAria: "Descartar rascunho",
   draftDiscardTitle: "Descartar rascunho?",
