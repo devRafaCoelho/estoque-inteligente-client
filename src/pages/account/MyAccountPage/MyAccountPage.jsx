@@ -27,9 +27,11 @@ import {
   updateMyPreferences,
 } from "../../../services/userService";
 import {
+  getPushBlockReason,
   getPushConfig,
   getServiceWorkerRegistration,
   isPushSupported,
+  requiresIosHomeScreenForPush,
   subscribePush,
   unsubscribePush,
 } from "../../../services/pushNotificationService";
@@ -211,6 +213,19 @@ export default function MyAccountPage() {
   };
 
   const handlePushToggle = async (enabled) => {
+    const blockReason = getPushBlockReason();
+    if (blockReason === "unsupported") {
+      error(MY_ACCOUNT_PAGE_COPY.pushUnsupported);
+      return;
+    }
+    if (enabled && blockReason === "ios_install_required") {
+      error(MY_ACCOUNT_PAGE_COPY.pushIosInstallRequired);
+      return;
+    }
+    if (enabled && blockReason === "denied") {
+      error(MY_ACCOUNT_PAGE_COPY.pushDenied);
+      return;
+    }
     if (!isPushSupported()) {
       error(MY_ACCOUNT_PAGE_COPY.pushUnsupported);
       return;
@@ -239,11 +254,18 @@ export default function MyAccountPage() {
         success(MY_ACCOUNT_PAGE_COPY.pushDisabledSuccess);
       }
     } catch (err) {
-      error(err instanceof ApiError ? err.message : err?.message || MY_ACCOUNT_PAGE_COPY.pushError);
+      if (requiresIosHomeScreenForPush()) {
+        error(MY_ACCOUNT_PAGE_COPY.pushIosInstallRequired);
+      } else {
+        error(err instanceof ApiError ? err.message : err?.message || MY_ACCOUNT_PAGE_COPY.pushError);
+      }
     } finally {
       setSavingPush(false);
     }
   };
+
+  const pushNeedsIosInstall = requiresIosHomeScreenForPush();
+  const pushToggleDisabled = savingPush || (pushNeedsIosInstall && !preferences.pushEnabled);
 
   const nudgeDays = Number(preferences.consumptionNudgeDays);
   const preferencesDirty =
@@ -512,18 +534,25 @@ export default function MyAccountPage() {
                   {MY_ACCOUNT_PAGE_COPY.pushTitle}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {MY_ACCOUNT_PAGE_COPY.pushSubtitle}
+                  {pushNeedsIosInstall
+                    ? MY_ACCOUNT_PAGE_COPY.pushSubtitleIosInstall
+                    : MY_ACCOUNT_PAGE_COPY.pushSubtitle}
                 </Typography>
                 <FormControlLabel
                   control={
                     <Switch
                       checked={preferences.pushEnabled}
-                      disabled={savingPush}
+                      disabled={pushToggleDisabled}
                       onChange={(e) => handlePushToggle(e.target.checked)}
                     />
                   }
                   label={MY_ACCOUNT_PAGE_COPY.pushEnabled}
                 />
+                {pushNeedsIosInstall ? (
+                  <FormHelperText sx={{ mx: 0, mt: 0.5 }}>
+                    {MY_ACCOUNT_PAGE_COPY.pushIosInstallHelp}
+                  </FormHelperText>
+                ) : null}
               </CardContent>
             </Card>
 

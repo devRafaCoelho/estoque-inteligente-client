@@ -59,13 +59,17 @@ export const MY_ACCOUNT_PAGE_COPY = {
   alertsSubtitle: "Escolha o que deseja receber no app",
   pushTitle: "Notificações no dispositivo",
   pushSubtitle: "Receba alertas no navegador e quando o app estiver instalado.",
+  pushSubtitleIosInstall:
+    "No iPhone/iPad, o push só funciona depois de adicionar o app à Tela de Início.",
+  pushIosInstallHelp:
+    "No Safari: toque em Compartilhar → Adicionar à Tela de Início. Abra pelo ícone na tela e ative esta opção de novo.",
   notifyLowStock: "Estoque baixo",
   notifyOutOfStock: "Estoque zerado",
   notifyRepurchase: "Sugestões de recompra",
   notifyConsumptionNudge: "Lembrete de baixa usual",
   notifyConsumptionNudgeHelp:
     "Avisa quando o consumo está fora do ritmo usual. No máximo 1 lembrete (atraso no padrão ou genérico) por intervalo.",
-  notifyEmailDigest: "Receber digest por e-mail",
+  notifyEmailDigest: "Receber resumo de alertas por e-mail",
   pushEnabled: "Ativar notificações push neste dispositivo",
   consumptionNudgeDays: "Intervalo mínimo entre lembretes (dias)",
   consumptionNudgeDaysHelp:
@@ -78,6 +82,8 @@ export const MY_ACCOUNT_PAGE_COPY = {
   preferencesError: "Erro ao salvar preferências",
   preferencesLoadError: "Erro ao carregar preferências",
   pushUnsupported: "Este navegador não suporta push web.",
+  pushIosInstallRequired:
+    "No iPhone, abra o app pela Tela de Início para ativar notificações. No Safari: Compartilhar → Adicionar à Tela de Início.",
   pushDenied: "Permissão de notificação negada no navegador.",
   pushEnabledSuccess: "Push ativado neste dispositivo",
   pushDisabledSuccess: "Push desativado neste dispositivo",

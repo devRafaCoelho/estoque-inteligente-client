@@ -8,6 +8,40 @@ function urlBase64ToUint8Array(base64String) {
   return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
 }
 
+/**
+ * iPhone/iPad (inclui iPadOS com UA desktop).
+ */
+export function isIosDevice() {
+  if (typeof navigator === "undefined" || typeof window === "undefined") {
+    return false;
+  }
+  const ua = navigator.userAgent || "";
+  if (/iPad|iPhone|iPod/i.test(ua)) return true;
+  // iPadOS 13+ reporta-se como Mac com touch
+  return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+}
+
+/**
+ * PWA aberta da Tela de Início (standalone).
+ */
+export function isStandaloneDisplay() {
+  if (typeof window === "undefined") return false;
+  const mediaStandalone =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(display-mode: standalone)").matches;
+  // iOS Safari legado
+  const iosStandalone = Boolean(window.navigator?.standalone);
+  return mediaStandalone || iosStandalone;
+}
+
+/**
+ * No iOS/iPadOS, Web Push só funciona com o app instalado na Tela de Início (16.4+).
+ * Dentro do Safari em aba, a API pode existir, mas a ativação falha ou fica inconsistente.
+ */
+export function requiresIosHomeScreenForPush() {
+  return isIosDevice() && !isStandaloneDisplay();
+}
+
 export function isPushSupported() {
   return (
     typeof window !== "undefined" &&
@@ -15,6 +49,22 @@ export function isPushSupported() {
     "PushManager" in window &&
     "Notification" in window
   );
+}
+
+/**
+ * @returns {'ok'|'unsupported'|'ios_install_required'|'denied'}
+ */
+export function getPushBlockReason() {
+  if (!isPushSupported()) return "unsupported";
+  if (requiresIosHomeScreenForPush()) return "ios_install_required";
+  if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+    return "denied";
+  }
+  return "ok";
+}
+
+export function canEnablePushOnThisDevice() {
+  return getPushBlockReason() === "ok";
 }
 
 /**

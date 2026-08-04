@@ -57,24 +57,13 @@ const theme = createTheme({
     },
     MuiInputLabel: {
       styleOverrides: {
-        outlined: ({ theme }) => ({
-          // Cobre a borda do notch; usa o fundo da página (não o paper branco)
+        outlined: {
           "&.MuiInputLabel-shrink": {
-            backgroundColor: theme.palette.background.default,
-            paddingInline: 4,
-            marginLeft: -4,
+            backgroundColor: "transparent",
+            paddingInline: 0,
+            marginLeft: 0,
           },
-        }),
-      },
-    },
-    MuiDialog: {
-      styleOverrides: {
-        paper: ({ theme }) => ({
-          // Em dialogs o fundo é paper — o label precisa acompanhar
-          "& .MuiInputLabel-outlined.MuiInputLabel-shrink": {
-            backgroundColor: theme.palette.background.paper,
-          },
-        }),
+        },
       },
     },
     MuiButton: {

@@ -40,7 +40,13 @@ export default defineConfig(({ mode }) => {
         srcDir: "src",
         filename: "sw.js",
         registerType: "autoUpdate",
-        includeAssets: ["favicon.png"],
+        includeAssets: [
+          "favicon.png",
+          "pwa-192.png",
+          "pwa-512.png",
+          "pwa-512-maskable.png",
+          "apple-touch-icon.png",
+        ],
         manifest: {
           name: "Estoque Inteligente",
           short_name: "Estoque",
@@ -54,20 +60,22 @@ export default defineConfig(({ mode }) => {
           lang: "pt-BR",
           icons: [
             {
-              src: "favicon.png",
+              src: "pwa-192.png",
               sizes: "192x192",
               type: "image/png",
+              purpose: "any",
             },
             {
-              src: "favicon.png",
+              src: "pwa-512.png",
               sizes: "512x512",
               type: "image/png",
+              purpose: "any",
             },
             {
-              src: "favicon.png",
+              src: "pwa-512-maskable.png",
               sizes: "512x512",
               type: "image/png",
-              purpose: "any maskable",
+              purpose: "maskable",
             },
           ],
         },

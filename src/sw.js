@@ -14,8 +14,8 @@ self.addEventListener("push", (event) => {
     body: payload.body || "",
     tag: payload.tag || undefined,
     data: payload.data || { url: "/notificacoes" },
-    icon: "/favicon.png",
-    badge: "/favicon.png",
+    icon: "/pwa-192.png",
+    badge: "/pwa-192.png",
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });

@@ -62,7 +62,6 @@ export const HOUSEHOLD_SECTION_COPY = {
   leaveConfirm: "Sair",
   leaveSuccess: "Você saiu da conta familiar",
   leaveError: "Não foi possível sair da conta familiar.",
-  noInvites: "Nenhum convite pendente.",
   expiresAt: (iso) => {
     try {
       return `Expira em ${new Date(iso).toLocaleDateString("pt-BR")}`;

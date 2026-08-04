@@ -390,11 +390,7 @@ export default function HouseholdSection({ currentUserId }) {
                     {COPY.inviteSubmit}
                   </LoadingButton>
                 </Stack>
-                {invites.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">
-                    {COPY.noInvites}
-                  </Typography>
-                ) : (
+                {invites.length > 0 ? (
                   <Stack spacing={1}>
                     {invites.map((inv) => {
                       const sessionLink =
@@ -415,7 +411,11 @@ export default function HouseholdSection({ currentUserId }) {
                               {COPY.expiresAt(inv.expiresAt)}
                             </Typography>
                           </Box>
-                          <Stack direction="row" spacing={0.5} sx={{ flexShrink: 0 }}>
+                          <Stack
+                            direction="row"
+                            spacing={0.5}
+                            sx={{ flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}
+                          >
                             {sessionLink ? (
                               <Button
                                 size="small"
@@ -439,7 +439,7 @@ export default function HouseholdSection({ currentUserId }) {
                       );
                     })}
                   </Stack>
-                )}
+                ) : null}
               </>
             ) : null}
 
